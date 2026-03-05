@@ -575,6 +575,7 @@ function getChartCurves(kpi, key, indexKey) {
 const multiLineRegistry = {};
 
 function drawChartsInContainer(prefix, kpi) {
+  let drawn = 0;
   CHART_SPECS.forEach(([key, indexKey, kpiKey, title], i) => {
     const cid = prefix + '-dc-' + i;
     const canvas = document.getElementById(cid);
@@ -586,8 +587,12 @@ function drawChartsInContainer(prefix, kpi) {
       multiLineRegistry[cid] = { title, curves, kpiText };
       const wrap = canvas.parentElement;
       wrap.onclick = () => openOverlay(cid, title, curves, kpiText);
+      drawn++;
+    } else {
+      canvas.parentElement.style.display = 'none';
     }
   });
+  return drawn;
 }
 
 async function drawDetailCharts(cardId, name) {
@@ -595,14 +600,26 @@ async function drawDetailCharts(cardId, name) {
   if (!el || el.dataset.chartsDrawn) return;
   el.dataset.chartsDrawn = '1';
   const kpi = await loadChartData(name);
-  if (!kpi) return;
+  if (!kpi) {
+    const cg = el.querySelector('.card-charts');
+    if (cg) cg.style.display = 'none';
+    return;
+  }
   drawChartsInContainer(cardId, kpi);
 }
 
 async function drawHeroCharts(name) {
   const kpi = await loadChartData(name);
-  if (!kpi) return;
-  drawChartsInContainer('hero', kpi);
+  if (!kpi) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+    return;
+  }
+  const drawn = drawChartsInContainer('hero', kpi);
+  if (drawn === 0) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+  }
 }
 
 function renderPage(node) {
@@ -613,7 +630,7 @@ function renderPage(node) {
   for (let i = 0; i < navStack.length; i++) {
     bc += `<a onclick="navigateTo(${i})">${navStack[i].name}</a><span class="sep">&rsaquo;</span>`;
   }
-  bc += `<span class="current">${node.name}</span></div>`;
+  bc += `<span class="current">${node.name}</span><span style="margin-left:auto;font-size:12px;color:#999;">Updated: ${DATA_DATE}</span></div>`;
 
   let compare = '';
   if (hasChildren) {
@@ -632,7 +649,7 @@ function renderPage(node) {
   let hero = `<div class="hero">
     <div class="hero-header">
       <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+node.ratio+'%)</span>' : ''}</div>
-      <div class="hero-kpi">${heroKpiHtml(node.kpi)}<div class="hero-kpi-item"><div class="hero-kpi-label">Updated</div><div class="hero-kpi-val" style="color:#666;font-size:13px;">${DATA_DATE}</div></div></div>
+      <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
     </div>
     <div class="hero-charts">
       <div class="hero-chart-wrap"><canvas id="hero-dc-0" class="hero-chart"></canvas></div>
