@@ -98,7 +98,12 @@ const COLORS = [
   '#42d4f4','#f032e6','#aa6e28','#469990','#000075',
   '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
 ];
-const CH = 600;
+function chartHeight() {
+  const W = Math.min(window.innerWidth, 1400);
+  if (W < 600) return Math.round(W * 1.4);
+  if (W < 900) return Math.round(400 + (W - 600) * 0.5);
+  return 650;
+}
 let navStack = [];
 let currentNode = TREE;
 
@@ -182,7 +187,7 @@ function drawChart(id, hoverIdx) {
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.clientWidth;
-  const H = CH;
+  const H = chartHeight();
   canvas.width = W * dpr; canvas.height = H * dpr;
   canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
