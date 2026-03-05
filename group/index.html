@@ -418,7 +418,7 @@ function renderPage(node) {
           ${isDrillable
             ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
             : '<span class="card-name">'+child.name+'</span>'}
-          <span class="card-ratio">${child.ratio||'-'}%</span>
+          <span class="card-ratio">${child.ratio ? fmt4(child.ratio.toString()) : '-'}%</span>
           ${ck60d.Net_Profit ? '<span class="badge badge-profit">60D Profit: '+fmt4(ck60d.Net_Profit)+'</span>' : ''}
           ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">60D Sharpe: '+fmt4(ck60d.Ann_Sharpe)+'</span>' : ''}
           ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
