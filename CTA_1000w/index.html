@@ -122,8 +122,15 @@ async function loadNodeData(name) {
   }
 }
 
+function fmt4(val) {
+  if (!val) return '';
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n)) return val;
+  return n.toPrecision(4) + (val.includes('w') ? 'w' : '');
+}
+
 function parseStd(val) {
-  if (!val) return 0;
   const s = val.replace('w','');
   const n = parseFloat(s);
   if (isNaN(n) || n === 0) return 0;
@@ -412,9 +419,10 @@ function renderPage(node) {
             ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
             : '<span class="card-name">'+child.name+'</span>'}
           <span class="card-ratio">${child.ratio||'-'}%</span>
-          ${ck60d.Net_Profit ? '<span class="badge badge-profit">Profit: '+ck60d.Net_Profit+'</span>' : ''}
-          ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">Sharpe: '+ck60d.Ann_Sharpe+'</span>' : ''}
-          ${ck60d.Max_Drawdown ? '<span class="badge badge-dd">MaxDD: '+ck60d.Max_Drawdown+'</span>' : ''}
+          ${ck60d.Net_Profit ? '<span class="badge badge-profit">60D Profit: '+fmt4(ck60d.Net_Profit)+'</span>' : ''}
+          ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">60D Sharpe: '+fmt4(ck60d.Ann_Sharpe)+'</span>' : ''}
+          ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
+          ${ck60d.Max_Drawdown ? '<span class="badge badge-dd">60D MaxDD: '+fmt4(ck60d.Max_Drawdown)+'</span>' : ''}
           <span class="card-arrow">&blacktriangleright;</span>
         </div>
         <div class="card-body">
