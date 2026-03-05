@@ -3,648 +3,501 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Strategy Dashboard (results_group) - 2026-03-05</title>
+<title>group Strategy Dashboard - 2026-03-05</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
-  body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-         background: #f0f2f5; color: #333; padding: 20px; }
-  h1 { text-align: center; margin-bottom: 6px; font-size: 24px; color: #1a1a2e; }
-  .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 20px; }
-  .controls { text-align: center; margin-bottom: 20px; }
-  .controls input { padding: 8px 16px; width: 320px; border: 1px solid #ddd;
-                     border-radius: 6px; font-size: 14px; outline: none; }
-  .controls input:focus { border-color: #4363d8; box-shadow: 0 0 0 2px rgba(67,99,216,0.15); }
-  .controls button { padding: 8px 16px; margin-left: 8px; border: none; border-radius: 6px;
-                      background: #4363d8; color: #fff; cursor: pointer; font-size: 14px; }
-  .controls button:hover { background: #3451b0; }
-  .card { background: #fff; border-radius: 10px; margin-bottom: 16px;
-           box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
-  .card-header { display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
-                  user-select: none; gap: 12px; border-bottom: 1px solid #f0f0f0; }
-  .card-header:hover { background: #fafbff; }
-  .rank { font-weight: 700; font-size: 18px; color: #4363d8; min-width: 40px; }
-  .name { font-weight: 600; font-size: 15px; flex: 1; }
-  .badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
-            background: #e8f5e9; color: #2e7d32; }
-  .badge-sharpe { background: #e3f2fd; color: #1565c0; }
-  .badge-dd { background: #fce4ec; color: #c62828; }
-  .toggle-icon { font-size: 12px; color: #aaa; transition: transform 0.2s; }
-  .card.collapsed .card-body { display: none; }
-  .card.collapsed .toggle-icon { transform: rotate(-90deg); }
-  .card-body { padding: 16px 20px; }
-  .kpi-row { display: flex; gap: 24px; margin-bottom: 12px; }
-  .kpi-table { border-collapse: collapse; font-size: 13px; }
-  .kpi-table th { background: #f5f6fa; padding: 6px 12px; text-align: center;
-                   border: 1px solid #e8e8e8; font-weight: 600; color: #555; }
-  .kpi-table td { padding: 5px 12px; border: 1px solid #e8e8e8; }
-  .kpi-label { color: #777; font-weight: 500; }
-  .kpi-val { font-weight: 600; color: #222; font-family: "SF Mono", Consolas, monospace; }
-  .chart-img { width: 100%; border-radius: 6px; cursor: pointer;
-                border: 1px solid #eee; margin-top: 4px;
-                image-rendering: -webkit-optimize-contrast; }
-  .chart-img:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
-  @media (max-width: 768px) {
-    body { padding: 10px; }
-    h1 { font-size: 18px; }
-    .controls input { width: 200px; font-size: 13px; }
-    .card-header { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
-    .rank { font-size: 15px; min-width: 30px; }
-    .name { font-size: 13px; flex-basis: calc(100% - 42px); }
-    .badge { font-size: 11px; padding: 2px 6px; }
-    .card-body { padding: 10px 12px; }
-    .kpi-row { flex-direction: column; gap: 8px; }
-    .kpi-table { width: 100%; font-size: 12px; }
-    .kpi-table th, .kpi-table td { padding: 4px 6px; }
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       background: #f0f2f5; color: #333; padding: 20px; max-width: 1400px; margin: 0 auto; }
+.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+              margin-bottom: 16px; font-size: 14px; color: #666; }
+.breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: #bbb; margin: 0 2px; }
+.breadcrumb .current { color: #333; font-weight: 600; }
+.compare-box { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+               box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+.compare-title { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 12px; }
+.compare-canvas { width: 100%; border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
+.compare-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; font-size: 13px; }
+.compare-legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer;
+                        padding: 2px 8px; border-radius: 4px; user-select: none; }
+.compare-legend-item:hover { background: #f0f2f5; }
+.compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.compare-legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
+.hero { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+         box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+.hero-header { display: flex; align-items: center; justify-content: space-between;
+               margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.hero-kpi { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-kpi-item { text-align: center; }
+.hero-kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.hero-kpi-val { font-size: 16px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; }
+.hero-img { width: 100%; border-radius: 8px; border: 1px solid #eee; }
+.section-header { display: flex; align-items: center; justify-content: space-between;
+                   margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e8e8e8; }
+.section-title { font-size: 16px; font-weight: 600; color: #555; }
+.expand-btn { padding: 6px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff;
+              cursor: pointer; font-size: 13px; font-weight: 500; color: #4363d8; }
+.expand-btn:hover { background: #f0f2f5; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+         overflow: hidden; transition: box-shadow 0.2s; }
+.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.card-header { display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+               user-select: none; gap: 12px; border-bottom: 1px solid transparent; }
+.card-header:hover { background: #fafbff; }
+.card.expanded .card-header { border-bottom-color: #f0f0f0; }
+.card-rank { font-weight: 700; font-size: 16px; color: #4363d8; min-width: 36px; }
+.card-name { font-weight: 600; font-size: 15px; flex: 1; color: #222; }
+.card-name.drillable { color: #4363d8; cursor: pointer; }
+.card-name.drillable:hover { text-decoration: underline; }
+.card-ratio { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+              background: #f3e8ff; color: #7c3aed; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-profit { background: #e8f5e9; color: #2e7d32; }
+.badge-sharpe { background: #e3f2fd; color: #1565c0; }
+.badge-dd { background: #fce4ec; color: #c62828; }
+.card-arrow { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+.card.expanded .card-arrow { transform: rotate(90deg); }
+.drill-icon { font-size: 14px; color: #4363d8; margin-left: 4px; }
+.card-body { display: none; padding: 16px 20px; }
+.card.expanded .card-body { display: block; }
+.card-kpi-row { display: flex; gap: 24px; margin-bottom: 12px; }
+.kpi-table { border-collapse: collapse; font-size: 13px; }
+.kpi-table th { background: #f5f6fa; padding: 6px 12px; text-align: center;
+                border: 1px solid #e8e8e8; font-weight: 600; color: #555; }
+.kpi-table td { padding: 5px 12px; border: 1px solid #e8e8e8; }
+.kpi-label { color: #777; font-weight: 500; }
+.kpi-val { font-weight: 600; color: #222; font-family: "SF Mono", Consolas, monospace; }
+.card-img { width: 100%; border-radius: 6px; border: 1px solid #eee;
+            image-rendering: -webkit-optimize-contrast; }
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .hero-title { font-size: 18px; }
+  .hero-kpi { gap: 10px; }
+  .hero-kpi-val { font-size: 14px; }
+  .card-header { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+  .card-rank { font-size: 14px; min-width: 28px; }
+  .card-name { font-size: 13px; }
+  .badge, .card-ratio { font-size: 11px; padding: 2px 6px; }
+  .card-body { padding: 10px 12px; }
+  .card-kpi-row { flex-direction: column; gap: 8px; }
+  .kpi-table { width: 100%; font-size: 12px; }
+}
 </style>
 </head>
 <body>
-<h1>Strategy Equity Dashboard</h1>
-<p class="subtitle">Updated: 2026-03-05 | Sorted by 60D Ann_Sharpe | 22 strategies | results_group</p>
-<div class="controls">
-  <input type="text" id="search" placeholder="Search strategy name..." oninput="filterCards()">
-  <button onclick="toggleAll()">Expand / Collapse All</button>
-</div>
-
-    <div class="card collapsed" id="CMF17_corr_atr_momentumfilter">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#1</span>
-        <span class="name">CMF17_corr_atr_momentumfilter</span>
-        <span class="badge">60D Profit: 11.333w</span>
-        <span class="badge badge-sharpe">Sharpe: 5.446</span>
-        <span class="badge badge-dd">MaxDD: 4.886w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">89.722w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">7.709w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.703</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.787w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">11.333w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.886w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.446</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.879w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CMF17_corr_atr_momentumfilter.webp" alt="CMF17_corr_atr_momentumfilter">
-      </div>
-    </div>
-    <div class="card collapsed" id="kmf_atr">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#2</span>
-        <span class="name">kmf_atr</span>
-        <span class="badge">60D Profit: 18.19w</span>
-        <span class="badge badge-sharpe">Sharpe: 5.412</span>
-        <span class="badge badge-dd">MaxDD: 2.787w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">91.274w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">6.154w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.375</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.887w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">18.19w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">2.787w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.412</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.403w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="kmf_atr.webp" alt="kmf_atr">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_ts_HTOR_v2">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#3</span>
-        <span class="name">CTA_ts_HTOR_v2</span>
-        <span class="badge">60D Profit: 17.594w</span>
-        <span class="badge badge-sharpe">Sharpe: 5.332</span>
-        <span class="badge badge-dd">MaxDD: 4.634w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">95.094w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">5.324w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.416</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.906w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">17.594w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.634w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.332</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.493w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_ts_HTOR_v2.webp" alt="CTA_ts_HTOR_v2">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_comm_daynight_combine_rSharpe_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#4</span>
-        <span class="name">Deap_comm_daynight_combine_rSharpe_opt</span>
-        <span class="badge">60D Profit: 11.114w</span>
-        <span class="badge badge-sharpe">Sharpe: 5.141</span>
-        <span class="badge badge-dd">MaxDD: 3.077w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">76.225w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">8.77w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.851</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.87w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">11.114w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">3.077w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.141</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.831w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_comm_daynight_combine_rSharpe_opt.webp" alt="Deap_comm_daynight_combine_rSharpe_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_comm_daynight_combine_Equal_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#5</span>
-        <span class="name">Deap_comm_daynight_combine_Equal_opt</span>
-        <span class="badge">60D Profit: 14.917w</span>
-        <span class="badge badge-sharpe">Sharpe: 5.102</span>
-        <span class="badge badge-dd">MaxDD: 4.991w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">105.12w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">9.792w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.133</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.089w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">14.917w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.991w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.102</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.117w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_comm_daynight_combine_Equal_opt.webp" alt="Deap_comm_daynight_combine_Equal_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_1000w">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#6</span>
-        <span class="name">CTA_1000w</span>
-        <span class="badge">60D Profit: 81.061w</span>
-        <span class="badge badge-sharpe">Sharpe: 4.832</span>
-        <span class="badge badge-dd">MaxDD: 25.784w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">603.328w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">43.283w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.114</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">6.311w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">81.061w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">25.784w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.832</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">6.597w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_1000w.webp" alt="CTA_1000w">
-      </div>
-    </div>
-    <div class="card collapsed" id="xiaowengroup_202509">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#7</span>
-        <span class="name">xiaowengroup_202509</span>
-        <span class="badge">60D Profit: 10.087w</span>
-        <span class="badge badge-sharpe">Sharpe: 4.68</span>
-        <span class="badge badge-dd">MaxDD: 3.559w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">19.533w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.52w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.659</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.745w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">10.087w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">3.559w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.68</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.831w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="xiaowengroup_202509.webp" alt="xiaowengroup_202509">
-      </div>
-    </div>
-    <div class="card collapsed" id="FuxingGroup_202601">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#8</span>
-        <span class="name">FuxingGroup_202601</span>
-        <span class="badge">60D Profit: 12.132w</span>
-        <span class="badge badge-sharpe">Sharpe: 4.616</span>
-        <span class="badge badge-dd">MaxDD: 4.571w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">120.151w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.571w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">5.07</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.771w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">12.132w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.571w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.616</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.024w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="FuxingGroup_202601.webp" alt="FuxingGroup_202601">
-      </div>
-    </div>
-    <div class="card collapsed" id="daydeapcomm500_neubeta">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#9</span>
-        <span class="name">daydeapcomm500_neubeta</span>
-        <span class="badge">60D Profit: 10.863w</span>
-        <span class="badge badge-sharpe">Sharpe: 4.615</span>
-        <span class="badge badge-dd">MaxDD: 2.764w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">64.664w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">9.331w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.362</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.895w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">10.863w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">2.764w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.615</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.073w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="daydeapcomm500_neubeta.webp" alt="daydeapcomm500_neubeta">
-      </div>
-    </div>
-    <div class="card collapsed" id="zlw_1000w">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#10</span>
-        <span class="name">zlw_1000w</span>
-        <span class="badge">60D Profit: 334.445w</span>
-        <span class="badge badge-sharpe">Sharpe: 4.516</span>
-        <span class="badge badge-dd">MaxDD: 137.132w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">1181.217w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">211.302w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.778</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">21.55w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">334.445w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">137.132w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.516</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">29.325w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="zlw_1000w.webp" alt="zlw_1000w">
-      </div>
-    </div>
-    <div class="card collapsed" id="ifp_complex_group">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#11</span>
-        <span class="name">ifp_complex_group</span>
-        <span class="badge">60D Profit: 12.732w</span>
-        <span class="badge badge-sharpe">Sharpe: 3.888</span>
-        <span class="badge badge-dd">MaxDD: 4.706w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">159.244w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">8.321w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.095</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.274w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">12.732w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.706w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.888</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.229w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="ifp_complex_group.webp" alt="ifp_complex_group">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_benchmark_v8_daxin_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#12</span>
-        <span class="name">Deap_benchmark_v8_daxin_opt</span>
-        <span class="badge">60D Profit: 10.264w</span>
-        <span class="badge badge-sharpe">Sharpe: 3.771</span>
-        <span class="badge badge-dd">MaxDD: 4.434w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">80.966w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">8.023w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.944</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.892w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">10.264w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.434w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.771</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.986w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_benchmark_v8_daxin_opt.webp" alt="Deap_benchmark_v8_daxin_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_comm_daynight_combine_Equal">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#13</span>
-        <span class="name">Deap_comm_daynight_combine_Equal</span>
-        <span class="badge">60D Profit: 16.227w</span>
-        <span class="badge badge-sharpe">Sharpe: 3.733</span>
-        <span class="badge badge-dd">MaxDD: 7.482w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">106.521w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">13.1w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.888</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.197w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">16.227w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">7.482w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.733</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.583w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_comm_daynight_combine_Equal.webp" alt="Deap_comm_daynight_combine_Equal">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_benchmark_v7_ML_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#14</span>
-        <span class="name">Deap_benchmark_v7_ML_opt</span>
-        <span class="badge">60D Profit: 7.182w</span>
-        <span class="badge badge-sharpe">Sharpe: 3.632</span>
-        <span class="badge badge-dd">MaxDD: 2.94w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">86.59w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.452w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.576</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.614w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">7.182w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">2.94w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.632</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.709w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_benchmark_v7_ML_opt.webp" alt="Deap_benchmark_v7_ML_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_hs_ltor">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#15</span>
-        <span class="name">CTA_hs_ltor</span>
-        <span class="badge">60D Profit: 4.535w</span>
-        <span class="badge badge-sharpe">Sharpe: 3.412</span>
-        <span class="badge badge-dd">MaxDD: 2.178w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">39.481w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">7.126w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.838</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.693w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">4.535w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">2.178w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.412</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.481w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_hs_ltor.webp" alt="CTA_hs_ltor">
-      </div>
-    </div>
-    <div class="card collapsed" id="macro_group">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#16</span>
-        <span class="name">macro_group</span>
-        <span class="badge">60D Profit: 10.194w</span>
-        <span class="badge badge-sharpe">Sharpe: 2.952</span>
-        <span class="badge badge-dd">MaxDD: 6.316w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">98.692w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">7.354w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.732</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.862w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">10.194w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">6.316w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.952</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.236w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="macro_group.webp" alt="macro_group">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_202503II">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#17</span>
-        <span class="name">CTA_202503II</span>
-        <span class="badge">60D Profit: 5.883w</span>
-        <span class="badge badge-sharpe">Sharpe: 2.876</span>
-        <span class="badge badge-dd">MaxDD: 3.977w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">98.581w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.187w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.184</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.766w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">5.883w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">3.977w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.876</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.773w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_202503II.webp" alt="CTA_202503II">
-      </div>
-    </div>
-    <div class="card collapsed" id="kfs_group">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#18</span>
-        <span class="name">kfs_group</span>
-        <span class="badge">60D Profit: 7.479w</span>
-        <span class="badge badge-sharpe">Sharpe: 2.467</span>
-        <span class="badge badge-dd">MaxDD: 5.109w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">55.681w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">9.263w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.977</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.907w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">7.479w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">5.109w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">2.467</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.274w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="kfs_group.webp" alt="kfs_group">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_ts_mtor_v2">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#19</span>
-        <span class="name">CTA_ts_mtor_v2</span>
-        <span class="badge">60D Profit: 9.44w</span>
-        <span class="badge badge-sharpe">Sharpe: 1.813</span>
-        <span class="badge badge-dd">MaxDD: 6.884w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">55.081w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">10.846w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.428</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.245w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">9.44w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">6.884w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.813</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.573w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_ts_mtor_v2.webp" alt="CTA_ts_mtor_v2">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_comm_daynight_v6_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#20</span>
-        <span class="name">Deap_comm_daynight_v6_opt</span>
-        <span class="badge">60D Profit: 2.391w</span>
-        <span class="badge badge-sharpe">Sharpe: 0.79</span>
-        <span class="badge badge-dd">MaxDD: 4.062w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">71.445w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.965w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">3.346</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.69w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">2.391w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">4.062w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">0.79</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.733w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_comm_daynight_v6_opt.webp" alt="Deap_comm_daynight_v6_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="Deap_comm_daynight_combine_ML_opt">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#21</span>
-        <span class="name">Deap_comm_daynight_combine_ML_opt</span>
-        <span class="badge">60D Profit: 1.755w</span>
-        <span class="badge badge-sharpe">Sharpe: 0.16</span>
-        <span class="badge badge-dd">MaxDD: 3.525w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">114.356w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">3.525w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">4.678</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.793w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">1.755w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">3.525w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">0.16</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">0.877w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="Deap_comm_daynight_combine_ML_opt.webp" alt="Deap_comm_daynight_combine_ML_opt">
-      </div>
-    </div>
-    <div class="card collapsed" id="CTA_ts_ltor">
-      <div class="card-header" onclick="toggleCard(this.parentElement)">
-        <span class="rank">#22</span>
-        <span class="name">CTA_ts_ltor</span>
-        <span class="badge">60D Profit: 1.405w</span>
-        <span class="badge badge-sharpe">Sharpe: -0.382</span>
-        <span class="badge badge-dd">MaxDD: 12.633w</span>
-        <span class="toggle-icon">▼</span>
-      </div>
-      <div class="card-body">
-        <div class="kpi-row">
-          <table class="kpi-table">
-            <tr><th colspan="4">2Y KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">57.495w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">13.095w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">1.383</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.367w</td></tr>
-          </table>
-          <table class="kpi-table">
-            <tr><th colspan="4">60D KPI</th></tr>
-            <tr><td class="kpi-label">Net_Profit</td><td class="kpi-val">1.405w</td><td class="kpi-label">Max_Drawdown</td><td class="kpi-val">12.633w</td></tr>
-            <tr><td class="kpi-label">Ann_Sharpe</td><td class="kpi-val">-0.382</td><td class="kpi-label">Daily_Std</td><td class="kpi-val">1.948w</td></tr>
-          </table>
-        </div>
-        <img class="chart-img" data-src="CTA_ts_ltor.webp" alt="CTA_ts_ltor">
-      </div>
-    </div>
+<div id="app"></div>
 <script>
-function toggleCard(card) {
-  card.classList.toggle('collapsed');
-  if (!card.classList.contains('collapsed')) {
-    var img = card.querySelector('img[data-src]');
-    if (img) {
-      img.src = img.getAttribute('data-src');
-      img.removeAttribute('data-src');
+const TREE = {"name": "group", "image": "group.webp", "kpi": {}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "image": "Deap_comm_daynight_combine_Equal.webp", "kpi": {"kpi_2y": {"Net_Profit": "106.521w", "Max_Drawdown": "13.1w", "Ann_Sharpe": "2.888", "Daily_Std": "1.197w"}, "kpi_60d": {"Net_Profit": "16.227w", "Max_Drawdown": "7.482w", "Ann_Sharpe": "3.733", "Daily_Std": "1.583w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "image": "Deap_comm_daynight_combine_Equal_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "105.12w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "3.133", "Daily_Std": "1.089w"}, "kpi_60d": {"Net_Profit": "14.917w", "Max_Drawdown": "4.991w", "Ann_Sharpe": "5.102", "Daily_Std": "1.117w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "image": "Deap_comm_daynight_combine_rSharpe_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "76.225w", "Max_Drawdown": "8.77w", "Ann_Sharpe": "2.851", "Daily_Std": "0.87w"}, "kpi_60d": {"Net_Profit": "11.114w", "Max_Drawdown": "3.077w", "Ann_Sharpe": "5.141", "Daily_Std": "0.831w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "image": "Deap_comm_daynight_combine_ML_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "114.356w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "4.678", "Daily_Std": "0.793w"}, "kpi_60d": {"Net_Profit": "1.755w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "0.16", "Daily_Std": "0.877w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "image": "Deap_benchmark_v8_daxin_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "80.966w", "Max_Drawdown": "8.023w", "Ann_Sharpe": "2.944", "Daily_Std": "0.892w"}, "kpi_60d": {"Net_Profit": "10.264w", "Max_Drawdown": "4.434w", "Ann_Sharpe": "3.771", "Daily_Std": "0.986w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "image": "Deap_comm_daynight_v6_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "71.445w", "Max_Drawdown": "4.965w", "Ann_Sharpe": "3.346", "Daily_Std": "0.69w"}, "kpi_60d": {"Net_Profit": "2.391w", "Max_Drawdown": "4.062w", "Ann_Sharpe": "0.79", "Daily_Std": "0.733w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "image": "Deap_benchmark_v7_ML_opt.webp", "kpi": {"kpi_2y": {"Net_Profit": "86.59w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.576", "Daily_Std": "0.614w"}, "kpi_60d": {"Net_Profit": "7.182w", "Max_Drawdown": "2.94w", "Ann_Sharpe": "3.632", "Daily_Std": "0.709w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "image": "CTA_hs_ltor.webp", "kpi": {"kpi_2y": {"Net_Profit": "39.481w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.838", "Daily_Std": "0.693w"}, "kpi_60d": {"Net_Profit": "4.535w", "Max_Drawdown": "2.178w", "Ann_Sharpe": "3.412", "Daily_Std": "0.481w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "image": "CTA_ts_ltor.webp", "kpi": {"kpi_2y": {"Net_Profit": "57.495w", "Max_Drawdown": "13.095w", "Ann_Sharpe": "1.383", "Daily_Std": "1.367w"}, "kpi_60d": {"Net_Profit": "1.405w", "Max_Drawdown": "12.633w", "Ann_Sharpe": "-0.382", "Daily_Std": "1.948w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "image": "CTA_ts_mtor_v2.webp", "kpi": {"kpi_2y": {"Net_Profit": "55.081w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.428", "Daily_Std": "1.245w"}, "kpi_60d": {"Net_Profit": "9.44w", "Max_Drawdown": "6.884w", "Ann_Sharpe": "1.813", "Daily_Std": "1.573w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "image": "CTA_ts_HTOR_v2.webp", "kpi": {"kpi_2y": {"Net_Profit": "95.094w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "3.416", "Daily_Std": "0.906w"}, "kpi_60d": {"Net_Profit": "17.594w", "Max_Drawdown": "4.634w", "Ann_Sharpe": "5.332", "Daily_Std": "1.493w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "image": "xiaowengroup_202509.webp", "kpi": {"kpi_2y": {"Net_Profit": "19.533w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.659", "Daily_Std": "0.745w"}, "kpi_60d": {"Net_Profit": "10.087w", "Max_Drawdown": "3.559w", "Ann_Sharpe": "4.68", "Daily_Std": "0.831w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_202503II", "image": "CTA_202503II.webp", "kpi": {"kpi_2y": {"Net_Profit": "98.581w", "Max_Drawdown": "4.187w", "Ann_Sharpe": "4.184", "Daily_Std": "0.766w"}, "kpi_60d": {"Net_Profit": "5.883w", "Max_Drawdown": "3.977w", "Ann_Sharpe": "2.876", "Daily_Std": "0.773w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "image": "CTA_1000w.webp", "kpi": {"kpi_2y": {"Net_Profit": "603.328w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "3.114", "Daily_Std": "6.311w"}, "kpi_60d": {"Net_Profit": "81.061w", "Max_Drawdown": "25.784w", "Ann_Sharpe": "4.832", "Daily_Std": "6.597w"}}, "children": [], "ratio": 0.0}, {"name": "CMF17_corr_atr_momentumfilter", "image": "CMF17_corr_atr_momentumfilter.webp", "kpi": {"kpi_2y": {"Net_Profit": "89.722w", "Max_Drawdown": "7.709w", "Ann_Sharpe": "3.703", "Daily_Std": "0.787w"}, "kpi_60d": {"Net_Profit": "11.333w", "Max_Drawdown": "4.886w", "Ann_Sharpe": "5.446", "Daily_Std": "0.879w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "image": "kmf_atr.webp", "kpi": {"kpi_2y": {"Net_Profit": "91.274w", "Max_Drawdown": "6.154w", "Ann_Sharpe": "3.375", "Daily_Std": "0.887w"}, "kpi_60d": {"Net_Profit": "18.19w", "Max_Drawdown": "2.787w", "Ann_Sharpe": "5.412", "Daily_Std": "1.403w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "image": "kfs_group.webp", "kpi": {"kpi_2y": {"Net_Profit": "55.681w", "Max_Drawdown": "9.263w", "Ann_Sharpe": "1.977", "Daily_Std": "0.907w"}, "kpi_60d": {"Net_Profit": "7.479w", "Max_Drawdown": "5.109w", "Ann_Sharpe": "2.467", "Daily_Std": "1.274w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "image": "macro_group.webp", "kpi": {"kpi_2y": {"Net_Profit": "98.692w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.732", "Daily_Std": "0.862w"}, "kpi_60d": {"Net_Profit": "10.194w", "Max_Drawdown": "6.316w", "Ann_Sharpe": "2.952", "Daily_Std": "1.236w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "image": "ifp_complex_group.webp", "kpi": {"kpi_2y": {"Net_Profit": "159.244w", "Max_Drawdown": "8.321w", "Ann_Sharpe": "4.095", "Daily_Std": "1.274w"}, "kpi_60d": {"Net_Profit": "12.732w", "Max_Drawdown": "4.706w", "Ann_Sharpe": "3.888", "Daily_Std": "1.229w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "image": "daydeapcomm500_neubeta.webp", "kpi": {"kpi_2y": {"Net_Profit": "64.664w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "2.362", "Daily_Std": "0.895w"}, "kpi_60d": {"Net_Profit": "10.863w", "Max_Drawdown": "2.764w", "Ann_Sharpe": "4.615", "Daily_Std": "1.073w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "image": "zlw_1000w.webp", "kpi": {"kpi_2y": {"Net_Profit": "1181.217w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.778", "Daily_Std": "21.55w"}, "kpi_60d": {"Net_Profit": "334.445w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "4.516", "Daily_Std": "29.325w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "image": "FuxingGroup_202601.webp", "kpi": {"kpi_2y": {"Net_Profit": "120.151w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "5.07", "Daily_Std": "0.771w"}, "kpi_60d": {"Net_Profit": "12.132w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.616", "Daily_Std": "1.024w"}}, "children": [], "ratio": 0.0}]};
+const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
+const COLORS = [
+  '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
+  '#42d4f4','#f032e6','#aa6e28','#469990','#000075',
+  '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
+];
+function chartHeight() {
+  const W = Math.min(window.innerWidth, 1400);
+  if (W < 600) return Math.round(W * 1.4);
+  if (W < 900) return Math.round(400 + (W - 600) * 0.5);
+  return 650;
+}
+let navStack = [];
+let currentNode = TREE;
+
+function parseStd(val) {
+  if (!val) return 0;
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n) || n === 0) return 0;
+  return val.includes('w') ? n * 10000 : n;
+}
+
+function kpiTableHtml(label, kpi) {
+  if (!kpi || Object.keys(kpi).length === 0) return '';
+  let rows = '';
+  for (let i = 0; i < KPI_KEYS.length; i += 2) {
+    const k1 = KPI_KEYS[i], k2 = KPI_KEYS[i+1];
+    rows += '<tr>';
+    rows += `<td class="kpi-label">${k1}</td><td class="kpi-val">${kpi[k1]||'-'}</td>`;
+    if (k2) rows += `<td class="kpi-label">${k2}</td><td class="kpi-val">${kpi[k2]||'-'}</td>`;
+    rows += '</tr>';
+  }
+  return `<table class="kpi-table"><tr><th colspan="4">${label}</th></tr>${rows}</table>`;
+}
+
+function heroKpiHtml(kpi) {
+  if (!kpi) return '';
+  const k2y = kpi.kpi_2y || {};
+  const k60d = kpi.kpi_60d || {};
+  let items = '';
+  const show = [
+    ['2Y Sharpe', k2y.Ann_Sharpe, '#1565c0'],
+    ['60D Sharpe', k60d.Ann_Sharpe, '#1565c0'],
+    ['2Y Profit', k2y.Net_Profit, '#2e7d32'],
+    ['60D Profit', k60d.Net_Profit, '#2e7d32'],
+    ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
+    ['60D MaxDD', k60d.Max_Drawdown, '#c62828'],
+  ];
+  for (const [label, val, color] of show) {
+    if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
+  }
+  return items;
+}
+
+const charts = {};
+
+function buildChartData(node, curveKey, stdKey) {
+  const curves = [];
+  function addCurve(n) {
+    const curve = n.kpi && n.kpi[curveKey];
+    const kpiGroup = stdKey === 'kpi_60d' ? (n.kpi && n.kpi.kpi_60d) : (n.kpi && n.kpi.kpi_2y);
+    const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
+    if (curve && curve.dates && curve.values && std > 0) {
+      const normed = curve.values.map(v => v / std);
+      const first = normed[0] || 0;
+      curves.push({ name: n.name, dates: curve.dates, values: normed.map(v => v - first) });
+    }
+  }
+  addCurve(node);
+  if (node.children) node.children.forEach(addCurve);
+  if (curves.length === 0) return null;
+  let refDates = curves[0].dates;
+  for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+  const N = refDates.length;
+  const dateIndex = {};
+  refDates.forEach((d, i) => dateIndex[d] = i);
+  const aligned = curves.map(c => {
+    const arr = new Array(N).fill(null);
+    c.dates.forEach((d, i) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[i]; });
+    return { name: c.name, data: arr };
+  });
+  return { aligned, refDates, N };
+}
+
+function drawChart(id, hoverIdx) {
+  const st = charts[id];
+  if (!st) return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const { aligned, refDates, N, pad, hidden } = st;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth;
+  const H = chartHeight();
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  let yMin = 0, yMax = 0;
+  aligned.forEach((c, ci) => {
+    if (hidden.has(ci)) return;
+    for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
+  });
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.08;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  const yTicks = 6;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.top + plotH * i / yTicks;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  st.paths = [];
+  aligned.forEach((c, ci) => {
+    if (hidden.has(ci)) { st.paths.push(null); return; }
+    const isHover = (hoverIdx === ci);
+    ctx.strokeStyle = COLORS[ci % COLORS.length];
+    ctx.lineWidth = isHover ? 3.5 : (ci === 0 ? 2.5 : 1.5);
+    ctx.globalAlpha = (hoverIdx !== undefined && hoverIdx !== -1 && !isHover) ? 0.25 : (ci === 0 ? 1.0 : 0.8);
+    const pts = [];
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      pts.push({ x, y, i });
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke(); ctx.globalAlpha = 1.0;
+    st.paths.push(pts);
+  });
+
+  ctx.fillStyle = '#888'; ctx.font = '11px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= yTicks; i++) {
+    const val = yMax - (yMax - yMin) * i / yTicks;
+    ctx.fillText(val.toFixed(1), pad.left - 6, pad.top + plotH * i / yTicks + 4);
+  }
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center';
+  const xStep = Math.max(1, Math.floor(N / 8));
+  for (let i = 0; i < N; i += xStep) {
+    const x = xOf(i);
+    ctx.save(); ctx.translate(x, H - pad.bottom + 14); ctx.rotate(-0.4);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  const xlast = xOf(N - 1);
+  ctx.save(); ctx.translate(xlast, H - pad.bottom + 14); ctx.rotate(-0.4);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  if (hoverIdx !== undefined && hoverIdx >= 0 && !hidden.has(hoverIdx)) {
+    const pts = st.paths[hoverIdx];
+    if (pts && pts.length > 0) {
+      const last = pts[pts.length - 1];
+      const name = aligned[hoverIdx].name;
+      ctx.font = 'bold 13px -apple-system, sans-serif';
+      const tw = ctx.measureText(name).width;
+      const tx = Math.min(last.x + 8, W - pad.right - tw - 12);
+      const ty = Math.max(last.y - 8, pad.top + 16);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.strokeStyle = COLORS[hoverIdx % COLORS.length]; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(tx - 4, ty - 13, tw + 8, 18, 4);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COLORS[hoverIdx % COLORS.length]; ctx.textAlign = 'left';
+      ctx.fillText(name, tx, ty);
     }
   }
 }
-function filterCards() {
-  const q = document.getElementById('search').value.toLowerCase();
-  document.querySelectorAll('.card').forEach(c => {
-    c.style.display = c.id.toLowerCase().includes(q) ? '' : 'none';
+
+function hitTest(id, mx, my) {
+  const st = charts[id];
+  if (!st || !st.paths) return -1;
+  let bestDist = 12, bestIdx = -1;
+  st.paths.forEach((pts, ci) => {
+    if (!pts || st.hidden.has(ci)) return;
+    for (const p of pts) {
+      const d = Math.sqrt((p.x - mx) ** 2 + (p.y - my) ** 2);
+      if (d < bestDist) { bestDist = d; bestIdx = ci; }
+    }
+  });
+  return bestIdx;
+}
+
+function buildLegend(id) {
+  const st = charts[id];
+  const el = document.getElementById(id + '-legend');
+  if (!el || !st) return;
+  el.innerHTML = st.aligned.map((c, ci) =>
+    `<span class="compare-legend-item${st.hidden.has(ci) ? ' hidden' : ''}" data-ci="${ci}">
+      <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
+      <span style="font-weight:600;">${c.name}</span>
+    </span>`
+  ).join('');
+  el.querySelectorAll('.compare-legend-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const ci = parseInt(item.dataset.ci);
+      if (st.hidden.has(ci)) st.hidden.delete(ci); else st.hidden.add(ci);
+      item.classList.toggle('hidden');
+      drawChart(id);
+    });
   });
 }
-let allCollapsed = true;
-function toggleAll() {
-  allCollapsed = !allCollapsed;
-  document.querySelectorAll('.card').forEach(c => {
-    c.classList.toggle('collapsed', allCollapsed);
-    if (!allCollapsed) {
-      var img = c.querySelector('img[data-src]');
-      if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
+
+function setupEvents(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  let lastHover = -1;
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
+    if (idx !== lastHover) { lastHover = idx; drawChart(id, idx); }
+  });
+  canvas.addEventListener('mouseleave', () => { lastHover = -1; drawChart(id); });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
+    if (idx >= 0) {
+      const st = charts[id];
+      if (st.hidden.has(idx)) st.hidden.delete(idx); else st.hidden.add(idx);
+      buildLegend(id); lastHover = -1; drawChart(id);
     }
   });
 }
+
+function initChart(id, node, curveKey, stdKey) {
+  const data = buildChartData(node, curveKey, stdKey);
+  if (!data) return;
+  charts[id] = { ...data, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: new Set() };
+  buildLegend(id);
+  drawChart(id);
+  setupEvents(id);
+}
+
+function renderPage(node) {
+  const app = document.getElementById('app');
+  const hasChildren = node.children && node.children.length > 0;
+
+  let bc = '<div class="breadcrumb">';
+  for (let i = 0; i < navStack.length; i++) {
+    bc += `<a onclick="navigateTo(${i})">${navStack[i].name}</a><span class="sep">&rsaquo;</span>`;
+  }
+  bc += `<span class="current">${node.name}</span></div>`;
+
+  let compare = '';
+  if (hasChildren) {
+    compare = `<div class="compare-box">
+      <div class="compare-title">60D Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-60d" class="compare-canvas"></canvas>
+      <div id="chart-60d-legend" class="compare-legend"></div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-title">2Y Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-2y" class="compare-canvas"></canvas>
+      <div id="chart-2y-legend" class="compare-legend"></div>
+    </div>`;
+  }
+
+  let hero = `<div class="hero">
+    <div class="hero-header">
+      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+node.ratio+'%)</span>' : ''}</div>
+      <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
+    </div>
+    <img class="hero-img" src="${node.image}" alt="${node.name}">
+  </div>`;
+
+  let cards = '';
+  if (hasChildren) {
+    const sorted = [...node.children].sort((a, b) => {
+      const sa = parseFloat((a.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sb = parseFloat((b.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
+      return sb - sa;
+    });
+
+    cards = `<div class="section-header">
+      <span class="section-title">Components (${sorted.length})</span>
+      <button class="expand-btn" onclick="toggleExpandAll()">Expand All</button>
+    </div><div class="cards">`;
+    sorted.forEach((child, idx) => {
+      const ck60d = (child.kpi && child.kpi.kpi_60d) || {};
+      const ck2y = (child.kpi && child.kpi.kpi_2y) || {};
+      const isDrillable = child.children && child.children.length > 0;
+      const cardId = 'card-' + idx;
+      const imgSrc = child.card_image || child.image;
+
+      cards += `<div class="card" id="${cardId}">
+        <div class="card-header" onclick="toggleCard('${cardId}')">
+          <span class="card-rank">#${idx+1}</span>
+          ${isDrillable
+            ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
+            : '<span class="card-name">'+child.name+'</span>'}
+          <span class="card-ratio">${child.ratio||'-'}%</span>
+          ${ck60d.Net_Profit ? '<span class="badge badge-profit">Profit: '+ck60d.Net_Profit+'</span>' : ''}
+          ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">Sharpe: '+ck60d.Ann_Sharpe+'</span>' : ''}
+          ${ck60d.Max_Drawdown ? '<span class="badge badge-dd">MaxDD: '+ck60d.Max_Drawdown+'</span>' : ''}
+          <span class="card-arrow">&blacktriangleright;</span>
+        </div>
+        <div class="card-body">
+          <div class="card-kpi-row">
+            ${kpiTableHtml('2Y KPI', ck2y)}
+            ${kpiTableHtml('60D KPI', ck60d)}
+          </div>
+          <img class="card-img" data-src="${imgSrc}" alt="${child.name}">
+        </div>
+      </div>`;
+    });
+    cards += '</div>';
+    node._sorted = sorted;
+  }
+
+  app.innerHTML = bc + compare + hero + cards;
+  window.scrollTo(0, 0);
+  if (hasChildren) {
+    Object.keys(charts).forEach(k => delete charts[k]);
+    requestAnimationFrame(() => {
+      initChart('chart-60d', node, 'curve_60d', 'kpi_60d');
+      initChart('chart-2y', node, 'curve_2y', 'kpi_2y');
+    });
+  }
+}
+
+let allExpanded = false;
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  const btn = document.querySelector('.expand-btn');
+  if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.card').forEach(c => {
+    if (allExpanded) {
+      c.classList.add('expanded');
+      const img = c.querySelector('img[data-src]');
+      if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
+    } else {
+      c.classList.remove('expanded');
+    }
+  });
+}
+
+function toggleCard(cardId) {
+  const card = document.getElementById(cardId);
+  const wasExpanded = card.classList.contains('expanded');
+  card.classList.toggle('expanded');
+  if (!wasExpanded) {
+    const img = card.querySelector('img[data-src]');
+    if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
+  }
+}
+
+function drillDown(sortedIdx) {
+  allExpanded = false;
+  const child = currentNode._sorted[sortedIdx];
+  navStack.push(currentNode);
+  currentNode = child;
+  location.hash = child.name;
+  renderPage(currentNode);
+}
+
+function navigateTo(stackIdx) {
+  allExpanded = false;
+  currentNode = navStack[stackIdx];
+  navStack = navStack.slice(0, stackIdx);
+  location.hash = currentNode === TREE ? '' : currentNode.name;
+  renderPage(currentNode);
+}
+
+function findNode(node, name) {
+  if (node.name === name) return [node, []];
+  if (node.children) {
+    for (const child of node.children) {
+      const result = findNode(child, name);
+      if (result) { result[1].unshift(node); return result; }
+    }
+  }
+  return null;
+}
+
+function navigateToHash() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && hash !== TREE.name) {
+    const result = findNode(TREE, hash);
+    if (result) {
+      const [target, ancestors] = result;
+      navStack = ancestors;
+      currentNode = target;
+      renderPage(currentNode);
+      return;
+    }
+  }
+  navStack = [];
+  currentNode = TREE;
+  renderPage(TREE);
+}
+
+navigateToHash();
+window.addEventListener('hashchange', navigateToHash);
+window.addEventListener('resize', () => { Object.keys(charts).forEach(id => drawChart(id)); });
 </script>
 </body>
 </html>
