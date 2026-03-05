@@ -16,9 +16,9 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 .breadcrumb .sep { color: #bbb; margin: 0 2px; }
 .breadcrumb .current { color: #333; font-weight: 600; }
 .compare-box { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
-               box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+               box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .compare-title { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 12px; }
-.compare-canvas { width: 100%; border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
+.compare-canvas { min-width: 800px; width: 100%; border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
 .compare-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; font-size: 13px; }
 .compare-legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer;
                         padding: 2px 8px; border-radius: 4px; user-select: none; }
@@ -101,10 +101,7 @@ const COLORS = [
   '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
 ];
 function chartHeight() {
-  const W = Math.min(window.innerWidth, 1400);
-  if (W < 600) return Math.round(W * 1.4);
-  if (W < 900) return Math.round(400 + (W - 600) * 0.5);
-  return 650;
+  return 550;
 }
 let navStack = [];
 let currentNode = TREE;
@@ -435,6 +432,7 @@ function renderPage(node) {
 
   app.innerHTML = bc + compare + hero + cards;
   window.scrollTo(0, 0);
+  setupLazyImages();
   if (hasChildren) {
     Object.keys(charts).forEach(k => delete charts[k]);
     requestAnimationFrame(() => {
@@ -444,30 +442,35 @@ function renderPage(node) {
   }
 }
 
+let imgObserver = null;
+function setupLazyImages() {
+  if (imgObserver) imgObserver.disconnect();
+  imgObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        const img = e.target;
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        imgObserver.unobserve(img);
+      }
+    }
+  }, { rootMargin: '200px' });
+  document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
+}
+
 let allExpanded = false;
 function toggleExpandAll() {
   allExpanded = !allExpanded;
   const btn = document.querySelector('.expand-btn');
   if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
   document.querySelectorAll('.card').forEach(c => {
-    if (allExpanded) {
-      c.classList.add('expanded');
-      const img = c.querySelector('img[data-src]');
-      if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
-    } else {
-      c.classList.remove('expanded');
-    }
+    if (allExpanded) c.classList.add('expanded');
+    else c.classList.remove('expanded');
   });
 }
 
 function toggleCard(cardId) {
-  const card = document.getElementById(cardId);
-  const wasExpanded = card.classList.contains('expanded');
-  card.classList.toggle('expanded');
-  if (!wasExpanded) {
-    const img = card.querySelector('img[data-src]');
-    if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
-  }
+  document.getElementById(cardId).classList.toggle('expanded');
 }
 
 async function drillDown(sortedIdx) {
