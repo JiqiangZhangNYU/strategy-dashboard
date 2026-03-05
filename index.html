@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategy Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       background: #f0f2f5; color: #333; padding: 40px 20px; max-width: 800px; margin: 0 auto; }
+h1 { font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+.date { font-size: 14px; color: #888; margin-bottom: 32px; }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.item { display: flex; align-items: center; justify-content: space-between;
+         background: #fff; padding: 18px 24px; border-radius: 10px;
+         box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-decoration: none; color: #333;
+         transition: box-shadow 0.2s, transform 0.1s; }
+.item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-1px); }
+.item-name { font-size: 18px; font-weight: 600; color: #4363d8; }
+.item-arrow { font-size: 18px; color: #aaa; }
+</style>
+</head>
+<body>
+<h1>Strategy Dashboard</h1>
+<div class="date">Updated: 2026-03-06</div>
+<div class="list">
+  <a class="item" href="CTA_1000w/"><span class="item-name">CTA_1000w</span><span class="item-arrow">&rsaquo;</span></a>
+  <a class="item" href="CTA_HS_LTOR_V2/"><span class="item-name">CTA_HS_LTOR_V2</span><span class="item-arrow">&rsaquo;</span></a>
+  <a class="item" href="deap/"><span class="item-name">deap</span><span class="item-arrow">&rsaquo;</span></a>
+  <a class="item" href="deap_style/"><span class="item-name">deap_style</span><span class="item-arrow">&rsaquo;</span></a>
+  <a class="item" href="group/"><span class="item-name">group</span><span class="item-arrow">&rsaquo;</span></a>
+</div>
+</body>
+</html>
