@@ -435,6 +435,7 @@ function renderPage(node) {
 
   app.innerHTML = bc + compare + hero + cards;
   window.scrollTo(0, 0);
+  setupLazyImages();
   if (hasChildren) {
     Object.keys(charts).forEach(k => delete charts[k]);
     requestAnimationFrame(() => {
@@ -444,30 +445,35 @@ function renderPage(node) {
   }
 }
 
+let imgObserver = null;
+function setupLazyImages() {
+  if (imgObserver) imgObserver.disconnect();
+  imgObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        const img = e.target;
+        img.src = img.getAttribute('data-src');
+        img.removeAttribute('data-src');
+        imgObserver.unobserve(img);
+      }
+    }
+  }, { rootMargin: '200px' });
+  document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
+}
+
 let allExpanded = false;
 function toggleExpandAll() {
   allExpanded = !allExpanded;
   const btn = document.querySelector('.expand-btn');
   if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
   document.querySelectorAll('.card').forEach(c => {
-    if (allExpanded) {
-      c.classList.add('expanded');
-      const img = c.querySelector('img[data-src]');
-      if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
-    } else {
-      c.classList.remove('expanded');
-    }
+    if (allExpanded) c.classList.add('expanded');
+    else c.classList.remove('expanded');
   });
 }
 
 function toggleCard(cardId) {
-  const card = document.getElementById(cardId);
-  const wasExpanded = card.classList.contains('expanded');
-  card.classList.toggle('expanded');
-  if (!wasExpanded) {
-    const img = card.querySelector('img[data-src]');
-    if (img) { img.src = img.getAttribute('data-src'); img.removeAttribute('data-src'); }
-  }
+  document.getElementById(cardId).classList.toggle('expanded');
 }
 
 async function drillDown(sortedIdx) {
