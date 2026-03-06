@@ -437,56 +437,48 @@ function setupEvents(id) {
   });
 }
 
-async function initChart(id, node, curveKey, stdKey) {
-  // Load chart data for parent + children, 4 at a time to avoid stampede
+async function initChart(id, node, curveKey, stdKey, preloaded) {
   const names = [node.name];
   if (node.children) node.children.forEach(c => names.push(c.name));
-  const kpis = new Array(names.length).fill(null);
-  const BATCH = 4;
-  // First load parent immediately
-  kpis[0] = await loadChartData(names[0]);
-  // Then batch-load children
-  for (let i = 1; i < names.length; i += BATCH) {
-    const batch = names.slice(i, i + BATCH);
-    const results = await Promise.all(batch.map(n => loadChartData(n)));
-    results.forEach((r, j) => { kpis[i + j] = r; });
-    // Draw incrementally after each batch
-    const curves = [];
-    for (let k = 0; k < kpis.length; k++) {
-      const kpi = kpis[k];
-      if (!kpi) continue;
-      const curve = kpi[curveKey];
-      const kpiGroup = stdKey === 'kpi_60d' ? kpi.kpi_60d : kpi.kpi_2y;
-      const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
-      if (curve && curve.dates && curve.values && std > 0) {
-        const normed = curve.values.map(v => v / std);
-        const first = normed[0] || 0;
-        curves.push({ name: names[k], dates: curve.dates, values: normed.map(v => v - first) });
-      }
+
+  // Use preloaded data or load all at once
+  const kpis = preloaded || await Promise.all(names.map(n => loadChartData(n)));
+
+  const curves = [];
+  for (let k = 0; k < kpis.length; k++) {
+    const kpi = kpis[k];
+    if (!kpi) continue;
+    const curve = kpi[curveKey];
+    const kpiGroup = stdKey === 'kpi_60d' ? kpi.kpi_60d : kpi.kpi_2y;
+    const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
+    if (curve && curve.dates && curve.values && std > 0) {
+      const normed = curve.values.map(v => v / std);
+      const first = normed[0] || 0;
+      curves.push({ name: names[k], dates: curve.dates, values: normed.map(v => v - first) });
     }
-    if (curves.length > 0) {
-      let refDates = curves[0].dates;
-      for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
-      const N = refDates.length;
-      const dateIndex = {};
-      refDates.forEach((d, di) => dateIndex[d] = di);
-      const aligned = curves.map(c => {
-        const arr = new Array(N).fill(null);
-        c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
-        return { name: c.name, data: arr };
-      });
-      // Sort by final value (descending) for legend order
-      const sortOrder = aligned.map((c, i) => i).sort((a, b) => {
-        const lastA = aligned[a].data.findLast(v => v !== null) ?? 0;
-        const lastB = aligned[b].data.findLast(v => v !== null) ?? 0;
-        return lastB - lastA;
-      });
-      const sortedAligned = sortOrder.map(i => aligned[i]);
-      const prevHidden = charts[id] ? charts[id].hidden : new Set();
-      charts[id] = { aligned: sortedAligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
-      buildLegend(id);
-      drawChart(id);
-    }
+  }
+  if (curves.length > 0) {
+    let refDates = curves[0].dates;
+    for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+    const N = refDates.length;
+    const dateIndex = {};
+    refDates.forEach((d, di) => dateIndex[d] = di);
+    const aligned = curves.map(c => {
+      const arr = new Array(N).fill(null);
+      c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
+      return { name: c.name, data: arr };
+    });
+    // Sort by final value (descending) for legend order
+    const sortOrder = aligned.map((c, i) => i).sort((a, b) => {
+      const lastA = aligned[a].data.findLast(v => v !== null) ?? 0;
+      const lastB = aligned[b].data.findLast(v => v !== null) ?? 0;
+      return lastB - lastA;
+    });
+    const sortedAligned = sortOrder.map(i => aligned[i]);
+    const prevHidden = charts[id] ? charts[id].hidden : new Set();
+    charts[id] = { aligned: sortedAligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
+    buildLegend(id);
+    drawChart(id);
   }
   if (charts[id]) setupEvents(id);
 }
@@ -797,8 +789,13 @@ function renderPage(node) {
     drawHeroCharts(node.name);
     if (hasChildren) {
       Object.keys(charts).forEach(k => delete charts[k]);
-      initChart('chart-60d', node, 'curve_60d', 'kpi_60d');
-      initChart('chart-2y', node, 'curve_2y', 'kpi_2y');
+      // Preload all chart data once, then init both charts in parallel
+      const names = [node.name];
+      node.children.forEach(c => names.push(c.name));
+      Promise.all(names.map(n => loadChartData(n))).then(preloaded => {
+        initChart('chart-60d', node, 'curve_60d', 'kpi_60d', preloaded);
+        initChart('chart-2y', node, 'curve_2y', 'kpi_2y', preloaded);
+      });
     }
   });
 }
