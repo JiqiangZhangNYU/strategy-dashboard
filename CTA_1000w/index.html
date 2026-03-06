@@ -335,47 +335,38 @@ function getColFromX(id, mx) {
   return col;
 }
 
-function showTooltip(id, col, mx, my) {
-  const st = charts[id];
-  if (!st) return;
+function getOrCreateTooltip(id) {
   const canvas = document.getElementById(id);
-  if (!canvas) return;
+  if (!canvas) return null;
   let tip = canvas.parentElement.querySelector('.chart-tooltip');
   if (!tip) {
     tip = document.createElement('div');
     tip.className = 'chart-tooltip';
     canvas.parentElement.style.position = 'relative';
     canvas.parentElement.appendChild(tip);
-    // When mouse enters tooltip, pin it for scrolling
-    tip.addEventListener('mouseenter', () => { tip.classList.add('pinned'); });
-    tip.addEventListener('mouseleave', () => {
-      tip.classList.remove('pinned');
-      tip.style.display = 'none';
-      // Redraw without crosshair
-      drawChart(id);
-    });
   }
-  if (col < 0) {
-    if (!tip.classList.contains('pinned')) tip.style.display = 'none';
-    return;
-  }
+  return tip;
+}
+
+function buildTooltipHtml(id, col) {
+  const st = charts[id];
+  if (!st || col < 0) return null;
   const { aligned, refDates, hidden } = st;
-  // Collect values, sort descending
   const rows = [];
   aligned.forEach((c, ci) => {
     if (hidden.has(ci) || c.data[col] === null) return;
     rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
   });
   rows.sort((a, b) => b.val - a.val);
-  if (rows.length === 0) { tip.style.display = 'none'; return; }
+  if (rows.length === 0) return null;
   let html = `<div class="tt-date">${refDates[col]}</div>`;
   for (const r of rows) {
     html += `<div class="tt-row"><span class="tt-swatch" style="background:${r.color}"></span><span class="tt-name">${r.name}</span><span class="tt-val">${r.val.toFixed(2)}</span></div>`;
   }
-  tip.innerHTML = html;
-  tip.style.display = 'block';
-  tip.classList.remove('pinned');
-  // Position: prefer right of cursor, flip if near edge
+  return html;
+}
+
+function positionTooltip(tip, canvas, mx, my) {
   const rect = canvas.parentElement.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
   const tipX = mx + canvasRect.left - rect.left;
@@ -386,6 +377,44 @@ function showTooltip(id, col, mx, my) {
   } else {
     tip.style.left = 'auto'; tip.style.right = (rect.width - tipX + 16) + 'px';
   }
+}
+
+function showTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  if (tip.classList.contains('pinned')) return;
+  if (col < 0) { tip.style.display = 'none'; return; }
+  const html = buildTooltipHtml(id, col);
+  if (!html) { tip.style.display = 'none'; return; }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  positionTooltip(tip, document.getElementById(id), mx, my);
+}
+
+function pinTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  // If already pinned, unpin
+  if (tip.classList.contains('pinned')) {
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+    return;
+  }
+  if (col < 0) return;
+  const html = buildTooltipHtml(id, col);
+  if (!html) return;
+  tip.innerHTML = '<div style="text-align:right;margin-bottom:4px;"><span class="tt-close" style="cursor:pointer;color:#999;font-size:16px;line-height:1;">&times;</span></div>' + html;
+  tip.style.display = 'block';
+  tip.classList.add('pinned');
+  positionTooltip(tip, document.getElementById(id), mx, my);
+  drawChart(id, col);
+  tip.querySelector('.tt-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+  });
 }
 
 function buildLegend(id) {
@@ -421,12 +450,21 @@ function setupEvents(id) {
   if (!canvas) return;
   let lastCol = -1;
   canvas.addEventListener('mousemove', (e) => {
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
     const col = getColFromX(id, mx);
     if (col !== lastCol) { lastCol = col; drawChart(id, col); }
     showTooltip(id, col, mx, my);
+  });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    pinTooltip(id, col, mx, my);
   });
   canvas.addEventListener('mouseleave', () => {
     lastCol = -1;
