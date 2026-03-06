@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FuxingGroup_202601 Strategy Dashboard - 2026-03-06</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       background: #f0f2f5; color: #333; padding: 20px; max-width: 1400px; margin: 0 auto; }
+.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+              margin-bottom: 16px; font-size: 14px; color: #666; }
+.breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: #bbb; margin: 0 2px; }
+.breadcrumb .current { color: #333; font-weight: 600; }
+.compare-box { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+               box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.compare-title { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 12px; }
+.compare-canvas { min-width: 800px; width: 100%; border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
+.compare-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; font-size: 13px; }
+.compare-legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer;
+                        padding: 2px 8px; border-radius: 4px; user-select: none; }
+.compare-legend-item:hover { background: #f0f2f5; }
+.compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.compare-legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
+.hero { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+         box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+.hero-header { display: flex; align-items: center; justify-content: space-between;
+               margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.hero-kpi { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-kpi-item { text-align: center; }
+.hero-kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.hero-kpi-val { font-size: 16px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; }
+.section-header { display: flex; align-items: center; justify-content: space-between;
+                   margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e8e8e8; }
+.section-title { font-size: 16px; font-weight: 600; color: #555; }
+.expand-btn { padding: 6px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff;
+              cursor: pointer; font-size: 13px; font-weight: 500; color: #4363d8; }
+.expand-btn:hover { background: #f0f2f5; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+         overflow: hidden; transition: box-shadow 0.2s; }
+.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.card-header { display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+               user-select: none; gap: 12px; border-bottom: 1px solid transparent; }
+.card-header:hover { background: #fafbff; }
+.card.expanded .card-header { border-bottom-color: #f0f0f0; }
+.card-rank { font-weight: 700; font-size: 16px; color: #4363d8; min-width: 36px; }
+.card-name { font-weight: 600; font-size: 15px; flex: 1; color: #222; }
+.card-name.drillable { color: #4363d8; cursor: pointer; }
+.card-name.drillable:hover { text-decoration: underline; }
+.card-ratio { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+              background: #f3e8ff; color: #7c3aed; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-profit { background: #e8f5e9; color: #2e7d32; }
+.badge-sharpe { background: #e3f2fd; color: #1565c0; }
+.badge-dd { background: #fce4ec; color: #c62828; }
+.card-arrow { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+.card.expanded .card-arrow { transform: rotate(90deg); }
+.drill-icon { font-size: 14px; color: #4363d8; margin-left: 4px; }
+.card-body { display: none; padding: 16px 20px; }
+.card.expanded .card-body { display: block; }
+.card-kpi-row { display: flex; gap: 24px; margin-bottom: 12px; }
+.kpi-table { border-collapse: collapse; font-size: 13px; }
+.kpi-table th { background: #f5f6fa; padding: 6px 12px; text-align: center;
+                border: 1px solid #e8e8e8; font-weight: 600; color: #555; }
+.kpi-table td { padding: 5px 12px; border: 1px solid #e8e8e8; }
+.kpi-label { color: #777; font-weight: 500; }
+.kpi-val { font-weight: 600; color: #222; font-family: "SF Mono", Consolas, monospace; }
+.card-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card-chart-wrap { cursor: pointer; }
+.card-chart { width: 100%; height: 200px; border-radius: 6px; border: 1px solid #eee; display: block; }
+.hero-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero-chart-wrap { cursor: pointer; }
+.hero-chart { width: 100%; height: 240px; border-radius: 8px; border: 1px solid #eee; display: block; }
+.overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+           background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.overlay canvas { max-width: 95vw; max-height: 90vh; background: #fff; border-radius: 8px; }
+.overlay-close { position: fixed; top: 12px; right: 18px; color: #fff; font-size: 32px;
+                  cursor: pointer; z-index: 10000; font-weight: bold; line-height: 1; }
+.loading { text-align: center; padding: 40px; color: #888; font-size: 15px; }
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .hero-title { font-size: 18px; }
+  .hero-kpi { gap: 10px; }
+  .hero-kpi-val { font-size: 14px; }
+  .card-header { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+  .card-rank { font-size: 14px; min-width: 28px; }
+  .card-name { font-size: 13px; }
+  .badge, .card-ratio { font-size: 11px; padding: 2px 6px; }
+  .card-body { padding: 10px 12px; }
+  .card-kpi-row { flex-direction: column; gap: 8px; }
+  .kpi-table { width: 100%; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="overlay" id="overlay" onclick="closeOverlay()">
+  <span class="overlay-close" onclick="closeOverlay()">&times;</span>
+  <canvas id="overlay-canvas"></canvas>
+</div>
+<script>
+const TREE = {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "118.49w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "5.023", "Daily_Std": "0.77w"}, "kpi_60d": {"Net_Profit": "11.662w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.318", "Daily_Std": "1.018w"}}, "children": [{"name": "FM_202601", "kpi": {"kpi_2y": {"Net_Profit": "135.709w", "Max_Drawdown": "6.311w", "Ann_Sharpe": "4.181", "Daily_Std": "1.059w"}, "kpi_60d": {"Net_Profit": "15.639w", "Max_Drawdown": "5.665w", "Ann_Sharpe": "4.765", "Daily_Std": "1.3w"}}, "children": [], "ratio": 42.697994858148405, "_drillable": true}, {"name": "CTA_202503II", "kpi": {"kpi_2y": {"Net_Profit": "97.661w", "Max_Drawdown": "4.187w", "Ann_Sharpe": "4.17", "Daily_Std": "0.765w"}, "kpi_60d": {"Net_Profit": "6.002w", "Max_Drawdown": "3.977w", "Ann_Sharpe": "2.905", "Daily_Std": "0.762w"}}, "children": [], "ratio": 41.42790091418363, "_drillable": true}, {"name": "ifp2_group", "kpi": {"kpi_2y": {"Net_Profit": "112.013w", "Max_Drawdown": "19.075w", "Ann_Sharpe": "1.98", "Daily_Std": "1.837w"}, "kpi_60d": {"Net_Profit": "-2.484w", "Max_Drawdown": "14.03w", "Ann_Sharpe": "-1.245", "Daily_Std": "2.069w"}}, "children": [], "ratio": 0.4004421757057362, "_drillable": true}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "615.366w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "3.348", "Daily_Std": "5.973w"}, "kpi_60d": {"Net_Profit": "58.949w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "2.07", "Daily_Std": "8.79w"}}, "children": [], "ratio": 1.4998965185830808, "_drillable": true}, {"name": "minblock_sif_vp_202507", "kpi": {"kpi_2y": {"Net_Profit": "58.379w", "Max_Drawdown": "15.917w", "Ann_Sharpe": "1.93", "Daily_Std": "0.995w"}, "kpi_60d": {"Net_Profit": "10.473w", "Max_Drawdown": "6.368w", "Ann_Sharpe": "1.353", "Daily_Std": "1.838w"}}, "children": [], "ratio": 8.175025487609625}, {"name": "minblock_ttf_202501", "kpi": {"kpi_2y": {"Net_Profit": "17.667w", "Max_Drawdown": "22.396w", "Ann_Sharpe": "0.577", "Daily_Std": "0.959w"}, "kpi_60d": {"Net_Profit": "-4.353w", "Max_Drawdown": "6.377w", "Ann_Sharpe": "-4.125", "Daily_Std": "0.471w"}}, "children": [], "ratio": 1.871354373147577}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "159.417w", "Max_Drawdown": "8.321w", "Ann_Sharpe": "4.088", "Daily_Std": "1.274w"}, "kpi_60d": {"Net_Profit": "13.059w", "Max_Drawdown": "4.706w", "Ann_Sharpe": "3.954", "Daily_Std": "1.212w"}}, "children": [], "ratio": 2.485, "_drillable": true}]};
+const DATA_DATE = '2026-03-06';
+const PARENT_MAP = {"FM_202601": "FuxingGroup_202601", "CTA_202503II": "FuxingGroup_202601", "CTA_202503": "CTA_202503II", "CTA_TS_HTOR_V2": "CTA_202503", "CTA_TS_HTOR": "CTA_TS_HTOR_V2", "AutoCTA_short_index_2025": "CTA_TS_HTOR", "AutoCTA_short_index_202503": "AutoCTA_short_index_2025", "AutoCTA_short_index_202505": "CTA_TS_HTOR", "AutoCTA_RawSigLongSS_Index_202507": "CTA_TS_HTOR", "AutoCTA_RawSigSSTwo_Index_202508": "CTA_TS_HTOR", "RAWSIGSS_PATCH": "CTA_TS_HTOR_V2", "CTA_TS_MTOR_V2": "CTA_202503", "CTA_TS_MTOR_2025": "CTA_TS_MTOR_V2", "CTA_TS_LTOR": "CTA_202503", "pyelf_21ENetlong_2023wf": "CTA_TS_LTOR", "pyelf_21ENetMLSigFilterWholeMonthDiff_360min_day_2023wf": "pyelf_21ENetlong_2023wf", "pyelf_21EnetLong_yydata_2024": "pyelf_21ENetlong_2023wf", "pyelf_21EnetLong_yydata_am_2024": "pyelf_21EnetLong_yydata_2024", "pyelf_21EnetLong_yydata_pm_2024": "pyelf_21EnetLong_yydata_2024", "pyelf_21EnetLong_yydata_night_2024": "pyelf_21EnetLong_yydata_2024", "pyelf_21ENetlong_spot_2024": "pyelf_21ENetlong_2023wf", "pyelf_21EnetLong_BIGTPSS": "CTA_TS_LTOR", "pyelf_21EnetLong_BIGTP": "CTA_TS_LTOR", "pyelf_21EnetLong_Nexrem": "CTA_TS_LTOR", "pyelf_21ENetlong_removeexrem_tp35_2025wf": "pyelf_21EnetLong_Nexrem", "pyelf_21ENetlong_removeexrem_tp50_2025wf": "pyelf_21EnetLong_Nexrem", "pyelf_21ENetlong_2025wf": "CTA_TS_LTOR", "pyelf_21ENetLong_newfilter_group1_2025wf": "pyelf_21ENetlong_2025wf", "pyelf_21ENetLong_onlyvortex_day_2025wf": "pyelf_21ENetLong_newfilter_group1_2025wf", "pyelf_21ENetLong_vortex_day_2025wf": "pyelf_21ENetLong_newfilter_group1_2025wf", "pyelf_21ENetLong_adx_day_2025wf": "pyelf_21ENetLong_newfilter_group1_2025wf", "pyelf_21ENetLong_newfilter_group2_2025wf": "pyelf_21ENetlong_2025wf", "pyelf_21ENetLong_newfilter_group3_2025wf": "pyelf_21ENetlong_2025wf", "pyelf_21ENetLong_onlytrend_day_2025wf": "pyelf_21ENetLong_newfilter_group3_2025wf", "pyelf_21ENetLong_V2_day_2025wf": "pyelf_21ENetLong_newfilter_group3_2025wf", "pyelf_25EnetLong_BIGTP": "CTA_TS_LTOR", "pyelf_21ENetLong_newfilter_tp50_group1_2025wf": "pyelf_25EnetLong_BIGTP", "pyelf_21ENetlong_onlyadx_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group1_2025wf", "pyelf_21ENetLong_onlygapintraday_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group1_2025wf", "pyelf_21ENetLong_newfilter_tp50_group2_2025wf": "pyelf_25EnetLong_BIGTP", "pyelf_21ENetlong_adx_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group2_2025wf", "pyelf_21ENetlong_cmo_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group2_2025wf", "pyelf_21ENetlong_bolling_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group2_2025wf", "pyelf_21ENetLong_vortex_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group2_2025wf", "pyelf_21ENetLong_onlytrend_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group2_2025wf", "pyelf_21ENetLong_newfilter_tp50_group3_2025wf": "pyelf_25EnetLong_BIGTP", "pyelf_21ENetlong_vortex_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group3_2025wf", "pyelf_21ENetLong_parkinson_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group3_2025wf", "pyelf_21ENetLong_newfilter_tp50_group4_2025wf": "pyelf_25EnetLong_BIGTP", "pyelf_21ENetlong_onlyyzvol_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group4_2025wf", "pyelf_21ENetlong_pricepos_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group4_2025wf", "pyelf_21ENetlong_onlytrendsingle_tp50_day_2025wf": "pyelf_21ENetLong_newfilter_tp50_group4_2025wf", "CTA_HS_LTOR": "CTA_202503", "CTA_HS_LTOR_V2": "CTA_HS_LTOR", "CTA_HS_LTOR_Mom": "CTA_HS_LTOR_V2", "pyelf_spotzlcorindex_qnmls_index": "CTA_HS_LTOR_Mom", "Deap_comm_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_neutral_index": "CTA_HS_LTOR_V2", "Deap_comm_neutral_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_cov_index": "CTA_HS_LTOR_V2", "Deap_comm_cov_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_2026_index": "CTA_HS_LTOR_V2", "Deap_comm_2026_index_opt": "CTA_HS_LTOR_V2", "ifp2_group": "FuxingGroup_202601", "tengfeng_1000w": "FuxingGroup_202601", "tengfeng_500w_20241008": "tengfeng_1000w", "FFT_cycle_group_20241009": "tengfeng_500w_20241008", "CTA_14comms_20240815": "tengfeng_500w_20241008", "pyelf_TTFDTMorning_Index": "CTA_14comms_20240815", "Enet_Tonly_index_1W": "CTA_14comms_20240815", "Enet_StockIndex_Fierce_3W": "CTA_14comms_20240815", "BondCycle_Group_20240428": "tengfeng_500w_20241008", "KeyExplainFactor_Group_20240926": "tengfeng_500w_20241008", "tengfeng_500w_20250528": "tengfeng_1000w", "FFT_Cycle_Group_20240304": "tengfeng_500w_20250528", "LLM_Group_20250516": "tengfeng_500w_20250528", "MLP_Group_20250518": "tengfeng_500w_20250528", "cta_4_tengfeng_20250308": "tengfeng_500w_20250528", "CTA_1000W": "cta_4_tengfeng_20250308", "minblock_sif_vp_202507": "CTA_1000W", "minblock_sif_vp_202409": "minblock_sif_vp_202507", "pyelf_21ENetStock_DayDiff_2024wf": "minblock_sif_vp_202409", "pyelf_StockDTMorning_Index": "minblock_sif_vp_202409", "pyelf_stocks_sif": "minblock_sif_vp_202409", "minblock_ttf_202501": "CTA_1000W", "pyelf_TTF_Index": "minblock_ttf_202501", "pyelf_21ENetBond_2024wf": "pyelf_TTF_Index", "pyelf_21ENetBond_MonthDiff_2024wf": "pyelf_21ENetBond_2024wf", "pyelf_21ENetBond_WeekDiff_2024wf": "pyelf_21ENetBond_2024wf", "tengfeng_500w_202511": "tengfeng_1000w", "all_weather_group_202511": "tengfeng_500w_202511", "sentiment_group_202511": "tengfeng_500w_202511", "volume_price_202511": "tengfeng_500w_202511", "multi_factor_202511": "tengfeng_500w_202511", "FM_202509": "multi_factor_202511", "risk_alarm_202511": "tengfeng_500w_202511", "event_driven_202511": "tengfeng_500w_202511", "tengfeng_500w_202512": "tengfeng_1000w", "all_weather_group_202512": "tengfeng_500w_202512", "event_driven_202512": "tengfeng_500w_202512", "sentiment_group_202512": "tengfeng_500w_202512", "multi_factor_202512": "tengfeng_500w_202512", "volume_price_202601": "tengfeng_500w_202512", "all_weather_group_202601": "tengfeng_500w_202512", "event_driven_202601": "tengfeng_500w_202512", "ifp_complex_group": "FuxingGroup_202601", "ifp_alpha_group": "ifp_complex_group", "ifp_beta_group": "ifp_complex_group"};
+const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
+const COLORS = [
+  '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
+  '#42d4f4','#f032e6','#aa6e28','#469990','#000075',
+  '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
+];
+function chartHeight() {
+  return 550;
+}
+let navStack = [];
+let currentNode = TREE;
+const nodeCache = {};
+const chartCache = {};
+
+async function loadNodeData(name) {
+  if (nodeCache[name]) return nodeCache[name];
+  try {
+    const r = await fetch('data/' + encodeURIComponent(name) + '.json');
+    if (!r.ok) return null;
+    const data = await r.json();
+    nodeCache[name] = data;
+    return data;
+  } catch(e) {
+    return null;
+  }
+}
+
+async function loadChartData(name) {
+  if (chartCache[name]) return chartCache[name];
+  try {
+    const r = await fetch('charts/' + encodeURIComponent(name) + '.json');
+    if (!r.ok) return null;
+    const data = await r.json();
+    chartCache[name] = data;
+    return data;
+  } catch(e) {
+    return null;
+  }
+}
+
+let overlayParams = null;
+function openOverlay(canvasId, title, curves, kpiText) {
+  overlayParams = { title, curves, kpiText };
+  const ov = document.getElementById('overlay');
+  const c = document.getElementById('overlay-canvas');
+  ov.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const W = Math.min(window.innerWidth * 0.95, 1200);
+  const H = Math.min(window.innerHeight * 0.88, 700);
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  requestAnimationFrame(() => drawMultiLine('overlay-canvas', title, curves, kpiText));
+}
+function closeOverlay() {
+  overlayParams = null;
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function fmt4(val) {
+  if (!val) return '';
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n)) return val;
+  return n.toPrecision(4) + (val.includes('w') ? 'w' : '');
+}
+
+function parseStd(val) {
+  if (!val) return 0;
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n) || n === 0) return 0;
+  return val.includes('w') ? n * 10000 : n;
+}
+
+function kpiTableHtml(label, kpi) {
+  if (!kpi || Object.keys(kpi).length === 0) return '';
+  let rows = '';
+  for (let i = 0; i < KPI_KEYS.length; i += 2) {
+    const k1 = KPI_KEYS[i], k2 = KPI_KEYS[i+1];
+    rows += '<tr>';
+    rows += `<td class="kpi-label">${k1}</td><td class="kpi-val">${kpi[k1]||'-'}</td>`;
+    if (k2) rows += `<td class="kpi-label">${k2}</td><td class="kpi-val">${kpi[k2]||'-'}</td>`;
+    rows += '</tr>';
+  }
+  return `<table class="kpi-table"><tr><th colspan="4">${label}</th></tr>${rows}</table>`;
+}
+
+function heroKpiHtml(kpi) {
+  if (!kpi) return '';
+  const k2y = kpi.kpi_2y || {};
+  const k60d = kpi.kpi_60d || {};
+  let items = '';
+  const show = [
+    ['2Y Sharpe', k2y.Ann_Sharpe, '#1565c0'],
+    ['60D Sharpe', k60d.Ann_Sharpe, '#1565c0'],
+    ['2Y Profit', k2y.Net_Profit, '#2e7d32'],
+    ['60D Profit', k60d.Net_Profit, '#2e7d32'],
+    ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
+    ['60D MaxDD', k60d.Max_Drawdown, '#c62828'],
+  ];
+  for (const [label, val, color] of show) {
+    if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
+  }
+  return items;
+}
+
+const charts = {};
+
+function drawChart(id, hoverIdx) {
+  const st = charts[id];
+  if (!st) return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const { aligned, refDates, N, pad, hidden } = st;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth;
+  const H = chartHeight();
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  let yMin = 0, yMax = 0;
+  aligned.forEach((c, ci) => {
+    if (hidden.has(ci)) return;
+    for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
+  });
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.08;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  const yTicks = 6;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.top + plotH * i / yTicks;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  st.paths = [];
+  aligned.forEach((c, ci) => {
+    if (hidden.has(ci)) { st.paths.push(null); return; }
+    const isHover = (hoverIdx === ci);
+    ctx.strokeStyle = COLORS[ci % COLORS.length];
+    ctx.lineWidth = isHover ? 3.5 : (ci === 0 ? 2.5 : 1.5);
+    ctx.globalAlpha = (hoverIdx !== undefined && hoverIdx !== -1 && !isHover) ? 0.25 : (ci === 0 ? 1.0 : 0.8);
+    const pts = [];
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      pts.push({ x, y, i });
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke(); ctx.globalAlpha = 1.0;
+    st.paths.push(pts);
+  });
+
+  ctx.fillStyle = '#888'; ctx.font = '11px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= yTicks; i++) {
+    const val = yMax - (yMax - yMin) * i / yTicks;
+    ctx.fillText(val.toFixed(1), pad.left - 6, pad.top + plotH * i / yTicks + 4);
+  }
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center';
+  const xStep = Math.max(1, Math.floor(N / 8));
+  for (let i = 0; i < N; i += xStep) {
+    const x = xOf(i);
+    ctx.save(); ctx.translate(x, H - pad.bottom + 14); ctx.rotate(-0.4);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  const xlast = xOf(N - 1);
+  ctx.save(); ctx.translate(xlast, H - pad.bottom + 14); ctx.rotate(-0.4);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  if (hoverIdx !== undefined && hoverIdx >= 0 && !hidden.has(hoverIdx)) {
+    const pts = st.paths[hoverIdx];
+    if (pts && pts.length > 0) {
+      const last = pts[pts.length - 1];
+      const name = aligned[hoverIdx].name;
+      ctx.font = 'bold 13px -apple-system, sans-serif';
+      const tw = ctx.measureText(name).width;
+      const tx = Math.min(last.x + 8, W - pad.right - tw - 12);
+      const ty = Math.max(last.y - 8, pad.top + 16);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.strokeStyle = COLORS[hoverIdx % COLORS.length]; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(tx - 4, ty - 13, tw + 8, 18, 4);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = COLORS[hoverIdx % COLORS.length]; ctx.textAlign = 'left';
+      ctx.fillText(name, tx, ty);
+    }
+  }
+}
+
+function hitTest(id, mx, my) {
+  const st = charts[id];
+  if (!st || !st.paths) return -1;
+  let bestDist = 12, bestIdx = -1;
+  st.paths.forEach((pts, ci) => {
+    if (!pts || st.hidden.has(ci)) return;
+    for (const p of pts) {
+      const d = Math.sqrt((p.x - mx) ** 2 + (p.y - my) ** 2);
+      if (d < bestDist) { bestDist = d; bestIdx = ci; }
+    }
+  });
+  return bestIdx;
+}
+
+function buildLegend(id) {
+  const st = charts[id];
+  const el = document.getElementById(id + '-legend');
+  if (!el || !st) return;
+  el.innerHTML = st.aligned.map((c, ci) =>
+    `<span class="compare-legend-item${st.hidden.has(ci) ? ' hidden' : ''}" data-ci="${ci}">
+      <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
+      <span style="font-weight:600;">${c.name}</span>
+    </span>`
+  ).join('');
+  el.querySelectorAll('.compare-legend-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const ci = parseInt(item.dataset.ci);
+      if (st.hidden.has(ci)) st.hidden.delete(ci); else st.hidden.add(ci);
+      item.classList.toggle('hidden');
+      drawChart(id);
+    });
+  });
+}
+
+function setupEvents(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  let lastHover = -1;
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
+    if (idx !== lastHover) { lastHover = idx; drawChart(id, idx); }
+  });
+  canvas.addEventListener('mouseleave', () => { lastHover = -1; drawChart(id); });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
+    if (idx >= 0) {
+      const st = charts[id];
+      if (st.hidden.has(idx)) st.hidden.delete(idx); else st.hidden.add(idx);
+      buildLegend(id); lastHover = -1; drawChart(id);
+    }
+  });
+}
+
+async function initChart(id, node, curveKey, stdKey) {
+  // Load chart data for parent + children, 4 at a time to avoid stampede
+  const names = [node.name];
+  if (node.children) node.children.forEach(c => names.push(c.name));
+  const kpis = new Array(names.length).fill(null);
+  const BATCH = 4;
+  // First load parent immediately
+  kpis[0] = await loadChartData(names[0]);
+  // Then batch-load children
+  for (let i = 1; i < names.length; i += BATCH) {
+    const batch = names.slice(i, i + BATCH);
+    const results = await Promise.all(batch.map(n => loadChartData(n)));
+    results.forEach((r, j) => { kpis[i + j] = r; });
+    // Draw incrementally after each batch
+    const curves = [];
+    for (let k = 0; k < kpis.length; k++) {
+      const kpi = kpis[k];
+      if (!kpi) continue;
+      const curve = kpi[curveKey];
+      const kpiGroup = stdKey === 'kpi_60d' ? kpi.kpi_60d : kpi.kpi_2y;
+      const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
+      if (curve && curve.dates && curve.values && std > 0) {
+        const normed = curve.values.map(v => v / std);
+        const first = normed[0] || 0;
+        curves.push({ name: names[k], dates: curve.dates, values: normed.map(v => v - first) });
+      }
+    }
+    if (curves.length > 0) {
+      let refDates = curves[0].dates;
+      for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+      const N = refDates.length;
+      const dateIndex = {};
+      refDates.forEach((d, di) => dateIndex[d] = di);
+      const aligned = curves.map(c => {
+        const arr = new Array(N).fill(null);
+        c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
+        return { name: c.name, data: arr };
+      });
+      charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: charts[id] ? charts[id].hidden : new Set() };
+      buildLegend(id);
+      drawChart(id);
+    }
+  }
+  if (charts[id]) setupEvents(id);
+}
+
+const LINE_COLORS = [
+  '#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd',
+  '#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf',
+];
+
+function drawMultiLine(canvasId, title, curves, kpiText) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !curves || curves.length === 0) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth;
+  const H = canvas.clientHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  const pad = { top: 28, right: 16, bottom: 40, left: 60 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  // Find longest date array as reference
+  let refDates = curves[0].dates;
+  for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+  const N = refDates.length;
+  if (N < 2) return;
+  const dateIndex = {};
+  refDates.forEach((d, i) => dateIndex[d] = i);
+
+  // Align all curves
+  const aligned = curves.map(c => {
+    const arr = new Array(N).fill(null);
+    c.dates.forEach((d, i) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[i]; });
+    return { name: c.name, data: arr };
+  });
+
+  // Y range
+  let yMin = Infinity, yMax = -Infinity;
+  for (const c of aligned) for (const v of c.data) {
+    if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+  }
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.06;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  // Background
+  ctx.fillStyle = '#fafafa'; ctx.fillRect(0, 0, W, H);
+  // Grid
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + plotH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  // Zero line
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 0.8; ctx.setLineDash([3,2]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw curves
+  aligned.forEach((c, ci) => {
+    ctx.strokeStyle = LINE_COLORS[ci % LINE_COLORS.length];
+    ctx.lineWidth = ci === 0 ? 2.2 : 1.4;
+    ctx.globalAlpha = ci === 0 ? 1.0 : 0.75;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // Y axis labels
+  ctx.fillStyle = '#888'; ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = yMax - (yMax - yMin) * i / 4;
+    const label = Math.abs(val) >= 10000 ? (val/10000).toFixed(1)+'w' : val.toFixed(0);
+    ctx.fillText(label, pad.left - 4, pad.top + plotH * i / 4 + 3);
+  }
+
+  // X axis dates
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center'; ctx.font = '9px -apple-system, sans-serif';
+  const xStep = Math.max(1, Math.floor(N / 6));
+  for (let i = 0; i < N; i += xStep) {
+    ctx.save(); ctx.translate(xOf(i), H - pad.bottom + 12); ctx.rotate(-0.35);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  ctx.save(); ctx.translate(xOf(N-1), H - pad.bottom + 12); ctx.rotate(-0.35);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  // Title
+  ctx.fillStyle = '#333'; ctx.font = 'bold 12px -apple-system, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(title, pad.left, 16);
+
+  // Legend (right side, compact)
+  if (aligned.length > 1) {
+    ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right';
+    const lx = W - pad.right - 4;
+    let ly = pad.top + 12;
+    const shown = aligned.slice(0, 10);
+    shown.forEach((c, ci) => {
+      const last = c.data.findLast(v => v !== null);
+      const valStr = last !== null && last !== undefined
+        ? (Math.abs(last) >= 10000 ? ' ('+(last/10000).toFixed(1)+'w)' : ' ('+last.toFixed(0)+')')
+        : '';
+      ctx.fillStyle = LINE_COLORS[ci % LINE_COLORS.length];
+      ctx.fillText(c.name + valStr, lx, ly);
+      ly += 11;
+    });
+  }
+
+  // KPI box
+  if (kpiText) {
+    ctx.font = '10px "SF Mono", Consolas, monospace'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    const lines = kpiText.split('\n');
+    const bw = 160, bh = lines.length * 13 + 8;
+    const bx = W - pad.right - bw - 2, by = H - pad.bottom - bh - 2;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = '#333';
+    lines.forEach((line, i) => ctx.fillText(line, bx + bw - 4, by + 12 + i * 13));
+  }
+}
+
+function buildKpiText(kpi) {
+  if (!kpi) return '';
+  const keys = ['Net_Profit','Max_Drawdown','Ann_Sharpe','Daily_Std'];
+  return keys.filter(k => kpi[k]).map(k => k + ': ' + kpi[k]).join('\n');
+}
+
+const CHART_SPECS = [
+  ['curve_2y', 'index_2y', 'kpi_2y', 'Equity (2Y)'],
+  ['curve_60d', 'index_60d', 'kpi_60d', 'Equity (60D)'],
+  ['top_2y', null, null, 'Top 10 (2Y)'],
+  ['top_60d', null, null, 'Top 10 (60D)'],
+  ['bottom_2y', null, null, 'Bottom 10 (2Y)'],
+  ['bottom_60d', null, null, 'Bottom 10 (60D)'],
+];
+
+function getChartCurves(kpi, key, indexKey) {
+  if (key === 'curve_2y' || key === 'curve_60d') {
+    const curves = [];
+    const main = kpi[key];
+    if (main) curves.push({ name: 'Zhuli', dates: main.dates, values: main.values });
+    const idx = kpi[indexKey];
+    if (idx) curves.push({ name: 'Index', dates: idx.dates, values: idx.values });
+    return curves.length > 0 ? curves : null;
+  } else {
+    const arr = kpi[key];
+    return (arr && arr.length > 0) ? arr : null;
+  }
+}
+
+const multiLineRegistry = {};
+
+function drawChartsInContainer(prefix, kpi) {
+  let drawn = 0;
+  CHART_SPECS.forEach(([key, indexKey, kpiKey, title], i) => {
+    const cid = prefix + '-dc-' + i;
+    const canvas = document.getElementById(cid);
+    if (!canvas) return;
+    const curves = getChartCurves(kpi, key, indexKey);
+    if (curves) {
+      const kpiText = kpiKey ? buildKpiText(kpi[kpiKey]) : null;
+      drawMultiLine(cid, title, curves, kpiText);
+      multiLineRegistry[cid] = { title, curves, kpiText };
+      const wrap = canvas.parentElement;
+      wrap.onclick = () => openOverlay(cid, title, curves, kpiText);
+      drawn++;
+    } else {
+      canvas.parentElement.style.display = 'none';
+    }
+  });
+  return drawn;
+}
+
+async function drawDetailCharts(cardId, name) {
+  const el = document.getElementById(cardId);
+  if (!el || el.dataset.chartsDrawn) return;
+  el.dataset.chartsDrawn = '1';
+  const kpi = await loadChartData(name);
+  if (!kpi) {
+    const cg = el.querySelector('.card-charts');
+    if (cg) cg.style.display = 'none';
+    return;
+  }
+  drawChartsInContainer(cardId, kpi);
+}
+
+async function drawHeroCharts(name) {
+  const kpi = await loadChartData(name);
+  if (!kpi) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+    return;
+  }
+  const drawn = drawChartsInContainer('hero', kpi);
+  if (drawn === 0) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+  }
+}
+
+function renderPage(node) {
+  const app = document.getElementById('app');
+  const hasChildren = node.children && node.children.length > 0;
+
+  let bc = '<div class="breadcrumb">';
+  for (let i = 0; i < navStack.length; i++) {
+    bc += `<a onclick="navigateTo(${i})">${navStack[i].name}</a><span class="sep">&rsaquo;</span>`;
+  }
+  bc += `<span class="current">${node.name}</span><span style="margin-left:auto;font-size:12px;color:#999;">Updated: ${DATA_DATE}</span></div>`;
+
+  let compare = '';
+  if (hasChildren) {
+    compare = `<div class="compare-box">
+      <div class="compare-title">60D Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-60d" class="compare-canvas"></canvas>
+      <div id="chart-60d-legend" class="compare-legend"></div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-title">2Y Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-2y" class="compare-canvas"></canvas>
+      <div id="chart-2y-legend" class="compare-legend"></div>
+    </div>`;
+  }
+
+  let hero = `<div class="hero">
+    <div class="hero-header">
+      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+node.ratio+'%)</span>' : ''}</div>
+      <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
+    </div>
+    <div class="hero-charts">
+      <div class="hero-chart-wrap"><canvas id="hero-dc-0" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-1" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-2" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-3" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-4" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-5" class="hero-chart"></canvas></div>
+    </div>
+  </div>`;
+
+  let cards = '';
+  if (hasChildren) {
+    const sorted = [...node.children].sort((a, b) => {
+      const sa = parseFloat((a.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sb = parseFloat((b.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
+      return sb - sa;
+    });
+
+    cards = `<div class="section-header">
+      <span class="section-title">Components (${sorted.length})</span>
+      <button class="expand-btn" onclick="toggleExpandAll()">Expand All</button>
+    </div><div class="cards">`;
+    sorted.forEach((child, idx) => {
+      const ck60d = (child.kpi && child.kpi.kpi_60d) || {};
+      const ck2y = (child.kpi && child.kpi.kpi_2y) || {};
+      const isDrillable = child._drillable || (child.children && child.children.length > 0);
+      const cardId = 'card-' + idx;
+
+      cards += `<div class="card" id="${cardId}">
+        <div class="card-header" onclick="toggleCard('${cardId}')">
+          <span class="card-rank">#${idx+1}</span>
+          ${isDrillable
+            ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
+            : '<span class="card-name">'+child.name+'</span>'}
+          <span class="card-ratio">${child.ratio ? fmt4(child.ratio.toString()) + '%' : ''}</span>
+          ${ck60d.Net_Profit ? '<span class="badge badge-profit">60D Profit: '+fmt4(ck60d.Net_Profit)+'</span>' : ''}
+          ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">60D Sharpe: '+fmt4(ck60d.Ann_Sharpe)+'</span>' : ''}
+          ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
+          ${ck60d.Max_Drawdown ? '<span class="badge badge-dd">60D MaxDD: '+fmt4(ck60d.Max_Drawdown)+'</span>' : ''}
+          <span class="card-arrow">&blacktriangleright;</span>
+        </div>
+        <div class="card-body">
+          <div class="card-kpi-row">
+            ${kpiTableHtml('2Y KPI', ck2y)}
+            ${kpiTableHtml('60D KPI', ck60d)}
+          </div>
+          <div class="card-charts">
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-0" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-1" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-2" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-3" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-4" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-5" class="card-chart"></canvas></div>
+          </div>
+        </div>
+      </div>`;
+    });
+    cards += '</div>';
+    node._sorted = sorted;
+  }
+
+  app.innerHTML = bc + compare + hero + cards;
+  window.scrollTo(0, 0);
+  Object.keys(multiLineRegistry).forEach(k => delete multiLineRegistry[k]);
+  requestAnimationFrame(() => {
+    drawHeroCharts(node.name);
+    if (hasChildren) {
+      Object.keys(charts).forEach(k => delete charts[k]);
+      initChart('chart-60d', node, 'curve_60d', 'kpi_60d');
+      initChart('chart-2y', node, 'curve_2y', 'kpi_2y');
+    }
+  });
+}
+
+let cardObserver = null;
+function setupCardObserver() {
+  if (cardObserver) cardObserver.disconnect();
+  cardObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting && e.target.classList.contains('expanded')) {
+        const idx = parseInt(e.target.id.replace('card-',''));
+        const child = currentNode._sorted && currentNode._sorted[idx];
+        if (child) drawDetailCharts(e.target.id, child.name);
+      }
+    }
+  }, { rootMargin: '200px' });
+  document.querySelectorAll('.card').forEach(c => cardObserver.observe(c));
+}
+
+let allExpanded = false;
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  const btn = document.querySelector('.expand-btn');
+  if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.card').forEach(c => {
+    if (allExpanded) c.classList.add('expanded');
+    else c.classList.remove('expanded');
+  });
+  if (allExpanded) setupCardObserver();
+}
+
+function toggleCard(cardId) {
+  const card = document.getElementById(cardId);
+  card.classList.toggle('expanded');
+  if (card.classList.contains('expanded')) {
+    const idx = parseInt(cardId.replace('card-',''));
+    const child = currentNode._sorted && currentNode._sorted[idx];
+    if (child) requestAnimationFrame(() => drawDetailCharts(cardId, child.name));
+  }
+}
+
+async function drillDown(sortedIdx) {
+  allExpanded = false;
+  const child = currentNode._sorted[sortedIdx];
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="loading">Loading ' + child.name + '...</div>';
+  const loaded = await loadNodeData(child.name);
+  if (loaded) {
+    navStack.push(currentNode);
+    currentNode = loaded;
+    location.hash = child.name;
+    renderPage(currentNode);
+  } else {
+    navStack.push(currentNode);
+    currentNode = child;
+    location.hash = child.name;
+    renderPage(currentNode);
+  }
+}
+
+function navigateTo(stackIdx) {
+  allExpanded = false;
+  currentNode = navStack[stackIdx];
+  navStack = navStack.slice(0, stackIdx);
+  location.hash = currentNode === TREE ? '' : currentNode.name;
+  renderPage(currentNode);
+}
+
+async function navigateToHash() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && hash !== TREE.name) {
+    const loaded = await loadNodeData(hash);
+    if (loaded) {
+      // Reconstruct navStack from parent map
+      const ancestors = [];
+      let cur = hash;
+      while (PARENT_MAP[cur]) {
+        ancestors.unshift(PARENT_MAP[cur]);
+        cur = PARENT_MAP[cur];
+      }
+      // Build navStack: TREE first, then load each ancestor
+      navStack = [TREE];
+      for (let i = 1; i < ancestors.length; i++) {
+        const anc = await loadNodeData(ancestors[i]);
+        if (anc) navStack.push(anc);
+      }
+      currentNode = loaded;
+      renderPage(currentNode);
+      return;
+    }
+  }
+  navStack = [];
+  currentNode = TREE;
+  renderPage(TREE);
+}
+
+navigateToHash();
+window.addEventListener('hashchange', navigateToHash);
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    Object.keys(charts).forEach(id => drawChart(id));
+    Object.keys(multiLineRegistry).forEach(id => {
+      const p = multiLineRegistry[id];
+      if (document.getElementById(id)) drawMultiLine(id, p.title, p.curves, p.kpiText);
+    });
+    if (overlayParams) {
+      const c = document.getElementById('overlay-canvas');
+      const W = Math.min(window.innerWidth * 0.95, 1200);
+      const H = Math.min(window.innerHeight * 0.88, 700);
+      c.style.width = W + 'px'; c.style.height = H + 'px';
+      drawMultiLine('overlay-canvas', overlayParams.title, overlayParams.curves, overlayParams.kpiText);
+    }
+  }, 150);
+});
+</script>
+</body>
+</html>
