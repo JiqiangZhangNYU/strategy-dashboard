@@ -207,6 +207,8 @@ function heroKpiHtml(kpi) {
     ['60D Profit', k60d.Net_Profit, '#2e7d32'],
     ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
     ['60D MaxDD', k60d.Max_Drawdown, '#c62828'],
+    ['2Y STD', k2y.Daily_Std, '#6a1b9a'],
+    ['60D STD', k60d.Daily_Std, '#6a1b9a'],
   ];
   for (const [label, val, color] of show) {
     if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
