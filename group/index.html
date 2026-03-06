@@ -27,7 +27,9 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 .compare-legend-item.highlight { background: #e3eafc; }
 .chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
                   border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
-                  box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 400px; overflow-y: auto; }
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
+                  scrollbar-width: thin; }
+.chart-tooltip.pinned { pointer-events: auto; }
 .chart-tooltip .tt-date { font-weight: 700; margin-bottom: 4px; color: #333; }
 .chart-tooltip .tt-row { display: flex; align-items: center; gap: 6px; padding: 1px 0; white-space: nowrap; }
 .chart-tooltip .tt-swatch { width: 10px; height: 3px; border-radius: 1px; flex-shrink: 0; }
@@ -344,8 +346,19 @@ function showTooltip(id, col, mx, my) {
     tip.className = 'chart-tooltip';
     canvas.parentElement.style.position = 'relative';
     canvas.parentElement.appendChild(tip);
+    // When mouse enters tooltip, pin it for scrolling
+    tip.addEventListener('mouseenter', () => { tip.classList.add('pinned'); });
+    tip.addEventListener('mouseleave', () => {
+      tip.classList.remove('pinned');
+      tip.style.display = 'none';
+      // Redraw without crosshair
+      drawChart(id);
+    });
   }
-  if (col < 0) { tip.style.display = 'none'; return; }
+  if (col < 0) {
+    if (!tip.classList.contains('pinned')) tip.style.display = 'none';
+    return;
+  }
   const { aligned, refDates, hidden } = st;
   // Collect values, sort descending
   const rows = [];
@@ -361,6 +374,7 @@ function showTooltip(id, col, mx, my) {
   }
   tip.innerHTML = html;
   tip.style.display = 'block';
+  tip.classList.remove('pinned');
   // Position: prefer right of cursor, flip if near edge
   const rect = canvas.parentElement.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
@@ -416,6 +430,8 @@ function setupEvents(id) {
   });
   canvas.addEventListener('mouseleave', () => {
     lastCol = -1;
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
     drawChart(id);
     showTooltip(id, -1, 0, 0);
   });
