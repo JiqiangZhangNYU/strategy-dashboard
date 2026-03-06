@@ -1,0 +1,1 @@
+{"name": "CTA_HS_LTOR", "kpi": {"kpi_2y": {"Net_Profit": "38.75w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.823", "Daily_Std": "0.692w"}, "kpi_60d": {"Net_Profit": "4.492w", "Max_Drawdown": "2.178w", "Ann_Sharpe": "3.322", "Daily_Std": "0.475w"}}, "children": [{"name": "CTA_HS_LTOR_V2", "kpi": {}, "children": [], "ratio": 100.0, "_drillable": true}], "ratio": 38.82352941}

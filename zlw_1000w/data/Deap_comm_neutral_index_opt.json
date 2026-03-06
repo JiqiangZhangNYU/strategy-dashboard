@@ -1,0 +1,1 @@
+{"name": "Deap_comm_neutral_index_opt", "kpi": {}, "children": [{"name": "Deap_comm_daynight_v3_opt", "kpi": {}, "children": [], "ratio": 30.0}, {"name": "Deap_benchmark_v6_ML_opt", "kpi": {}, "children": [], "ratio": 40.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {}, "children": [], "ratio": 30.0}], "ratio": 15.0}
