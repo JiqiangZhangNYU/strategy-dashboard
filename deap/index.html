@@ -24,6 +24,17 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
                         padding: 2px 8px; border-radius: 4px; user-select: none; }
 .compare-legend-item:hover { background: #f0f2f5; }
 .compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.compare-legend-item.highlight { background: #e3eafc; }
+.chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
+                  border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
+                  scrollbar-width: thin; }
+.chart-tooltip.pinned { pointer-events: auto; }
+.chart-tooltip .tt-date { font-weight: 700; margin-bottom: 4px; color: #333; }
+.chart-tooltip .tt-row { display: flex; align-items: center; gap: 6px; padding: 1px 0; white-space: nowrap; }
+.chart-tooltip .tt-swatch { width: 10px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+.chart-tooltip .tt-name { flex: 1; }
+.chart-tooltip .tt-val { font-weight: 600; font-variant-numeric: tabular-nums; }
 .compare-legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
 .hero { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
          box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
@@ -207,6 +218,8 @@ function heroKpiHtml(kpi) {
     ['60D Profit', k60d.Net_Profit, '#2e7d32'],
     ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
     ['60D MaxDD', k60d.Max_Drawdown, '#c62828'],
+    ['2Y STD', k2y.Daily_Std, '#6a1b9a'],
+    ['60D STD', k60d.Daily_Std, '#6a1b9a'],
   ];
   for (const [label, val, color] of show) {
     if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
@@ -216,7 +229,7 @@ function heroKpiHtml(kpi) {
 
 const charts = {};
 
-function drawChart(id, hoverIdx) {
+function drawChart(id, hoverCol, highlightIdx) {
   const st = charts[id];
   if (!st) return;
   const canvas = document.getElementById(id);
@@ -260,10 +273,10 @@ function drawChart(id, hoverIdx) {
   st.paths = [];
   aligned.forEach((c, ci) => {
     if (hidden.has(ci)) { st.paths.push(null); return; }
-    const isHover = (hoverIdx === ci);
+    const isHL = (highlightIdx === ci);
     ctx.strokeStyle = COLORS[ci % COLORS.length];
-    ctx.lineWidth = isHover ? 3.5 : (ci === 0 ? 2.5 : 1.5);
-    ctx.globalAlpha = (hoverIdx !== undefined && hoverIdx !== -1 && !isHover) ? 0.25 : (ci === 0 ? 1.0 : 0.8);
+    ctx.lineWidth = isHL ? 3.5 : (ci === 0 ? 2.5 : 1.5);
+    ctx.globalAlpha = (highlightIdx !== undefined && highlightIdx >= 0 && !isHL) ? 0.15 : (ci === 0 ? 1.0 : 0.8);
     const pts = [];
     ctx.beginPath();
     let started = false;
@@ -293,37 +306,86 @@ function drawChart(id, hoverIdx) {
   ctx.save(); ctx.translate(xlast, H - pad.bottom + 14); ctx.rotate(-0.4);
   ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
 
-  if (hoverIdx !== undefined && hoverIdx >= 0 && !hidden.has(hoverIdx)) {
-    const pts = st.paths[hoverIdx];
-    if (pts && pts.length > 0) {
-      const last = pts[pts.length - 1];
-      const name = aligned[hoverIdx].name;
-      ctx.font = 'bold 13px -apple-system, sans-serif';
-      const tw = ctx.measureText(name).width;
-      const tx = Math.min(last.x + 8, W - pad.right - tw - 12);
-      const ty = Math.max(last.y - 8, pad.top + 16);
-      ctx.fillStyle = 'rgba(255,255,255,0.92)';
-      ctx.strokeStyle = COLORS[hoverIdx % COLORS.length]; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.roundRect(tx - 4, ty - 13, tw + 8, 18, 4);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = COLORS[hoverIdx % COLORS.length]; ctx.textAlign = 'left';
-      ctx.fillText(name, tx, ty);
-    }
+  // Vertical crosshair
+  if (hoverCol !== undefined && hoverCol >= 0 && hoverCol < N) {
+    const hx = xOf(hoverCol);
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 0.8; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(hx, pad.top); ctx.lineTo(hx, H - pad.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots on curves at hover column
+    aligned.forEach((c, ci) => {
+      if (hidden.has(ci) || c.data[hoverCol] === null) return;
+      const y = yOf(c.data[hoverCol]);
+      ctx.fillStyle = COLORS[ci % COLORS.length];
+      ctx.beginPath(); ctx.arc(hx, y, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
   }
 }
 
-function hitTest(id, mx, my) {
+function getColFromX(id, mx) {
   const st = charts[id];
-  if (!st || !st.paths) return -1;
-  let bestDist = 12, bestIdx = -1;
-  st.paths.forEach((pts, ci) => {
-    if (!pts || st.hidden.has(ci)) return;
-    for (const p of pts) {
-      const d = Math.sqrt((p.x - mx) ** 2 + (p.y - my) ** 2);
-      if (d < bestDist) { bestDist = d; bestIdx = ci; }
-    }
+  if (!st) return -1;
+  const canvas = document.getElementById(id);
+  if (!canvas) return -1;
+  const { N, pad } = st;
+  const W = canvas.clientWidth;
+  const plotW = W - pad.left - pad.right;
+  const col = Math.round((mx - pad.left) / plotW * (N - 1));
+  if (col < 0 || col >= N || mx < pad.left || mx > W - pad.right) return -1;
+  return col;
+}
+
+function showTooltip(id, col, mx, my) {
+  const st = charts[id];
+  if (!st) return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  let tip = canvas.parentElement.querySelector('.chart-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    canvas.parentElement.style.position = 'relative';
+    canvas.parentElement.appendChild(tip);
+    // When mouse enters tooltip, pin it for scrolling
+    tip.addEventListener('mouseenter', () => { tip.classList.add('pinned'); });
+    tip.addEventListener('mouseleave', () => {
+      tip.classList.remove('pinned');
+      tip.style.display = 'none';
+      // Redraw without crosshair
+      drawChart(id);
+    });
+  }
+  if (col < 0) {
+    if (!tip.classList.contains('pinned')) tip.style.display = 'none';
+    return;
+  }
+  const { aligned, refDates, hidden } = st;
+  // Collect values, sort descending
+  const rows = [];
+  aligned.forEach((c, ci) => {
+    if (hidden.has(ci) || c.data[col] === null) return;
+    rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
   });
-  return bestIdx;
+  rows.sort((a, b) => b.val - a.val);
+  if (rows.length === 0) { tip.style.display = 'none'; return; }
+  let html = `<div class="tt-date">${refDates[col]}</div>`;
+  for (const r of rows) {
+    html += `<div class="tt-row"><span class="tt-swatch" style="background:${r.color}"></span><span class="tt-name">${r.name}</span><span class="tt-val">${r.val.toFixed(2)}</span></div>`;
+  }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  tip.classList.remove('pinned');
+  // Position: prefer right of cursor, flip if near edge
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const tipX = mx + canvasRect.left - rect.left;
+  const tipY = my + canvasRect.top - rect.top;
+  tip.style.top = Math.max(0, tipY - 20) + 'px';
+  if (tipX + 220 < rect.width) {
+    tip.style.left = (tipX + 16) + 'px'; tip.style.right = 'auto';
+  } else {
+    tip.style.left = 'auto'; tip.style.right = (rect.width - tipX + 16) + 'px';
+  }
 }
 
 function buildLegend(id) {
@@ -337,10 +399,18 @@ function buildLegend(id) {
     </span>`
   ).join('');
   el.querySelectorAll('.compare-legend-item').forEach(item => {
+    const ci = parseInt(item.dataset.ci);
     item.addEventListener('click', () => {
-      const ci = parseInt(item.dataset.ci);
       if (st.hidden.has(ci)) st.hidden.delete(ci); else st.hidden.add(ci);
       item.classList.toggle('hidden');
+      drawChart(id);
+    });
+    item.addEventListener('mouseenter', () => {
+      item.classList.add('highlight');
+      drawChart(id, undefined, ci);
+    });
+    item.addEventListener('mouseleave', () => {
+      item.classList.remove('highlight');
       drawChart(id);
     });
   });
@@ -349,66 +419,66 @@ function buildLegend(id) {
 function setupEvents(id) {
   const canvas = document.getElementById(id);
   if (!canvas) return;
-  let lastHover = -1;
+  let lastCol = -1;
   canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
-    if (idx !== lastHover) { lastHover = idx; drawChart(id, idx); }
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    if (col !== lastCol) { lastCol = col; drawChart(id, col); }
+    showTooltip(id, col, mx, my);
   });
-  canvas.addEventListener('mouseleave', () => { lastHover = -1; drawChart(id); });
-  canvas.addEventListener('click', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const idx = hitTest(id, e.clientX - rect.left, e.clientY - rect.top);
-    if (idx >= 0) {
-      const st = charts[id];
-      if (st.hidden.has(idx)) st.hidden.delete(idx); else st.hidden.add(idx);
-      buildLegend(id); lastHover = -1; drawChart(id);
-    }
+  canvas.addEventListener('mouseleave', () => {
+    lastCol = -1;
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
+    drawChart(id);
+    showTooltip(id, -1, 0, 0);
   });
 }
 
-async function initChart(id, node, curveKey, stdKey) {
-  // Load chart data for parent + children, 4 at a time to avoid stampede
+async function initChart(id, node, curveKey, stdKey, preloaded) {
   const names = [node.name];
   if (node.children) node.children.forEach(c => names.push(c.name));
-  const kpis = new Array(names.length).fill(null);
-  const BATCH = 4;
-  // First load parent immediately
-  kpis[0] = await loadChartData(names[0]);
-  // Then batch-load children
-  for (let i = 1; i < names.length; i += BATCH) {
-    const batch = names.slice(i, i + BATCH);
-    const results = await Promise.all(batch.map(n => loadChartData(n)));
-    results.forEach((r, j) => { kpis[i + j] = r; });
-    // Draw incrementally after each batch
-    const curves = [];
-    for (let k = 0; k < kpis.length; k++) {
-      const kpi = kpis[k];
-      if (!kpi) continue;
-      const curve = kpi[curveKey];
-      const kpiGroup = stdKey === 'kpi_60d' ? kpi.kpi_60d : kpi.kpi_2y;
-      const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
-      if (curve && curve.dates && curve.values && std > 0) {
-        const normed = curve.values.map(v => v / std);
-        const first = normed[0] || 0;
-        curves.push({ name: names[k], dates: curve.dates, values: normed.map(v => v - first) });
-      }
+
+  // Use preloaded data or load all at once
+  const kpis = preloaded || await Promise.all(names.map(n => loadChartData(n)));
+
+  const curves = [];
+  for (let k = 0; k < kpis.length; k++) {
+    const kpi = kpis[k];
+    if (!kpi) continue;
+    const curve = kpi[curveKey];
+    const kpiGroup = stdKey === 'kpi_60d' ? kpi.kpi_60d : kpi.kpi_2y;
+    const std = parseStd(kpiGroup && kpiGroup.Daily_Std);
+    if (curve && curve.dates && curve.values && std > 0) {
+      const normed = curve.values.map(v => v / std);
+      const first = normed[0] || 0;
+      curves.push({ name: names[k], dates: curve.dates, values: normed.map(v => v - first) });
     }
-    if (curves.length > 0) {
-      let refDates = curves[0].dates;
-      for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
-      const N = refDates.length;
-      const dateIndex = {};
-      refDates.forEach((d, di) => dateIndex[d] = di);
-      const aligned = curves.map(c => {
-        const arr = new Array(N).fill(null);
-        c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
-        return { name: c.name, data: arr };
-      });
-      charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: charts[id] ? charts[id].hidden : new Set() };
-      buildLegend(id);
-      drawChart(id);
-    }
+  }
+  if (curves.length > 0) {
+    let refDates = curves[0].dates;
+    for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+    const N = refDates.length;
+    const dateIndex = {};
+    refDates.forEach((d, di) => dateIndex[d] = di);
+    const aligned = curves.map(c => {
+      const arr = new Array(N).fill(null);
+      c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
+      return { name: c.name, data: arr };
+    });
+    // Sort by final value (descending) for legend order
+    const sortOrder = aligned.map((c, i) => i).sort((a, b) => {
+      const lastA = aligned[a].data.findLast(v => v !== null) ?? 0;
+      const lastB = aligned[b].data.findLast(v => v !== null) ?? 0;
+      return lastB - lastA;
+    });
+    const sortedAligned = sortOrder.map(i => aligned[i]);
+    const prevHidden = charts[id] ? charts[id].hidden : new Set();
+    charts[id] = { aligned: sortedAligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
+    buildLegend(id);
+    drawChart(id);
   }
   if (charts[id]) setupEvents(id);
 }
@@ -719,8 +789,13 @@ function renderPage(node) {
     drawHeroCharts(node.name);
     if (hasChildren) {
       Object.keys(charts).forEach(k => delete charts[k]);
-      initChart('chart-60d', node, 'curve_60d', 'kpi_60d');
-      initChart('chart-2y', node, 'curve_2y', 'kpi_2y');
+      // Preload all chart data once, then init both charts in parallel
+      const names = [node.name];
+      node.children.forEach(c => names.push(c.name));
+      Promise.all(names.map(n => loadChartData(n))).then(preloaded => {
+        initChart('chart-60d', node, 'curve_60d', 'kpi_60d', preloaded);
+        initChart('chart-2y', node, 'curve_2y', 'kpi_2y', preloaded);
+      });
     }
   });
 }
