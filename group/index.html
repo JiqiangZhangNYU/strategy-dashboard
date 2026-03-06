@@ -407,7 +407,15 @@ async function initChart(id, node, curveKey, stdKey) {
         c.dates.forEach((d, di) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[di]; });
         return { name: c.name, data: arr };
       });
-      charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: charts[id] ? charts[id].hidden : new Set() };
+      // Sort by final value (descending) for legend order
+      const sortOrder = aligned.map((c, i) => i).sort((a, b) => {
+        const lastA = aligned[a].data.findLast(v => v !== null) ?? 0;
+        const lastB = aligned[b].data.findLast(v => v !== null) ?? 0;
+        return lastB - lastA;
+      });
+      const sortedAligned = sortOrder.map(i => aligned[i]);
+      const prevHidden = charts[id] ? charts[id].hidden : new Set();
+      charts[id] = { aligned: sortedAligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
       buildLegend(id);
       drawChart(id);
     }
