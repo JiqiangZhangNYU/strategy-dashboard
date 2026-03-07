@@ -116,7 +116,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
   <canvas id="overlay-canvas"></canvas>
 </div>
 <script>
-const TREE = {"name": "group", "kpi": {"kpi_2y": {}, "kpi_60d": {}}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "kpi": {"kpi_2y": {"Net_Profit": "103.0w", "Max_Drawdown": "13.1w", "Ann_Sharpe": "2.793", "Daily_Std": "1.2w"}, "kpi_60d": {"Net_Profit": "10.628w", "Max_Drawdown": "7.482w", "Ann_Sharpe": "2.849", "Daily_Std": "1.51w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "kpi": {"kpi_2y": {"Net_Profit": "103.235w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "3.088", "Daily_Std": "1.089w"}, "kpi_60d": {"Net_Profit": "11.689w", "Max_Drawdown": "4.991w", "Ann_Sharpe": "4.6", "Daily_Std": "1.03w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "kpi": {"kpi_2y": {"Net_Profit": "74.539w", "Max_Drawdown": "8.77w", "Ann_Sharpe": "2.785", "Daily_Std": "0.87w"}, "kpi_60d": {"Net_Profit": "8.26w", "Max_Drawdown": "3.077w", "Ann_Sharpe": "4.246", "Daily_Std": "0.786w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "111.817w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "4.599", "Daily_Std": "0.791w"}, "kpi_60d": {"Net_Profit": "-0.176w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "-0.111", "Daily_Std": "0.835w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "77.884w", "Max_Drawdown": "8.023w", "Ann_Sharpe": "2.85", "Daily_Std": "0.893w"}, "kpi_60d": {"Net_Profit": "6.491w", "Max_Drawdown": "4.434w", "Ann_Sharpe": "2.524", "Daily_Std": "0.941w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {"kpi_2y": {"Net_Profit": "69.64w", "Max_Drawdown": "4.965w", "Ann_Sharpe": "3.279", "Daily_Std": "0.687w"}, "kpi_60d": {"Net_Profit": "1.376w", "Max_Drawdown": "4.13w", "Ann_Sharpe": "0.502", "Daily_Std": "0.702w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.194w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.577", "Daily_Std": "0.613w"}, "kpi_60d": {"Net_Profit": "6.962w", "Max_Drawdown": "2.94w", "Ann_Sharpe": "4.907", "Daily_Std": "0.666w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "kpi": {"kpi_2y": {"Net_Profit": "38.448w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.801", "Daily_Std": "0.692w"}, "kpi_60d": {"Net_Profit": "3.504w", "Max_Drawdown": "2.178w", "Ann_Sharpe": "3.81", "Daily_Std": "0.454w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "kpi": {"kpi_2y": {"Net_Profit": "63.642w", "Max_Drawdown": "13.095w", "Ann_Sharpe": "1.491", "Daily_Std": "1.387w"}, "kpi_60d": {"Net_Profit": "4.471w", "Max_Drawdown": "12.633w", "Ann_Sharpe": "0.446", "Daily_Std": "2.042w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "kpi": {"kpi_2y": {"Net_Profit": "54.676w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.404", "Daily_Std": "1.245w"}, "kpi_60d": {"Net_Profit": "6.969w", "Max_Drawdown": "6.884w", "Ann_Sharpe": "1.237", "Daily_Std": "1.468w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "kpi": {"kpi_2y": {"Net_Profit": "94.345w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "3.41", "Daily_Std": "0.905w"}, "kpi_60d": {"Net_Profit": "17.967w", "Max_Drawdown": "4.634w", "Ann_Sharpe": "4.755", "Daily_Std": "1.47w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "kpi": {"kpi_2y": {"Net_Profit": "19.28w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.574", "Daily_Std": "0.74w"}, "kpi_60d": {"Net_Profit": "8.32w", "Max_Drawdown": "3.559w", "Ann_Sharpe": "3.569", "Daily_Std": "0.799w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "kpi": {"kpi_2y": {"Net_Profit": "601.172w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "3.103", "Daily_Std": "6.311w"}, "kpi_60d": {"Net_Profit": "76.465w", "Max_Drawdown": "25.784w", "Ann_Sharpe": "4.31", "Daily_Std": "6.404w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "kpi": {"kpi_2y": {"Net_Profit": "89.546w", "Max_Drawdown": "6.154w", "Ann_Sharpe": "3.298", "Daily_Std": "0.888w"}, "kpi_60d": {"Net_Profit": "16.229w", "Max_Drawdown": "2.787w", "Ann_Sharpe": "4.71", "Daily_Std": "1.405w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "kpi": {"kpi_2y": {"Net_Profit": "52.03w", "Max_Drawdown": "9.263w", "Ann_Sharpe": "1.849", "Daily_Std": "0.909w"}, "kpi_60d": {"Net_Profit": "5.232w", "Max_Drawdown": "5.128w", "Ann_Sharpe": "1.057", "Daily_Std": "1.286w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "kpi": {"kpi_2y": {"Net_Profit": "97.993w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.7", "Daily_Std": "0.861w"}, "kpi_60d": {"Net_Profit": "8.744w", "Max_Drawdown": "6.316w", "Ann_Sharpe": "2.415", "Daily_Std": "1.177w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "159.955w", "Max_Drawdown": "8.321w", "Ann_Sharpe": "4.129", "Daily_Std": "1.275w"}, "kpi_60d": {"Net_Profit": "11.989w", "Max_Drawdown": "4.706w", "Ann_Sharpe": "4.332", "Daily_Std": "1.18w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "64.442w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "2.363", "Daily_Std": "0.895w"}, "kpi_60d": {"Net_Profit": "11.324w", "Max_Drawdown": "2.411w", "Ann_Sharpe": "5.116", "Daily_Std": "1.062w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1154.641w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.746", "Daily_Std": "21.556w"}, "kpi_60d": {"Net_Profit": "284.418w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "3.527", "Daily_Std": "28.794w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "117.951w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.987", "Daily_Std": "0.77w"}, "kpi_60d": {"Net_Profit": "10.071w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "3.5", "Daily_Std": "0.995w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "114.164w", "Max_Drawdown": "5.578w", "Ann_Sharpe": "4.072", "Daily_Std": "0.911w"}, "kpi_60d": {"Net_Profit": "11.438w", "Max_Drawdown": "3.97w", "Ann_Sharpe": "4.708", "Daily_Std": "1.037w"}}, "children": [], "ratio": 0.0}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "611.052w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "3.311", "Daily_Std": "5.968w"}, "kpi_60d": {"Net_Profit": "42.146w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "1.234", "Daily_Std": "8.31w"}}, "children": [], "ratio": 0.0}]};
+const TREE = {"name": "group", "kpi": {"kpi_2y": {}, "kpi_6m": {}}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "kpi": {"kpi_2y": {"Net_Profit": "103.0w", "Max_Drawdown": "13.1w", "Ann_Sharpe": "2.793", "Daily_Std": "1.2w"}, "kpi_6m": {"Net_Profit": "34.241w", "Max_Drawdown": "7.482w", "Ann_Sharpe": "3.6", "Daily_Std": "1.301w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "kpi": {"kpi_2y": {"Net_Profit": "103.235w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "3.088", "Daily_Std": "1.089w"}, "kpi_6m": {"Net_Profit": "34.374w", "Max_Drawdown": "4.991w", "Ann_Sharpe": "4.39", "Daily_Std": "1.073w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "kpi": {"kpi_2y": {"Net_Profit": "74.539w", "Max_Drawdown": "8.77w", "Ann_Sharpe": "2.785", "Daily_Std": "0.87w"}, "kpi_6m": {"Net_Profit": "25.598w", "Max_Drawdown": "3.077w", "Ann_Sharpe": "4.254", "Daily_Std": "0.825w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "111.817w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "4.599", "Daily_Std": "0.791w"}, "kpi_6m": {"Net_Profit": "13.788w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "2.226", "Daily_Std": "0.822w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "77.884w", "Max_Drawdown": "8.023w", "Ann_Sharpe": "2.85", "Daily_Std": "0.893w"}, "kpi_6m": {"Net_Profit": "25.396w", "Max_Drawdown": "4.557w", "Ann_Sharpe": "3.503", "Daily_Std": "0.971w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {"kpi_2y": {"Net_Profit": "69.64w", "Max_Drawdown": "4.965w", "Ann_Sharpe": "3.279", "Daily_Std": "0.687w"}, "kpi_6m": {"Net_Profit": "15.678w", "Max_Drawdown": "4.13w", "Ann_Sharpe": "3.271", "Daily_Std": "0.642w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.194w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.577", "Daily_Std": "0.613w"}, "kpi_6m": {"Net_Profit": "18.988w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "3.995", "Daily_Std": "0.647w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "kpi": {"kpi_2y": {"Net_Profit": "38.448w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.801", "Daily_Std": "0.692w"}, "kpi_6m": {"Net_Profit": "9.864w", "Max_Drawdown": "2.524w", "Ann_Sharpe": "2.615", "Daily_Std": "0.495w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "kpi": {"kpi_2y": {"Net_Profit": "63.642w", "Max_Drawdown": "13.095w", "Ann_Sharpe": "1.491", "Daily_Std": "1.387w"}, "kpi_6m": {"Net_Profit": "26.983w", "Max_Drawdown": "12.633w", "Ann_Sharpe": "2.496", "Daily_Std": "1.494w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "kpi": {"kpi_2y": {"Net_Profit": "54.676w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.404", "Daily_Std": "1.245w"}, "kpi_6m": {"Net_Profit": "26.325w", "Max_Drawdown": "7.164w", "Ann_Sharpe": "2.791", "Daily_Std": "1.333w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "kpi": {"kpi_2y": {"Net_Profit": "94.345w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "3.41", "Daily_Std": "0.905w"}, "kpi_6m": {"Net_Profit": "35.468w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "4.07", "Daily_Std": "1.246w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "kpi": {"kpi_2y": {"Net_Profit": "19.28w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.574", "Daily_Std": "0.74w"}, "kpi_6m": {"Net_Profit": "19.397w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.612", "Daily_Std": "0.743w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "kpi": {"kpi_2y": {"Net_Profit": "601.172w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "3.103", "Daily_Std": "6.311w"}, "kpi_6m": {"Net_Profit": "119.706w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "2.488", "Daily_Std": "6.725w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "kpi": {"kpi_2y": {"Net_Profit": "89.546w", "Max_Drawdown": "6.154w", "Ann_Sharpe": "3.298", "Daily_Std": "0.888w"}, "kpi_6m": {"Net_Profit": "18.922w", "Max_Drawdown": "5.183w", "Ann_Sharpe": "2.626", "Daily_Std": "0.976w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "kpi": {"kpi_2y": {"Net_Profit": "52.03w", "Max_Drawdown": "9.263w", "Ann_Sharpe": "1.849", "Daily_Std": "0.909w"}, "kpi_6m": {"Net_Profit": "16.24w", "Max_Drawdown": "5.128w", "Ann_Sharpe": "2.094", "Daily_Std": "1.053w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "kpi": {"kpi_2y": {"Net_Profit": "97.993w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.7", "Daily_Std": "0.861w"}, "kpi_6m": {"Net_Profit": "18.268w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "2.538", "Daily_Std": "0.994w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "159.955w", "Max_Drawdown": "8.321w", "Ann_Sharpe": "4.129", "Daily_Std": "1.275w"}, "kpi_6m": {"Net_Profit": "32.069w", "Max_Drawdown": "5.538w", "Ann_Sharpe": "3.534", "Daily_Std": "1.259w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "64.442w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "2.363", "Daily_Std": "0.895w"}, "kpi_6m": {"Net_Profit": "16.324w", "Max_Drawdown": "6.371w", "Ann_Sharpe": "2.384", "Daily_Std": "0.873w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1154.641w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.746", "Daily_Std": "21.556w"}, "kpi_6m": {"Net_Profit": "618.024w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "3.598", "Daily_Std": "23.779w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "117.951w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.987", "Daily_Std": "0.77w"}, "kpi_6m": {"Net_Profit": "25.717w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.141", "Daily_Std": "0.847w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "114.164w", "Max_Drawdown": "5.578w", "Ann_Sharpe": "4.072", "Daily_Std": "0.911w"}, "kpi_6m": {"Net_Profit": "24.612w", "Max_Drawdown": "4.753w", "Ann_Sharpe": "3.827", "Daily_Std": "0.874w"}}, "children": [], "ratio": 0.0}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "611.052w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "3.311", "Daily_Std": "5.968w"}, "kpi_6m": {"Net_Profit": "129.815w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "2.583", "Daily_Std": "6.773w"}}, "children": [], "ratio": 0.0}]};
 const DATA_DATE = '2026-03-07';
 const PARENT_MAP = {};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
@@ -209,17 +209,17 @@ function kpiTableHtml(label, kpi) {
 function heroKpiHtml(kpi) {
   if (!kpi) return '';
   const k2y = kpi.kpi_2y || {};
-  const k60d = kpi.kpi_60d || {};
+  const k6m = kpi.kpi_6m || {};
   let items = '';
   const show = [
     ['2Y Sharpe', k2y.Ann_Sharpe, '#1565c0'],
-    ['60D Sharpe', k60d.Ann_Sharpe, '#1565c0'],
+    ['6M Sharpe', k6m.Ann_Sharpe, '#1565c0'],
     ['2Y Profit', k2y.Net_Profit, '#2e7d32'],
-    ['60D Profit', k60d.Net_Profit, '#2e7d32'],
+    ['6M Profit', k6m.Net_Profit, '#2e7d32'],
     ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
-    ['60D MaxDD', k60d.Max_Drawdown, '#c62828'],
+    ['6M MaxDD', k6m.Max_Drawdown, '#c62828'],
     ['2Y STD', k2y.Daily_Std, '#6a1b9a'],
-    ['60D STD', k60d.Daily_Std, '#6a1b9a'],
+    ['6M STD', k6m.Daily_Std, '#6a1b9a'],
   ];
   for (const [label, val, color] of show) {
     if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
@@ -640,15 +640,15 @@ function buildKpiText(kpi) {
 
 const CHART_SPECS = [
   ['curve_2y', 'index_2y', 'kpi_2y', 'Equity (2Y)'],
-  ['curve_60d', 'index_60d', 'kpi_60d', 'Equity (60D)'],
+  ['curve_6m', 'index_6m', 'kpi_6m', 'Equity (6M)'],
   ['top_2y', null, null, 'Top 10 (2Y)'],
-  ['top_60d', null, null, 'Top 10 (60D)'],
+  ['top_6m', null, null, 'Top 10 (6M)'],
   ['bottom_2y', null, null, 'Bottom 10 (2Y)'],
-  ['bottom_60d', null, null, 'Bottom 10 (60D)'],
+  ['bottom_6m', null, null, 'Bottom 10 (6M)'],
 ];
 
 function getChartCurves(kpi, key, indexKey) {
-  if (key === 'curve_2y' || key === 'curve_60d') {
+  if (key === 'curve_2y' || key === 'curve_6m') {
     const curves = [];
     const main = kpi[key];
     if (main) curves.push({ name: 'Zhuli', dates: main.dates, values: main.values });
@@ -724,9 +724,9 @@ function renderPage(node) {
   let compare = '';
   if (hasChildren) {
     compare = `<div class="compare-box">
-      <div class="compare-title">60D Normalized Equity (Equity / Daily_Std)</div>
-      <canvas id="chart-60d" class="compare-canvas"></canvas>
-      <div id="chart-60d-legend" class="compare-legend"></div>
+      <div class="compare-title">6M Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-6m" class="compare-canvas"></canvas>
+      <div id="chart-6m-legend" class="compare-legend"></div>
     </div>
     <div class="compare-box">
       <div class="compare-title">2Y Normalized Equity (Equity / Daily_Std)</div>
@@ -753,8 +753,8 @@ function renderPage(node) {
   let cards = '';
   if (hasChildren) {
     const sorted = [...node.children].sort((a, b) => {
-      const sa = parseFloat((a.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
-      const sb = parseFloat((b.kpi?.kpi_60d?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sa = parseFloat((a.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sb = parseFloat((b.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
       return sb - sa;
     });
 
@@ -763,7 +763,7 @@ function renderPage(node) {
       <button class="expand-btn" onclick="toggleExpandAll()">Expand All</button>
     </div><div class="cards">`;
     sorted.forEach((child, idx) => {
-      const ck60d = (child.kpi && child.kpi.kpi_60d) || {};
+      const ck6m = (child.kpi && child.kpi.kpi_6m) || {};
       const ck2y = (child.kpi && child.kpi.kpi_2y) || {};
       const isDrillable = child._drillable || (child.children && child.children.length > 0);
       const cardId = 'card-' + idx;
@@ -775,16 +775,16 @@ function renderPage(node) {
             ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
             : '<span class="card-name">'+child.name+'</span>'}
           <span class="card-ratio">${child.ratio ? fmt4(child.ratio.toString()) + '%' : ''}</span>
-          ${ck60d.Net_Profit ? '<span class="badge badge-profit">60D Profit: '+fmt4(ck60d.Net_Profit)+'</span>' : ''}
-          ${ck60d.Ann_Sharpe ? '<span class="badge badge-sharpe">60D Sharpe: '+fmt4(ck60d.Ann_Sharpe)+'</span>' : ''}
+          ${ck6m.Net_Profit ? '<span class="badge badge-profit">6M Profit: '+fmt4(ck6m.Net_Profit)+'</span>' : ''}
+          ${ck6m.Ann_Sharpe ? '<span class="badge badge-sharpe">6M Sharpe: '+fmt4(ck6m.Ann_Sharpe)+'</span>' : ''}
           ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
-          ${ck60d.Max_Drawdown ? '<span class="badge badge-dd">60D MaxDD: '+fmt4(ck60d.Max_Drawdown)+'</span>' : ''}
+          ${ck6m.Max_Drawdown ? '<span class="badge badge-dd">6M MaxDD: '+fmt4(ck6m.Max_Drawdown)+'</span>' : ''}
           <span class="card-arrow">&blacktriangleright;</span>
         </div>
         <div class="card-body">
           <div class="card-kpi-row">
             ${kpiTableHtml('2Y KPI', ck2y)}
-            ${kpiTableHtml('60D KPI', ck60d)}
+            ${kpiTableHtml('6M KPI', ck6m)}
           </div>
           <div class="card-charts">
             <div class="card-chart-wrap"><canvas id="${cardId}-dc-0" class="card-chart"></canvas></div>
@@ -810,7 +810,7 @@ function renderPage(node) {
       Object.keys(charts).forEach(k => delete charts[k]);
       loadCompareData(node.name).then(cmpData => {
         if (cmpData) {
-          initChartFromCompare('chart-60d', 'c60d', cmpData);
+          initChartFromCompare('chart-6m', 'c6m', cmpData);
           initChartFromCompare('chart-2y', 'c2y', cmpData);
         }
       });
