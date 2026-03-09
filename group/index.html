@@ -8,7 +8,24 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-       background: #f0f2f5; color: #333; padding: 20px; max-width: 1400px; margin: 0 auto; }
+       background: #f0f2f5; color: #333; padding: 0; margin: 0; display: flex; min-height: 100vh; }
+.sidebar { width: 260px; min-width: 260px; background: #fff; border-right: 1px solid #e0e0e0;
+            padding: 12px 0; overflow-y: auto; height: 100vh; position: sticky; top: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04); font-size: 13px; flex-shrink: 0; }
+.sidebar-title { font-size: 14px; font-weight: 700; color: #1a1a2e; padding: 8px 16px 12px;
+                  border-bottom: 1px solid #eee; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; cursor: pointer; padding: 5px 12px 5px 0;
+             color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+             border-radius: 0 6px 6px 0; margin-right: 8px; user-select: none; }
+.nav-item:hover { background: #f0f2f5; color: #4363d8; }
+.nav-item.active { background: #e3eafc; color: #4363d8; font-weight: 600; }
+.nav-toggle { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+               flex-shrink: 0; font-size: 10px; color: #aaa; transition: transform 0.15s; }
+.nav-toggle.expanded { transform: rotate(90deg); }
+.nav-toggle.empty { visibility: hidden; }
+.nav-children { display: none; }
+.nav-children.expanded { display: block; }
+.main-content { flex: 1; padding: 20px; max-width: 1400px; min-width: 0; }
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
               margin-bottom: 16px; font-size: 14px; color: #666; }
 .breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
@@ -95,7 +112,10 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
                   cursor: pointer; z-index: 10000; font-weight: bold; line-height: 1; }
 .loading { text-align: center; padding: 40px; color: #888; font-size: 15px; }
 @media (max-width: 768px) {
-  body { padding: 10px; }
+  body { flex-direction: column; }
+  .sidebar { width: 100%; min-width: 100%; height: auto; max-height: 50vh; position: relative;
+              border-right: none; border-bottom: 1px solid #e0e0e0; }
+  .main-content { padding: 10px; }
   .hero-title { font-size: 18px; }
   .hero-kpi { gap: 10px; }
   .hero-kpi-val { font-size: 14px; }
@@ -110,6 +130,11 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 </style>
 </head>
 <body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">group</div>
+  <div id="nav-tree"></div>
+</div>
+<div class="main-content">
 <div id="app"></div>
 <div class="overlay" id="overlay" onclick="closeOverlay()">
   <span class="overlay-close" onclick="closeOverlay()">&times;</span>
@@ -119,6 +144,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 const TREE = {"name": "group", "kpi": {"kpi_2y": {}, "kpi_6m": {}}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "kpi": {"kpi_2y": {"Net_Profit": "101.034w", "Max_Drawdown": "13.1w", "Ann_Sharpe": "2.763", "Daily_Std": "1.201w"}, "kpi_6m": {"Net_Profit": "33.182w", "Max_Drawdown": "7.482w", "Ann_Sharpe": "3.507", "Daily_Std": "1.311w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "kpi": {"kpi_2y": {"Net_Profit": "101.326w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "3.046", "Daily_Std": "1.09w"}, "kpi_6m": {"Net_Profit": "33.447w", "Max_Drawdown": "4.991w", "Ann_Sharpe": "4.274", "Daily_Std": "1.081w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "kpi": {"kpi_2y": {"Net_Profit": "73.809w", "Max_Drawdown": "8.77w", "Ann_Sharpe": "2.782", "Daily_Std": "0.872w"}, "kpi_6m": {"Net_Profit": "24.623w", "Max_Drawdown": "3.077w", "Ann_Sharpe": "4.052", "Daily_Std": "0.83w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "109.802w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "4.564", "Daily_Std": "0.791w"}, "kpi_6m": {"Net_Profit": "12.135w", "Max_Drawdown": "3.525w", "Ann_Sharpe": "2.062", "Daily_Std": "0.823w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "75.834w", "Max_Drawdown": "8.023w", "Ann_Sharpe": "2.787", "Daily_Std": "0.892w"}, "kpi_6m": {"Net_Profit": "24.121w", "Max_Drawdown": "4.557w", "Ann_Sharpe": "3.558", "Daily_Std": "0.978w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {"kpi_2y": {"Net_Profit": "67.133w", "Max_Drawdown": "4.965w", "Ann_Sharpe": "3.237", "Daily_Std": "0.685w"}, "kpi_6m": {"Net_Profit": "14.917w", "Max_Drawdown": "4.13w", "Ann_Sharpe": "3.192", "Daily_Std": "0.646w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "84.018w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.541", "Daily_Std": "0.611w"}, "kpi_6m": {"Net_Profit": "18.073w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "3.841", "Daily_Std": "0.651w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "kpi": {"kpi_2y": {"Net_Profit": "37.602w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.785", "Daily_Std": "0.693w"}, "kpi_6m": {"Net_Profit": "8.842w", "Max_Drawdown": "2.524w", "Ann_Sharpe": "2.446", "Daily_Std": "0.496w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "kpi": {"kpi_2y": {"Net_Profit": "61.342w", "Max_Drawdown": "13.095w", "Ann_Sharpe": "1.464", "Daily_Std": "1.388w"}, "kpi_6m": {"Net_Profit": "26.315w", "Max_Drawdown": "12.633w", "Ann_Sharpe": "2.487", "Daily_Std": "1.506w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "kpi": {"kpi_2y": {"Net_Profit": "50.231w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.363", "Daily_Std": "1.239w"}, "kpi_6m": {"Net_Profit": "25.556w", "Max_Drawdown": "7.164w", "Ann_Sharpe": "2.722", "Daily_Std": "1.337w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "kpi": {"kpi_2y": {"Net_Profit": "93.129w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "3.379", "Daily_Std": "0.906w"}, "kpi_6m": {"Net_Profit": "36.285w", "Max_Drawdown": "5.324w", "Ann_Sharpe": "4.133", "Daily_Std": "1.249w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "kpi": {"kpi_2y": {"Net_Profit": "19.28w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.574", "Daily_Std": "0.74w"}, "kpi_6m": {"Net_Profit": "18.868w", "Max_Drawdown": "4.52w", "Ann_Sharpe": "3.582", "Daily_Std": "0.748w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "kpi": {"kpi_2y": {"Net_Profit": "585.533w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "3.052", "Daily_Std": "6.307w"}, "kpi_6m": {"Net_Profit": "116.222w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "2.604", "Daily_Std": "6.767w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "kpi": {"kpi_2y": {"Net_Profit": "88.378w", "Max_Drawdown": "6.154w", "Ann_Sharpe": "3.281", "Daily_Std": "0.889w"}, "kpi_6m": {"Net_Profit": "18.34w", "Max_Drawdown": "5.183w", "Ann_Sharpe": "2.649", "Daily_Std": "0.984w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "kpi": {"kpi_2y": {"Net_Profit": "50.481w", "Max_Drawdown": "9.263w", "Ann_Sharpe": "1.842", "Daily_Std": "0.91w"}, "kpi_6m": {"Net_Profit": "16.489w", "Max_Drawdown": "5.128w", "Ann_Sharpe": "2.173", "Daily_Std": "1.061w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "kpi": {"kpi_2y": {"Net_Profit": "96.531w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.695", "Daily_Std": "0.862w"}, "kpi_6m": {"Net_Profit": "17.015w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "2.482", "Daily_Std": "0.997w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "157.307w", "Max_Drawdown": "8.321w", "Ann_Sharpe": "4.081", "Daily_Std": "1.271w"}, "kpi_6m": {"Net_Profit": "31.055w", "Max_Drawdown": "5.538w", "Ann_Sharpe": "3.423", "Daily_Std": "1.265w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "64.055w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "2.361", "Daily_Std": "0.897w"}, "kpi_6m": {"Net_Profit": "14.782w", "Max_Drawdown": "6.371w", "Ann_Sharpe": "2.336", "Daily_Std": "0.874w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1144.784w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.755", "Daily_Std": "21.599w"}, "kpi_6m": {"Net_Profit": "611.751w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "3.602", "Daily_Std": "23.969w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "115.819w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.955", "Daily_Std": "0.77w"}, "kpi_6m": {"Net_Profit": "25.013w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.138", "Daily_Std": "0.854w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "112.453w", "Max_Drawdown": "5.578w", "Ann_Sharpe": "4.046", "Daily_Std": "0.912w"}, "kpi_6m": {"Net_Profit": "24.361w", "Max_Drawdown": "4.753w", "Ann_Sharpe": "3.833", "Daily_Std": "0.881w"}}, "children": [], "ratio": 0.0}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "595.44w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "3.278", "Daily_Std": "5.964w"}, "kpi_6m": {"Net_Profit": "124.002w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "2.579", "Daily_Std": "6.828w"}}, "children": [], "ratio": 0.0}]};
 const DATA_DATE = '2026-03-09';
 const PARENT_MAP = {};
+const NAV_TREE = {"name": "group", "children": []};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -132,6 +158,110 @@ let navStack = [];
 let currentNode = TREE;
 const nodeCache = {};
 const chartCache = {};
+
+function renderNavTree(node, container, depth) {
+  const item = document.createElement('div');
+  item.className = 'nav-item';
+  item.style.paddingLeft = (12 + depth * 16) + 'px';
+  item.dataset.name = node.name;
+
+  const toggle = document.createElement('span');
+  toggle.className = 'nav-toggle' + (node.children.length > 0 ? '' : ' empty');
+  toggle.textContent = '▶';
+  item.appendChild(toggle);
+
+  const label = document.createElement('span');
+  label.textContent = node.name;
+  label.style.overflow = 'hidden';
+  label.style.textOverflow = 'ellipsis';
+  item.appendChild(label);
+
+  container.appendChild(item);
+
+  let childrenDiv = null;
+  if (node.children.length > 0) {
+    childrenDiv = document.createElement('div');
+    childrenDiv.className = 'nav-children';
+    container.appendChild(childrenDiv);
+    for (const child of node.children) {
+      renderNavTree(child, childrenDiv, depth + 1);
+    }
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!childrenDiv) return;
+    const isExpanded = childrenDiv.classList.contains('expanded');
+    if (isExpanded) {
+      childrenDiv.classList.remove('expanded');
+      toggle.classList.remove('expanded');
+    } else {
+      childrenDiv.classList.add('expanded');
+      toggle.classList.add('expanded');
+    }
+  });
+
+  item.addEventListener('click', () => {
+    navToName(node.name);
+  });
+}
+
+async function navToName(name) {
+  if (name === TREE.name) {
+    navStack = [];
+    currentNode = TREE;
+    location.hash = '';
+    renderPage(currentNode);
+    updateNavActive();
+    return;
+  }
+  const loaded = await loadNodeData(name);
+  if (!loaded) return;
+  const ancestors = [];
+  let cur = name;
+  while (PARENT_MAP[cur]) {
+    ancestors.unshift(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  navStack = [TREE];
+  for (let i = 1; i < ancestors.length; i++) {
+    const anc = await loadNodeData(ancestors[i]);
+    if (anc) navStack.push(anc);
+  }
+  currentNode = loaded;
+  location.hash = name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.name === currentNode.name);
+  });
+  // Auto-expand ancestors in sidebar
+  const ancestors = new Set();
+  let cur = currentNode.name;
+  while (PARENT_MAP[cur]) {
+    ancestors.add(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  ancestors.add(TREE.name);
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (ancestors.has(el.dataset.name)) {
+      const next = el.nextElementSibling;
+      if (next && next.classList.contains('nav-children')) {
+        next.classList.add('expanded');
+        el.querySelector('.nav-toggle')?.classList.add('expanded');
+      }
+    }
+  });
+}
+
+function initSidebar() {
+  const container = document.getElementById('nav-tree');
+  renderNavTree(NAV_TREE, container, 0);
+  updateNavActive();
+}
 
 async function loadNodeData(name) {
   if (nodeCache[name]) return nodeCache[name];
@@ -872,6 +1002,7 @@ async function drillDown(sortedIdx) {
     location.hash = child.name;
     renderPage(currentNode);
   }
+  updateNavActive();
 }
 
 function navigateTo(stackIdx) {
@@ -880,6 +1011,7 @@ function navigateTo(stackIdx) {
   navStack = navStack.slice(0, stackIdx);
   location.hash = currentNode === TREE ? '' : currentNode.name;
   renderPage(currentNode);
+  updateNavActive();
 }
 
 async function navigateToHash() {
@@ -902,16 +1034,19 @@ async function navigateToHash() {
       }
       currentNode = loaded;
       renderPage(currentNode);
+      updateNavActive();
       return;
     }
   }
   navStack = [];
   currentNode = TREE;
   renderPage(TREE);
+  updateNavActive();
 }
 
+initSidebar();
 navigateToHash();
-window.addEventListener('hashchange', navigateToHash);
+window.addEventListener('hashchange', () => { navigateToHash().then(() => updateNavActive()); });
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
@@ -931,5 +1066,6 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 </script>
+</div>
 </body>
 </html>

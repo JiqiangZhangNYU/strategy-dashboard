@@ -8,7 +8,24 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-       background: #f0f2f5; color: #333; padding: 20px; max-width: 1400px; margin: 0 auto; }
+       background: #f0f2f5; color: #333; padding: 0; margin: 0; display: flex; min-height: 100vh; }
+.sidebar { width: 260px; min-width: 260px; background: #fff; border-right: 1px solid #e0e0e0;
+            padding: 12px 0; overflow-y: auto; height: 100vh; position: sticky; top: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04); font-size: 13px; flex-shrink: 0; }
+.sidebar-title { font-size: 14px; font-weight: 700; color: #1a1a2e; padding: 8px 16px 12px;
+                  border-bottom: 1px solid #eee; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; cursor: pointer; padding: 5px 12px 5px 0;
+             color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+             border-radius: 0 6px 6px 0; margin-right: 8px; user-select: none; }
+.nav-item:hover { background: #f0f2f5; color: #4363d8; }
+.nav-item.active { background: #e3eafc; color: #4363d8; font-weight: 600; }
+.nav-toggle { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+               flex-shrink: 0; font-size: 10px; color: #aaa; transition: transform 0.15s; }
+.nav-toggle.expanded { transform: rotate(90deg); }
+.nav-toggle.empty { visibility: hidden; }
+.nav-children { display: none; }
+.nav-children.expanded { display: block; }
+.main-content { flex: 1; padding: 20px; max-width: 1400px; min-width: 0; }
 .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
               margin-bottom: 16px; font-size: 14px; color: #666; }
 .breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
@@ -95,7 +112,10 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
                   cursor: pointer; z-index: 10000; font-weight: bold; line-height: 1; }
 .loading { text-align: center; padding: 40px; color: #888; font-size: 15px; }
 @media (max-width: 768px) {
-  body { padding: 10px; }
+  body { flex-direction: column; }
+  .sidebar { width: 100%; min-width: 100%; height: auto; max-height: 50vh; position: relative;
+              border-right: none; border-bottom: 1px solid #e0e0e0; }
+  .main-content { padding: 10px; }
   .hero-title { font-size: 18px; }
   .hero-kpi { gap: 10px; }
   .hero-kpi-val { font-size: 14px; }
@@ -110,6 +130,11 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 </style>
 </head>
 <body>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-title">CTA_HS_LTOR_V2</div>
+  <div id="nav-tree"></div>
+</div>
+<div class="main-content">
 <div id="app"></div>
 <div class="overlay" id="overlay" onclick="closeOverlay()">
   <span class="overlay-close" onclick="closeOverlay()">&times;</span>
@@ -119,6 +144,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 const TREE = {"name": "CTA_HS_LTOR_V2", "kpi": {"kpi_2y": {"Net_Profit": "53.482w", "Max_Drawdown": "6.367w", "Ann_Sharpe": "2.508", "Daily_Std": "0.703w"}, "kpi_6m": {"Net_Profit": "8.861w", "Max_Drawdown": "2.524w", "Ann_Sharpe": "2.453", "Daily_Std": "0.496w"}}, "children": [{"name": "CTA_HS_LTOR_Mom", "kpi": {"kpi_2y": {"Net_Profit": "55.416w", "Max_Drawdown": "9.36w", "Ann_Sharpe": "1.96", "Daily_Std": "0.931w"}, "kpi_6m": {"Net_Profit": "25.105w", "Max_Drawdown": "6.319w", "Ann_Sharpe": "3.403", "Daily_Std": "1.047w"}}, "children": [], "ratio": 5.0, "_drillable": true}, {"name": "Deap_comm_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "65.303w", "Max_Drawdown": "5.256w", "Ann_Sharpe": "2.807", "Daily_Std": "0.767w"}, "kpi_6m": {"Net_Profit": "9.74w", "Max_Drawdown": "3.449w", "Ann_Sharpe": "2.109", "Daily_Std": "0.631w"}}, "children": [], "ratio": 12.0, "_drillable": true}, {"name": "Deap_comm_neutral_index", "kpi": {"kpi_2y": {"Net_Profit": "87.774w", "Max_Drawdown": "7.291w", "Ann_Sharpe": "3.828", "Daily_Std": "0.75w"}, "kpi_6m": {"Net_Profit": "4.179w", "Max_Drawdown": "3.409w", "Ann_Sharpe": "0.856", "Daily_Std": "0.688w"}}, "children": [], "ratio": 3.0, "_drillable": true}, {"name": "Deap_comm_neutral_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "74.22w", "Max_Drawdown": "6.529w", "Ann_Sharpe": "3.72", "Daily_Std": "0.657w"}, "kpi_6m": {"Net_Profit": "3.251w", "Max_Drawdown": "3.979w", "Ann_Sharpe": "0.652", "Daily_Std": "0.703w"}}, "children": [], "ratio": 12.0, "_drillable": true}, {"name": "Deap_comm_cov_index", "kpi": {"kpi_2y": {"Net_Profit": "83.697w", "Max_Drawdown": "3.97w", "Ann_Sharpe": "4.543", "Daily_Std": "0.606w"}, "kpi_6m": {"Net_Profit": "15.147w", "Max_Drawdown": "3.97w", "Ann_Sharpe": "3.34", "Daily_Std": "0.622w"}}, "children": [], "ratio": 3.0, "_drillable": true}, {"name": "Deap_comm_cov_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "83.453w", "Max_Drawdown": "4.144w", "Ann_Sharpe": "4.548", "Daily_Std": "0.606w"}, "kpi_6m": {"Net_Profit": "17.495w", "Max_Drawdown": "4.144w", "Ann_Sharpe": "3.831", "Daily_Std": "0.63w"}}, "children": [], "ratio": 12.0, "_drillable": true}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "64.055w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "2.361", "Daily_Std": "0.897w"}, "kpi_6m": {"Net_Profit": "14.782w", "Max_Drawdown": "6.371w", "Ann_Sharpe": "2.336", "Daily_Std": "0.874w"}}, "children": [], "ratio": 8.0}, {"name": "Deap_comm_2026_index", "kpi": {"kpi_2y": {"Net_Profit": "87.149w", "Max_Drawdown": "5.316w", "Ann_Sharpe": "3.382", "Daily_Std": "0.848w"}, "kpi_6m": {"Net_Profit": "20.894w", "Max_Drawdown": "4.182w", "Ann_Sharpe": "3.315", "Daily_Std": "0.877w"}}, "children": [], "ratio": 13.0, "_drillable": true}, {"name": "Deap_comm_2026_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "75.662w", "Max_Drawdown": "3.973w", "Ann_Sharpe": "3.288", "Daily_Std": "0.758w"}, "kpi_6m": {"Net_Profit": "20.873w", "Max_Drawdown": "3.894w", "Ann_Sharpe": "3.525", "Daily_Std": "0.823w"}}, "children": [], "ratio": 32.0, "_drillable": true}]};
 const DATA_DATE = '2026-03-09';
 const PARENT_MAP = {"CTA_HS_LTOR_Mom": "CTA_HS_LTOR_V2", "pyelf_spotzlcorindex_qnmls_index": "CTA_HS_LTOR_Mom", "Deap_comm_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_neutral_index": "CTA_HS_LTOR_V2", "Deap_comm_neutral_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_cov_index": "CTA_HS_LTOR_V2", "Deap_comm_cov_index_opt": "CTA_HS_LTOR_V2", "Deap_comm_2026_index": "CTA_HS_LTOR_V2", "Deap_comm_2026_index_opt": "CTA_HS_LTOR_V2"};
+const NAV_TREE = {"name": "CTA_HS_LTOR_V2", "children": [{"name": "CTA_HS_LTOR_Mom", "children": [{"name": "pyelf_spotzlcorindex_qnmls_index", "children": []}]}, {"name": "Deap_comm_index_opt", "children": []}, {"name": "Deap_comm_neutral_index", "children": []}, {"name": "Deap_comm_neutral_index_opt", "children": []}, {"name": "Deap_comm_cov_index", "children": []}, {"name": "Deap_comm_cov_index_opt", "children": []}, {"name": "Deap_comm_2026_index", "children": []}, {"name": "Deap_comm_2026_index_opt", "children": []}]};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -132,6 +158,110 @@ let navStack = [];
 let currentNode = TREE;
 const nodeCache = {};
 const chartCache = {};
+
+function renderNavTree(node, container, depth) {
+  const item = document.createElement('div');
+  item.className = 'nav-item';
+  item.style.paddingLeft = (12 + depth * 16) + 'px';
+  item.dataset.name = node.name;
+
+  const toggle = document.createElement('span');
+  toggle.className = 'nav-toggle' + (node.children.length > 0 ? '' : ' empty');
+  toggle.textContent = '▶';
+  item.appendChild(toggle);
+
+  const label = document.createElement('span');
+  label.textContent = node.name;
+  label.style.overflow = 'hidden';
+  label.style.textOverflow = 'ellipsis';
+  item.appendChild(label);
+
+  container.appendChild(item);
+
+  let childrenDiv = null;
+  if (node.children.length > 0) {
+    childrenDiv = document.createElement('div');
+    childrenDiv.className = 'nav-children';
+    container.appendChild(childrenDiv);
+    for (const child of node.children) {
+      renderNavTree(child, childrenDiv, depth + 1);
+    }
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!childrenDiv) return;
+    const isExpanded = childrenDiv.classList.contains('expanded');
+    if (isExpanded) {
+      childrenDiv.classList.remove('expanded');
+      toggle.classList.remove('expanded');
+    } else {
+      childrenDiv.classList.add('expanded');
+      toggle.classList.add('expanded');
+    }
+  });
+
+  item.addEventListener('click', () => {
+    navToName(node.name);
+  });
+}
+
+async function navToName(name) {
+  if (name === TREE.name) {
+    navStack = [];
+    currentNode = TREE;
+    location.hash = '';
+    renderPage(currentNode);
+    updateNavActive();
+    return;
+  }
+  const loaded = await loadNodeData(name);
+  if (!loaded) return;
+  const ancestors = [];
+  let cur = name;
+  while (PARENT_MAP[cur]) {
+    ancestors.unshift(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  navStack = [TREE];
+  for (let i = 1; i < ancestors.length; i++) {
+    const anc = await loadNodeData(ancestors[i]);
+    if (anc) navStack.push(anc);
+  }
+  currentNode = loaded;
+  location.hash = name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.name === currentNode.name);
+  });
+  // Auto-expand ancestors in sidebar
+  const ancestors = new Set();
+  let cur = currentNode.name;
+  while (PARENT_MAP[cur]) {
+    ancestors.add(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  ancestors.add(TREE.name);
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (ancestors.has(el.dataset.name)) {
+      const next = el.nextElementSibling;
+      if (next && next.classList.contains('nav-children')) {
+        next.classList.add('expanded');
+        el.querySelector('.nav-toggle')?.classList.add('expanded');
+      }
+    }
+  });
+}
+
+function initSidebar() {
+  const container = document.getElementById('nav-tree');
+  renderNavTree(NAV_TREE, container, 0);
+  updateNavActive();
+}
 
 async function loadNodeData(name) {
   if (nodeCache[name]) return nodeCache[name];
@@ -872,6 +1002,7 @@ async function drillDown(sortedIdx) {
     location.hash = child.name;
     renderPage(currentNode);
   }
+  updateNavActive();
 }
 
 function navigateTo(stackIdx) {
@@ -880,6 +1011,7 @@ function navigateTo(stackIdx) {
   navStack = navStack.slice(0, stackIdx);
   location.hash = currentNode === TREE ? '' : currentNode.name;
   renderPage(currentNode);
+  updateNavActive();
 }
 
 async function navigateToHash() {
@@ -902,16 +1034,19 @@ async function navigateToHash() {
       }
       currentNode = loaded;
       renderPage(currentNode);
+      updateNavActive();
       return;
     }
   }
   navStack = [];
   currentNode = TREE;
   renderPage(TREE);
+  updateNavActive();
 }
 
+initSidebar();
 navigateToHash();
-window.addEventListener('hashchange', navigateToHash);
+window.addEventListener('hashchange', () => { navigateToHash().then(() => updateNavActive()); });
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
@@ -931,5 +1066,6 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 </script>
+</div>
 </body>
 </html>
