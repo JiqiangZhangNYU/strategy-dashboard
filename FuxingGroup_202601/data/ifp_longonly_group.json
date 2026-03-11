@@ -1,0 +1,1 @@
+{"name": "ifp_longonly_group", "kpi": {}, "children": [{"name": "ifp4_preview_comm_alpha_longonly", "kpi": {}, "children": [], "ratio": 250.296}, {"name": "ifp4_preview_comm_beta_longonly", "kpi": {}, "children": [], "ratio": 175.309}, {"name": "ifp4_preview_macro_beta_longonly", "kpi": {}, "children": [], "ratio": 331.81}], "ratio": 6.203}
