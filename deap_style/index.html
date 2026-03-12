@@ -329,6 +329,13 @@ function fmt4(val) {
   return n.toPrecision(4) + (val.includes('w') ? 'w' : '');
 }
 
+function fmtPct1(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const n = parseFloat(val);
+  if (isNaN(n)) return '';
+  return n.toFixed(1);
+}
+
 function parseStd(val) {
   if (!val) return 0;
   const s = val.replace('w','');
@@ -568,7 +575,7 @@ function buildLegend(id) {
   el.innerHTML = st.aligned.map((c, ci) =>
     `<span class="compare-legend-item${st.hidden.has(ci) ? ' hidden' : ''}" data-ci="${ci}">
       <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
-      <span style="font-weight:600;">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${c.display_ratio.toFixed(1)}%)` : ''}</span>
+      <span style="font-weight:600;">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${fmtPct1(c.display_ratio)}%)` : ''}</span>
     </span>`
   ).join('');
   el.querySelectorAll('.compare-legend-item').forEach(item => {
@@ -881,7 +888,7 @@ function renderPage(node) {
 
   let hero = `<div class="hero">
     <div class="hero-header">
-      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+node.ratio+'%)</span>' : ''}</div>
+      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+fmtPct1(node.ratio)+'%)</span>' : ''}</div>
       <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
     </div>
     <div class="hero-charts">
@@ -918,7 +925,7 @@ function renderPage(node) {
           ${isDrillable
             ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
             : '<span class="card-name">'+child.name+'</span>'}
-          <span class="card-ratio">${child.ratio ? fmt4(child.ratio.toString()) + '%' : ''}</span>
+          <span class="card-ratio">${child.ratio ? fmtPct1(child.ratio) + '%' : ''}</span>
           ${ck6m.Net_Profit ? '<span class="badge badge-profit">6M Profit: '+fmt4(ck6m.Net_Profit)+'</span>' : ''}
           ${ck6m.Ann_Sharpe ? '<span class="badge badge-sharpe">6M Sharpe: '+fmt4(ck6m.Ann_Sharpe)+'</span>' : ''}
           ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
