@@ -165,7 +165,7 @@ const PARENT_MAP = {};
 const NAV_TREE = {"name": "deap_style", "children": []};
 const ALL_DATA = {};
 let ALL_COMPARE = {};
-const FILE_HASHES = {"charts/Deap_comm_styles_basis.json": "23f05a4b", "charts/Deap_comm_styles_inv_mom.json": "8a10833c", "charts/Deap_comm_styles_inv_others.json": "172a1011", "charts/Deap_comm_styles_lob.json": "afbbb3cb", "charts/Deap_comm_styles_member.json": "ac93644b", "charts/Deap_comm_styles_mom.json": "d0940dcc", "charts/Deap_comm_styles_others_pv.json": "ad43efbd", "charts/Deap_comm_styles_profit.json": "2ac57cd8", "charts/Deap_comm_styles_receipt.json": "fa40b205", "charts/Deap_comm_styles_ry.json": "d51fa98a", "charts/Deap_comm_styles_spot.json": "87cb6375", "charts/Deap_comm_styles_value.json": "e6b053b2", "charts/Deap_comm_styles_volume_opi.json": "854938e9", "charts/Deap_bench_styles_basis_ema.json": "4e5c52ec", "charts/Deap_bench_styles_basis_zscore.json": "0fb0d54f", "charts/Deap_bench_styles_delay_mom.json": "6f92ee93", "charts/Deap_bench_styles_inventory_long_positive.json": "5fc61532", "charts/Deap_bench_styles_inventory_zlw_zscore.json": "b27cbedc", "charts/Deap_bench_styles_inventory_zscore.json": "50120030", "charts/Deap_bench_styles_member_all_ema.json": "76289fdf", "charts/Deap_bench_styles_mom_1y.json": "b58776bb", "charts/Deap_bench_styles_receipt_zscore.json": "69ba6ae8", "charts/Deap_bench_styles_rycumprod.json": "923f34be", "charts/Deap_bench_styles_ryminus_ema.json": "1948dfd5", "charts/Deap_bench_styles_spot_ratio_vol.json": "ad9b03d0", "charts/Deap_bench_styles_all_equal.json": "4eacdab5", "charts/Deap_bench_styles_all_rsharpe.json": "79b62876", "charts/Deap_comm_styles_all_equal.json": "0fd5825e", "charts/Deap_comm_styles_all_rsharpe.json": "8452a8c2", "compare/deap_style.json": "d2506f03", "compare_bundle.json": "de57e26e"};
+const FILE_HASHES = {"charts/Deap_comm_styles_basis.json": "23f05a4b", "charts/Deap_comm_styles_inv_mom.json": "8a10833c", "charts/Deap_comm_styles_inv_others.json": "172a1011", "charts/Deap_comm_styles_lob.json": "afbbb3cb", "charts/Deap_comm_styles_member.json": "ac93644b", "charts/Deap_comm_styles_mom.json": "d0940dcc", "charts/Deap_comm_styles_others_pv.json": "ad43efbd", "charts/Deap_comm_styles_profit.json": "2ac57cd8", "charts/Deap_comm_styles_receipt.json": "fa40b205", "charts/Deap_comm_styles_ry.json": "d51fa98a", "charts/Deap_comm_styles_spot.json": "87cb6375", "charts/Deap_comm_styles_value.json": "e6b053b2", "charts/Deap_comm_styles_volume_opi.json": "854938e9", "charts/Deap_bench_styles_basis_ema.json": "4e5c52ec", "charts/Deap_bench_styles_basis_zscore.json": "0fb0d54f", "charts/Deap_bench_styles_delay_mom.json": "6f92ee93", "charts/Deap_bench_styles_inventory_long_positive.json": "5fc61532", "charts/Deap_bench_styles_inventory_zlw_zscore.json": "b27cbedc", "charts/Deap_bench_styles_inventory_zscore.json": "50120030", "charts/Deap_bench_styles_member_all_ema.json": "76289fdf", "charts/Deap_bench_styles_mom_1y.json": "b58776bb", "charts/Deap_bench_styles_receipt_zscore.json": "69ba6ae8", "charts/Deap_bench_styles_rycumprod.json": "923f34be", "charts/Deap_bench_styles_ryminus_ema.json": "1948dfd5", "charts/Deap_bench_styles_spot_ratio_vol.json": "ad9b03d0", "charts/Deap_bench_styles_all_equal.json": "4eacdab5", "charts/Deap_bench_styles_all_rsharpe.json": "79b62876", "charts/Deap_comm_styles_all_equal.json": "0fd5825e", "charts/Deap_comm_styles_all_rsharpe.json": "8452a8c2", "compare/deap_style.json": "d2506f03", "compare_bundle.json": "f03ac885"};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -1107,17 +1107,31 @@ initSidebar();
   });
 })();
 navigateToHash();
-// Fetch compare bundle once at startup, then render compare charts
-fetchRetry(hashUrl('compare_bundle.json'), 2).then(data => {
-  if (data) {
-    ALL_COMPARE = data;
-    // Re-render compare charts for current page if it has children
-    if (currentNode.children && currentNode.children.length > 0) {
-      const cmpData = loadCompareData(currentNode.name);
-      if (cmpData) {
-        initChartFromCompare('chart-6m', 'c6m', cmpData);
-        initChartFromCompare('chart-2y', 'c2y', cmpData);
-      }
+// Fetch compact compare bundle, unpack, render
+fetchRetry(hashUrl('compare_bundle.json'), 2).then(raw => {
+  if (!raw) return;
+  const dp = raw._d;
+  for (const k in raw) {
+    if (k === '_d') continue;
+    const entry = {};
+    for (const sk in raw[k]) {
+      const s = raw[k][sk];
+      const refDates = dp[s.di];
+      const N = refDates.length;
+      const aligned = s.a.map(a => {
+        const data = a.v.slice();
+        while (data.length < N) data.push(null);
+        return {name: a.n, data, ratio: a.r ?? null, display_ratio: a.dr ?? null};
+      });
+      entry[sk] = {refDates, aligned};
+    }
+    ALL_COMPARE[k] = entry;
+  }
+  if (currentNode.children && currentNode.children.length > 0) {
+    const cmpData = loadCompareData(currentNode.name);
+    if (cmpData) {
+      initChartFromCompare('chart-6m', 'c6m', cmpData);
+      initChartFromCompare('chart-2y', 'c2y', cmpData);
     }
   }
 });

@@ -165,7 +165,7 @@ const PARENT_MAP = {};
 const NAV_TREE = {"name": "group", "children": []};
 const ALL_DATA = {};
 let ALL_COMPARE = {};
-const FILE_HASHES = {"charts/Deap_comm_daynight_combine_Equal.json": "07d3c49b", "charts/Deap_comm_daynight_combine_Equal_opt.json": "987d2402", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "6b2d43f9", "charts/Deap_comm_daynight_combine_ML_opt.json": "94833be9", "charts/Deap_benchmark_v8_daxin_opt.json": "32ed7519", "charts/Deap_comm_daynight_v6_opt.json": "dbcc22a1", "charts/Deap_benchmark_v7_ML_opt.json": "026f092f", "charts/CTA_hs_ltor.json": "6f6bdd6c", "charts/CTA_ts_ltor.json": "c3e9d4e9", "charts/CTA_ts_mtor_v2.json": "7b86b4ff", "charts/CTA_ts_HTOR_v2.json": "357a5623", "charts/xiaowengroup_202509.json": "09baf12c", "charts/CTA_1000w.json": "95f567a1", "charts/kmf_atr.json": "18ed213a", "charts/kfs_group.json": "e6d52d53", "charts/macro_group.json": "9952f6f5", "charts/ifp_complex_group.json": "f9d2d76f", "charts/daydeapcomm500_neubeta.json": "be3d51f3", "charts/zlw_1000w.json": "b73e1d0c", "charts/FuxingGroup_202601.json": "0c0b2c8c", "charts/QMF_Group.json": "af79cbbc", "charts/tengfeng_1000w.json": "255fef2a", "compare/group.json": "492195f6", "compare_bundle.json": "2114c91d"};
+const FILE_HASHES = {"charts/Deap_comm_daynight_combine_Equal.json": "07d3c49b", "charts/Deap_comm_daynight_combine_Equal_opt.json": "987d2402", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "6b2d43f9", "charts/Deap_comm_daynight_combine_ML_opt.json": "94833be9", "charts/Deap_benchmark_v8_daxin_opt.json": "32ed7519", "charts/Deap_comm_daynight_v6_opt.json": "dbcc22a1", "charts/Deap_benchmark_v7_ML_opt.json": "026f092f", "charts/CTA_hs_ltor.json": "6f6bdd6c", "charts/CTA_ts_ltor.json": "c3e9d4e9", "charts/CTA_ts_mtor_v2.json": "7b86b4ff", "charts/CTA_ts_HTOR_v2.json": "357a5623", "charts/xiaowengroup_202509.json": "09baf12c", "charts/CTA_1000w.json": "95f567a1", "charts/kmf_atr.json": "18ed213a", "charts/kfs_group.json": "e6d52d53", "charts/macro_group.json": "9952f6f5", "charts/ifp_complex_group.json": "f9d2d76f", "charts/daydeapcomm500_neubeta.json": "be3d51f3", "charts/zlw_1000w.json": "b73e1d0c", "charts/FuxingGroup_202601.json": "0c0b2c8c", "charts/QMF_Group.json": "af79cbbc", "charts/tengfeng_1000w.json": "255fef2a", "compare/group.json": "492195f6", "compare_bundle.json": "41d24692"};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -1107,17 +1107,31 @@ initSidebar();
   });
 })();
 navigateToHash();
-// Fetch compare bundle once at startup, then render compare charts
-fetchRetry(hashUrl('compare_bundle.json'), 2).then(data => {
-  if (data) {
-    ALL_COMPARE = data;
-    // Re-render compare charts for current page if it has children
-    if (currentNode.children && currentNode.children.length > 0) {
-      const cmpData = loadCompareData(currentNode.name);
-      if (cmpData) {
-        initChartFromCompare('chart-6m', 'c6m', cmpData);
-        initChartFromCompare('chart-2y', 'c2y', cmpData);
-      }
+// Fetch compact compare bundle, unpack, render
+fetchRetry(hashUrl('compare_bundle.json'), 2).then(raw => {
+  if (!raw) return;
+  const dp = raw._d;
+  for (const k in raw) {
+    if (k === '_d') continue;
+    const entry = {};
+    for (const sk in raw[k]) {
+      const s = raw[k][sk];
+      const refDates = dp[s.di];
+      const N = refDates.length;
+      const aligned = s.a.map(a => {
+        const data = a.v.slice();
+        while (data.length < N) data.push(null);
+        return {name: a.n, data, ratio: a.r ?? null, display_ratio: a.dr ?? null};
+      });
+      entry[sk] = {refDates, aligned};
+    }
+    ALL_COMPARE[k] = entry;
+  }
+  if (currentNode.children && currentNode.children.length > 0) {
+    const cmpData = loadCompareData(currentNode.name);
+    if (cmpData) {
+      initChartFromCompare('chart-6m', 'c6m', cmpData);
+      initChartFromCompare('chart-2y', 'c2y', cmpData);
     }
   }
 });

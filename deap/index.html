@@ -165,7 +165,7 @@ const PARENT_MAP = {};
 const NAV_TREE = {"name": "deap", "children": []};
 const ALL_DATA = {};
 let ALL_COMPARE = {};
-const FILE_HASHES = {"charts/Deap_benchmark_v2_opt.json": "72e97db2", "charts/Deap_benchmark_v4.json": "fb45c86b", "charts/Deap_benchmark_v4_ML_opt.json": "f62ca218", "charts/Deap_benchmark_v4_opt.json": "dac65f59", "charts/Deap_benchmark_v5_ML_opt.json": "5508e346", "charts/Deap_benchmark_v6_ML_opt.json": "e807a692", "charts/Deap_benchmark_v7_ML.json": "eff81b3d", "charts/Deap_benchmark_v7_ML_opt.json": "026f092f", "charts/Deap_benchmark_v8_daxin.json": "29b10151", "charts/Deap_benchmark_v8_daxin_opt.json": "32ed7519", "charts/Deap_benchmark_values.json": "86e73dc0", "charts/Deap_comm_cs_mom_21d.json": "abbe20ce", "charts/Deap_comm_cs_mom_252d.json": "be87b206", "charts/Deap_comm_daynight_combine_Equal.json": "07d3c49b", "charts/Deap_comm_daynight_combine_Equal_opt.json": "987d2402", "charts/Deap_comm_daynight_combine_ML_opt.json": "94833be9", "charts/Deap_comm_daynight_combine_MLpos_opt.json": "fa2917a2", "charts/Deap_comm_daynight_combine_rSharpe.json": "92227089", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "6b2d43f9", "charts/Deap_comm_daynight_Group_opt.json": "ec9534d8", "charts/Deap_comm_daynight_v2_opt.json": "c6145adb", "charts/Deap_comm_daynight_v3_opt.json": "1b07d4ae", "charts/Deap_comm_daynight_v4_opt.json": "29f6899a", "charts/Deap_comm_daynight_v5_opt.json": "9dacacfa", "charts/Deap_comm_daynight_v6_opt.json": "dbcc22a1", "charts/Deap_comm_daynight_v7_opt.json": "c8b579da", "charts/Deap_bench_styles_all_rsharpe.json": "79b62876", "charts/Deap_bench_styles_all_equal.json": "4eacdab5", "charts/Deap_comm_styles_all_equal.json": "0fd5825e", "charts/Deap_comm_styles_all_rsharpe.json": "8452a8c2", "compare/deap.json": "4bdb039d", "compare_bundle.json": "f0474d41"};
+const FILE_HASHES = {"charts/Deap_benchmark_v2_opt.json": "72e97db2", "charts/Deap_benchmark_v4.json": "fb45c86b", "charts/Deap_benchmark_v4_ML_opt.json": "f62ca218", "charts/Deap_benchmark_v4_opt.json": "dac65f59", "charts/Deap_benchmark_v5_ML_opt.json": "5508e346", "charts/Deap_benchmark_v6_ML_opt.json": "e807a692", "charts/Deap_benchmark_v7_ML.json": "eff81b3d", "charts/Deap_benchmark_v7_ML_opt.json": "026f092f", "charts/Deap_benchmark_v8_daxin.json": "29b10151", "charts/Deap_benchmark_v8_daxin_opt.json": "32ed7519", "charts/Deap_benchmark_values.json": "86e73dc0", "charts/Deap_comm_cs_mom_21d.json": "abbe20ce", "charts/Deap_comm_cs_mom_252d.json": "be87b206", "charts/Deap_comm_daynight_combine_Equal.json": "07d3c49b", "charts/Deap_comm_daynight_combine_Equal_opt.json": "987d2402", "charts/Deap_comm_daynight_combine_ML_opt.json": "94833be9", "charts/Deap_comm_daynight_combine_MLpos_opt.json": "fa2917a2", "charts/Deap_comm_daynight_combine_rSharpe.json": "92227089", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "6b2d43f9", "charts/Deap_comm_daynight_Group_opt.json": "ec9534d8", "charts/Deap_comm_daynight_v2_opt.json": "c6145adb", "charts/Deap_comm_daynight_v3_opt.json": "1b07d4ae", "charts/Deap_comm_daynight_v4_opt.json": "29f6899a", "charts/Deap_comm_daynight_v5_opt.json": "9dacacfa", "charts/Deap_comm_daynight_v6_opt.json": "dbcc22a1", "charts/Deap_comm_daynight_v7_opt.json": "c8b579da", "charts/Deap_bench_styles_all_rsharpe.json": "79b62876", "charts/Deap_bench_styles_all_equal.json": "4eacdab5", "charts/Deap_comm_styles_all_equal.json": "0fd5825e", "charts/Deap_comm_styles_all_rsharpe.json": "8452a8c2", "compare/deap.json": "4bdb039d", "compare_bundle.json": "8a9af504"};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -1107,17 +1107,31 @@ initSidebar();
   });
 })();
 navigateToHash();
-// Fetch compare bundle once at startup, then render compare charts
-fetchRetry(hashUrl('compare_bundle.json'), 2).then(data => {
-  if (data) {
-    ALL_COMPARE = data;
-    // Re-render compare charts for current page if it has children
-    if (currentNode.children && currentNode.children.length > 0) {
-      const cmpData = loadCompareData(currentNode.name);
-      if (cmpData) {
-        initChartFromCompare('chart-6m', 'c6m', cmpData);
-        initChartFromCompare('chart-2y', 'c2y', cmpData);
-      }
+// Fetch compact compare bundle, unpack, render
+fetchRetry(hashUrl('compare_bundle.json'), 2).then(raw => {
+  if (!raw) return;
+  const dp = raw._d;
+  for (const k in raw) {
+    if (k === '_d') continue;
+    const entry = {};
+    for (const sk in raw[k]) {
+      const s = raw[k][sk];
+      const refDates = dp[s.di];
+      const N = refDates.length;
+      const aligned = s.a.map(a => {
+        const data = a.v.slice();
+        while (data.length < N) data.push(null);
+        return {name: a.n, data, ratio: a.r ?? null, display_ratio: a.dr ?? null};
+      });
+      entry[sk] = {refDates, aligned};
+    }
+    ALL_COMPARE[k] = entry;
+  }
+  if (currentNode.children && currentNode.children.length > 0) {
+    const cmpData = loadCompareData(currentNode.name);
+    if (cmpData) {
+      initChartFromCompare('chart-6m', 'c6m', cmpData);
+      initChartFromCompare('chart-2y', 'c2y', cmpData);
     }
   }
 });
