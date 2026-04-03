@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>deap_style Strategy Dashboard - 2026-04-03</title>
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(function(reg){
+  reg.addEventListener('updatefound',function(){var nw=reg.installing;
+    nw.addEventListener('statechange',function(){
+      if(nw.state==='activated'&&navigator.serviceWorker.controller)location.reload();
+    });
+  });
+}).catch(function(){});}</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
@@ -227,8 +236,13 @@ async function navToName(name) {
     updateNavActive();
     return;
   }
+  const app = document.getElementById('app');
+  app.innerHTML = '<div class="loading">Loading ' + name + '...</div>';
   const loaded = await loadNodeData(name);
-  if (!loaded) return;
+  if (!loaded) {
+    app.innerHTML = '<div class="loading" style="color:#c62828">加载失败: ' + name + ' <a href="javascript:navToName(\''+name+'\')">重试</a></div>';
+    return;
+  }
   const ancestors = [];
   let cur = name;
   while (PARENT_MAP[cur]) {
@@ -285,30 +299,30 @@ function hashUrl(url) {
   return url + '?v=' + (h || Date.now());
 }
 
+async function fetchRetry(url, retries) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const r = await fetch(url);
+      if (r.ok) return await r.json();
+      if (r.status === 404) return null;
+    } catch(e) {}
+    if (i < retries) await new Promise(r => setTimeout(r, 500 * (i + 1)));
+  }
+  return null;
+}
+
 async function loadNodeData(name) {
   if (nodeCache[name]) return nodeCache[name];
-  try {
-    const r = await fetch(hashUrl('data/' + encodeURIComponent(name) + '.json'));
-    if (!r.ok) return null;
-    const data = await r.json();
-    nodeCache[name] = data;
-    return data;
-  } catch(e) {
-    return null;
-  }
+  const data = await fetchRetry(hashUrl('data/' + encodeURIComponent(name) + '.json'), 2);
+  if (data) nodeCache[name] = data;
+  return data;
 }
 
 async function loadChartData(name) {
   if (chartCache[name]) return chartCache[name];
-  try {
-    const r = await fetch(hashUrl('charts/' + encodeURIComponent(name) + '.json'));
-    if (!r.ok) return null;
-    const data = await r.json();
-    chartCache[name] = data;
-    return data;
-  } catch(e) {
-    return null;
-  }
+  const data = await fetchRetry(hashUrl('charts/' + encodeURIComponent(name) + '.json'), 2);
+  if (data) chartCache[name] = data;
+  return data;
 }
 
 let overlayParams = null;
@@ -639,15 +653,9 @@ if (ROOT_COMPARE) compareCache[TREE.name] = ROOT_COMPARE;
 
 async function loadCompareData(name) {
   if (compareCache[name]) return compareCache[name];
-  try {
-    const r = await fetch(hashUrl('compare/' + encodeURIComponent(name) + '.json'));
-    if (!r.ok) return null;
-    const data = await r.json();
-    compareCache[name] = data;
-    return data;
-  } catch(e) {
-    return null;
-  }
+  const data = await fetchRetry(hashUrl('compare/' + encodeURIComponent(name) + '.json'), 2);
+  if (data) compareCache[name] = data;
+  return data;
 }
 
 function initChartFromCompare(id, compareKey, cmpData) {

@@ -1,5 +1,5 @@
 // Auto-generated — do not edit
-const CACHE = 'dash-vf5202e2e';
+const CACHE = 'dash-v68e99e8d';
 const PRECACHE = ['./index.html'];
 
 self.addEventListener('install', e => {
@@ -17,14 +17,12 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.open(CACHE).then(c =>
-      c.match(e.request).then(cached => {
-        const net = fetch(e.request).then(r => {
-          if (r.ok) c.put(e.request, r.clone());
-          return r;
-        }).catch(() => cached);
-        return cached || net;
-      })
-    )
+    fetch(e.request).then(r => {
+      if (r.ok) {
+        const clone = r.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return r;
+    }).catch(() => caches.match(e.request))
   );
 });
