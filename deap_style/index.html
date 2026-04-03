@@ -302,7 +302,10 @@ function hashUrl(url) {
 async function fetchRetry(url, retries) {
   for (let i = 0; i <= retries; i++) {
     try {
-      const r = await fetch(url);
+      const ac = new AbortController();
+      const tid = setTimeout(() => ac.abort(), 8000);
+      const r = await fetch(url, {signal: ac.signal});
+      clearTimeout(tid);
       if (r.ok) return await r.json();
       if (r.status === 404) return null;
     } catch(e) {}
