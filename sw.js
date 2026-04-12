@@ -1,5 +1,5 @@
 // Auto-generated — do not edit
-const CACHE = 'dash-v0f2d1ff6';
+const CACHE = 'dash-v87967d25';
 const PRECACHE = ['./index.html'];
 
 self.addEventListener('install', e => {
