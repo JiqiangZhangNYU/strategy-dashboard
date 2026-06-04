@@ -56,6 +56,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 .compare-legend-item:hover { background: #f0f2f5; }
 .compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
 .compare-legend-item.highlight { background: #e3eafc; }
+.compare-legend-item.selected { background: #e3eafc; box-shadow: inset 0 0 0 1px #b4c7f0; }
 .chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
                   border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
                   box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
@@ -401,12 +402,16 @@ function heroKpiHtml(kpi) {
 
 const charts = {};
 
+// A curve is hidden only when a selection is active and it is not part of it.
+// Empty selection => everything shows (default state).
+function curveHidden(st, ci) { return st.selected.size > 0 && !st.selected.has(ci); }
+
 function drawChart(id, hoverCol, highlightIdx) {
   const st = charts[id];
   if (!st) return;
   const canvas = document.getElementById(id);
   if (!canvas) return;
-  const { aligned, refDates, N, pad, hidden } = st;
+  const { aligned, refDates, N, pad } = st;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.clientWidth;
@@ -419,7 +424,7 @@ function drawChart(id, hoverCol, highlightIdx) {
 
   let yMin = 0, yMax = 0;
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci)) return;
+    if (curveHidden(st, ci)) return;
     for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
   });
   if (yMin === yMax) { yMin -= 1; yMax += 1; }
@@ -444,7 +449,7 @@ function drawChart(id, hoverCol, highlightIdx) {
 
   st.paths = [];
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci)) { st.paths.push(null); return; }
+    if (curveHidden(st, ci)) { st.paths.push(null); return; }
     const isHL = (highlightIdx === ci);
     ctx.strokeStyle = COLORS[ci % COLORS.length];
     ctx.lineWidth = isHL ? 3.5 : (ci === 0 ? 2.5 : 1.5);
@@ -486,7 +491,7 @@ function drawChart(id, hoverCol, highlightIdx) {
     ctx.setLineDash([]);
     // Dots on curves at hover column
     aligned.forEach((c, ci) => {
-      if (hidden.has(ci) || c.data[hoverCol] === null) return;
+      if (curveHidden(st, ci) || c.data[hoverCol] === null) return;
       const y = yOf(c.data[hoverCol]);
       ctx.fillStyle = COLORS[ci % COLORS.length];
       ctx.beginPath(); ctx.arc(hx, y, 3.5, 0, Math.PI * 2); ctx.fill();
@@ -523,10 +528,10 @@ function getOrCreateTooltip(id) {
 function buildTooltipHtml(id, col) {
   const st = charts[id];
   if (!st || col < 0) return null;
-  const { aligned, refDates, hidden } = st;
+  const { aligned, refDates } = st;
   const rows = [];
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci) || c.data[col] === null) return;
+    if (curveHidden(st, ci) || c.data[col] === null) return;
     rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
   });
   rows.sort((a, b) => b.val - a.val);
@@ -594,7 +599,7 @@ function buildLegend(id) {
   const el = document.getElementById(id + '-legend');
   if (!el || !st) return;
   el.innerHTML = st.aligned.map((c, ci) =>
-    `<span class="compare-legend-item${st.hidden.has(ci) ? ' hidden' : ''}" data-ci="${ci}">
+    `<span class="compare-legend-item${curveHidden(st, ci) ? ' hidden' : ''}${st.selected.has(ci) ? ' selected' : ''}" data-ci="${ci}">
       <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
       <span style="font-weight:600;">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${fmtPct1(c.display_ratio)}%)` : ''}</span>
     </span>`
@@ -602,8 +607,9 @@ function buildLegend(id) {
   el.querySelectorAll('.compare-legend-item').forEach(item => {
     const ci = parseInt(item.dataset.ci);
     item.addEventListener('click', () => {
-      if (st.hidden.has(ci)) st.hidden.delete(ci); else st.hidden.add(ci);
-      item.classList.toggle('hidden');
+      // Click to keep a curve; click more to compare several. Empty => show all.
+      if (st.selected.has(ci)) st.selected.delete(ci); else st.selected.add(ci);
+      buildLegend(id);
       drawChart(id);
     });
     item.addEventListener('mouseenter', () => {
@@ -656,8 +662,8 @@ function initChartFromCompare(id, compareKey, cmpData) {
   if (!d || !d.aligned || d.aligned.length === 0) return;
   const { refDates, aligned } = d;
   const N = refDates.length;
-  const prevHidden = charts[id] ? charts[id].hidden : new Set();
-  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
+  const prevSelected = charts[id] ? charts[id].selected : new Set();
+  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, selected: prevSelected };
   buildLegend(id);
   drawChart(id);
   setupEvents(id);

@@ -56,6 +56,7 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
 .compare-legend-item:hover { background: #f0f2f5; }
 .compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
 .compare-legend-item.highlight { background: #e3eafc; }
+.compare-legend-item.selected { background: #e3eafc; box-shadow: inset 0 0 0 1px #b4c7f0; }
 .chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
                   border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
                   box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
@@ -159,13 +160,13 @@ body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, 
   <canvas id="overlay-canvas"></canvas>
 </div>
 <script>
-const TREE = {"name": "group", "kpi": {}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "kpi": {"kpi_2y": {"Net_Profit": "93.177w", "Max_Drawdown": "13.100w", "Ann_Sharpe": "2.480", "Daily_Std": "1.230w"}, "kpi_6m": {"Net_Profit": "19.543w", "Max_Drawdown": "9.464w", "Ann_Sharpe": "1.884", "Daily_Std": "1.426w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "kpi": {"kpi_2y": {"Net_Profit": "96.253w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "2.925", "Daily_Std": "1.077w"}, "kpi_6m": {"Net_Profit": "22.669w", "Max_Drawdown": "5.309w", "Ann_Sharpe": "2.897", "Daily_Std": "1.076w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "kpi": {"kpi_2y": {"Net_Profit": "68.713w", "Max_Drawdown": "8.770w", "Ann_Sharpe": "2.641", "Daily_Std": "0.852w"}, "kpi_6m": {"Net_Profit": "17.332w", "Max_Drawdown": "4.776w", "Ann_Sharpe": "2.888", "Daily_Std": "0.825w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "95.440w", "Max_Drawdown": "9.085w", "Ann_Sharpe": "3.551", "Daily_Std": "0.880w"}, "kpi_6m": {"Net_Profit": "5.584w", "Max_Drawdown": "9.085w", "Ann_Sharpe": "0.658", "Daily_Std": "1.167w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.697w", "Max_Drawdown": "7.183w", "Ann_Sharpe": "3.077", "Daily_Std": "0.922w"}, "kpi_6m": {"Net_Profit": "22.283w", "Max_Drawdown": "4.557w", "Ann_Sharpe": "2.986", "Daily_Std": "1.026w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {"kpi_2y": {"Net_Profit": "58.388w", "Max_Drawdown": "8.889w", "Ann_Sharpe": "2.747", "Daily_Std": "0.696w"}, "kpi_6m": {"Net_Profit": "7.283w", "Max_Drawdown": "8.889w", "Ann_Sharpe": "1.332", "Daily_Std": "0.752w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.575w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.279", "Daily_Std": "0.662w"}, "kpi_6m": {"Net_Profit": "16.449w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "2.666", "Daily_Std": "0.848w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "kpi": {"kpi_2y": {"Net_Profit": "32.050w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.526", "Daily_Std": "0.688w"}, "kpi_6m": {"Net_Profit": "7.763w", "Max_Drawdown": "3.738w", "Ann_Sharpe": "1.705", "Daily_Std": "0.626w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "kpi": {"kpi_2y": {"Net_Profit": "27.227w", "Max_Drawdown": "9.610w", "Ann_Sharpe": "0.953", "Daily_Std": "0.935w"}, "kpi_6m": {"Net_Profit": "1.433w", "Max_Drawdown": "9.610w", "Ann_Sharpe": "0.175", "Daily_Std": "1.125w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "kpi": {"kpi_2y": {"Net_Profit": "41.237w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.100", "Daily_Std": "1.227w"}, "kpi_6m": {"Net_Profit": "8.915w", "Max_Drawdown": "6.884w", "Ann_Sharpe": "1.058", "Daily_Std": "1.159w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "kpi": {"kpi_2y": {"Net_Profit": "85.020w", "Max_Drawdown": "8.844w", "Ann_Sharpe": "2.815", "Daily_Std": "0.989w"}, "kpi_6m": {"Net_Profit": "31.750w", "Max_Drawdown": "8.844w", "Ann_Sharpe": "3.085", "Daily_Std": "1.415w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "kpi": {"kpi_2y": {"Net_Profit": "21.316w", "Max_Drawdown": "4.520w", "Ann_Sharpe": "2.910", "Daily_Std": "0.662w"}, "kpi_6m": {"Net_Profit": "12.569w", "Max_Drawdown": "3.559w", "Ann_Sharpe": "2.792", "Daily_Std": "0.619w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "kpi": {"kpi_2y": {"Net_Profit": "471.981w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "2.516", "Daily_Std": "6.141w"}, "kpi_6m": {"Net_Profit": "124.505w", "Max_Drawdown": "31.747w", "Ann_Sharpe": "3.087", "Daily_Std": "5.545w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "kpi": {"kpi_2y": {"Net_Profit": "86.609w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "2.903", "Daily_Std": "0.977w"}, "kpi_6m": {"Net_Profit": "17.321w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "1.760", "Daily_Std": "1.353w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "kpi": {"kpi_2y": {"Net_Profit": "38.865w", "Max_Drawdown": "10.757w", "Ann_Sharpe": "1.408", "Daily_Std": "0.904w"}, "kpi_6m": {"Net_Profit": "3.929w", "Max_Drawdown": "10.757w", "Ann_Sharpe": "0.492", "Daily_Std": "1.099w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "kpi": {"kpi_2y": {"Net_Profit": "83.016w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.296", "Daily_Std": "0.825w"}, "kpi_6m": {"Net_Profit": "13.590w", "Max_Drawdown": "6.316w", "Ann_Sharpe": "2.218", "Daily_Std": "0.842w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "141.351w", "Max_Drawdown": "6.474w", "Ann_Sharpe": "3.798", "Daily_Std": "1.218w"}, "kpi_6m": {"Net_Profit": "20.851w", "Max_Drawdown": "6.474w", "Ann_Sharpe": "2.457", "Daily_Std": "1.167w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "61.548w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "1.816", "Daily_Std": "1.109w"}, "kpi_6m": {"Net_Profit": "11.430w", "Max_Drawdown": "8.268w", "Ann_Sharpe": "0.971", "Daily_Std": "1.618w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1111.994w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.653", "Daily_Std": "22.021w"}, "kpi_6m": {"Net_Profit": "380.078w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "2.380", "Daily_Std": "21.954w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "101.267w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.417", "Daily_Std": "0.751w"}, "kpi_6m": {"Net_Profit": "13.864w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "2.456", "Daily_Std": "0.776w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "95.980w", "Max_Drawdown": "8.787w", "Ann_Sharpe": "3.441", "Daily_Std": "0.913w"}, "kpi_6m": {"Net_Profit": "4.703w", "Max_Drawdown": "8.787w", "Ann_Sharpe": "0.710", "Daily_Std": "0.911w"}}, "children": [], "ratio": 0.0}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "486.753w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "2.955", "Daily_Std": "5.392w"}, "kpi_6m": {"Net_Profit": "79.729w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "1.816", "Daily_Std": "6.036w"}}, "children": [], "ratio": 0.0}]};
+const TREE = {"name": "group", "kpi": {}, "children": [{"name": "Deap_comm_daynight_combine_Equal", "kpi": {"kpi_2y": {"Net_Profit": "93.177w", "Max_Drawdown": "13.100w", "Ann_Sharpe": "2.480", "Daily_Std": "1.230w"}, "kpi_6m": {"Net_Profit": "19.543w", "Max_Drawdown": "9.464w", "Ann_Sharpe": "1.884", "Daily_Std": "1.426w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_Equal_opt", "kpi": {"kpi_2y": {"Net_Profit": "96.253w", "Max_Drawdown": "9.792w", "Ann_Sharpe": "2.925", "Daily_Std": "1.077w"}, "kpi_6m": {"Net_Profit": "22.669w", "Max_Drawdown": "5.309w", "Ann_Sharpe": "2.897", "Daily_Std": "1.076w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_rSharpe_opt", "kpi": {"kpi_2y": {"Net_Profit": "68.713w", "Max_Drawdown": "8.770w", "Ann_Sharpe": "2.641", "Daily_Std": "0.852w"}, "kpi_6m": {"Net_Profit": "17.332w", "Max_Drawdown": "4.776w", "Ann_Sharpe": "2.888", "Daily_Std": "0.825w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_combine_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "95.440w", "Max_Drawdown": "9.085w", "Ann_Sharpe": "3.551", "Daily_Std": "0.880w"}, "kpi_6m": {"Net_Profit": "5.584w", "Max_Drawdown": "9.085w", "Ann_Sharpe": "0.658", "Daily_Std": "1.167w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.697w", "Max_Drawdown": "7.183w", "Ann_Sharpe": "3.077", "Daily_Std": "0.922w"}, "kpi_6m": {"Net_Profit": "22.283w", "Max_Drawdown": "4.557w", "Ann_Sharpe": "2.986", "Daily_Std": "1.026w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_daynight_v6_opt", "kpi": {"kpi_2y": {"Net_Profit": "58.388w", "Max_Drawdown": "8.889w", "Ann_Sharpe": "2.747", "Daily_Std": "0.696w"}, "kpi_6m": {"Net_Profit": "7.283w", "Max_Drawdown": "8.889w", "Ann_Sharpe": "1.332", "Daily_Std": "0.752w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_benchmark_v7_ML_opt", "kpi": {"kpi_2y": {"Net_Profit": "86.575w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "4.279", "Daily_Std": "0.662w"}, "kpi_6m": {"Net_Profit": "16.449w", "Max_Drawdown": "4.452w", "Ann_Sharpe": "2.666", "Daily_Std": "0.848w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_hs_ltor", "kpi": {"kpi_2y": {"Net_Profit": "32.050w", "Max_Drawdown": "7.126w", "Ann_Sharpe": "1.526", "Daily_Std": "0.688w"}, "kpi_6m": {"Net_Profit": "7.763w", "Max_Drawdown": "3.738w", "Ann_Sharpe": "1.705", "Daily_Std": "0.626w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_ltor", "kpi": {"kpi_2y": {"Net_Profit": "27.227w", "Max_Drawdown": "9.610w", "Ann_Sharpe": "0.953", "Daily_Std": "0.935w"}, "kpi_6m": {"Net_Profit": "1.433w", "Max_Drawdown": "9.610w", "Ann_Sharpe": "0.175", "Daily_Std": "1.125w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_mtor_v2", "kpi": {"kpi_2y": {"Net_Profit": "41.237w", "Max_Drawdown": "10.846w", "Ann_Sharpe": "1.100", "Daily_Std": "1.227w"}, "kpi_6m": {"Net_Profit": "8.915w", "Max_Drawdown": "6.884w", "Ann_Sharpe": "1.058", "Daily_Std": "1.159w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_ts_HTOR_v2", "kpi": {"kpi_2y": {"Net_Profit": "85.020w", "Max_Drawdown": "8.844w", "Ann_Sharpe": "2.815", "Daily_Std": "0.989w"}, "kpi_6m": {"Net_Profit": "31.750w", "Max_Drawdown": "8.844w", "Ann_Sharpe": "3.085", "Daily_Std": "1.415w"}}, "children": [], "ratio": 0.0}, {"name": "xiaowengroup_202509", "kpi": {"kpi_2y": {"Net_Profit": "21.316w", "Max_Drawdown": "4.520w", "Ann_Sharpe": "2.910", "Daily_Std": "0.662w"}, "kpi_6m": {"Net_Profit": "12.569w", "Max_Drawdown": "3.559w", "Ann_Sharpe": "2.792", "Daily_Std": "0.619w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_1000w", "kpi": {"kpi_2y": {"Net_Profit": "471.981w", "Max_Drawdown": "43.283w", "Ann_Sharpe": "2.516", "Daily_Std": "6.141w"}, "kpi_6m": {"Net_Profit": "124.505w", "Max_Drawdown": "31.747w", "Ann_Sharpe": "3.087", "Daily_Std": "5.545w"}}, "children": [], "ratio": 0.0}, {"name": "kmf_atr", "kpi": {"kpi_2y": {"Net_Profit": "86.609w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "2.903", "Daily_Std": "0.977w"}, "kpi_6m": {"Net_Profit": "17.321w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "1.760", "Daily_Std": "1.353w"}}, "children": [], "ratio": 0.0}, {"name": "kfs_group", "kpi": {"kpi_2y": {"Net_Profit": "38.865w", "Max_Drawdown": "10.757w", "Ann_Sharpe": "1.408", "Daily_Std": "0.904w"}, "kpi_6m": {"Net_Profit": "3.929w", "Max_Drawdown": "10.757w", "Ann_Sharpe": "0.492", "Daily_Std": "1.099w"}}, "children": [], "ratio": 0.0}, {"name": "macro_group", "kpi": {"kpi_2y": {"Net_Profit": "83.016w", "Max_Drawdown": "7.354w", "Ann_Sharpe": "3.296", "Daily_Std": "0.825w"}, "kpi_6m": {"Net_Profit": "13.590w", "Max_Drawdown": "6.316w", "Ann_Sharpe": "2.218", "Daily_Std": "0.842w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "141.351w", "Max_Drawdown": "6.474w", "Ann_Sharpe": "3.798", "Daily_Std": "1.218w"}, "kpi_6m": {"Net_Profit": "20.851w", "Max_Drawdown": "6.474w", "Ann_Sharpe": "2.457", "Daily_Std": "1.167w"}}, "children": [], "ratio": 0.0}, {"name": "daydeapcomm500_neubeta", "kpi": {"kpi_2y": {"Net_Profit": "61.548w", "Max_Drawdown": "9.331w", "Ann_Sharpe": "1.816", "Daily_Std": "1.109w"}, "kpi_6m": {"Net_Profit": "11.430w", "Max_Drawdown": "8.268w", "Ann_Sharpe": "0.971", "Daily_Std": "1.618w"}}, "children": [], "ratio": 0.0}, {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1111.994w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.653", "Daily_Std": "22.021w"}, "kpi_6m": {"Net_Profit": "380.078w", "Max_Drawdown": "137.132w", "Ann_Sharpe": "2.380", "Daily_Std": "21.954w"}}, "children": [], "ratio": 0.0}, {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "101.267w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "4.417", "Daily_Std": "0.751w"}, "kpi_6m": {"Net_Profit": "13.864w", "Max_Drawdown": "4.571w", "Ann_Sharpe": "2.456", "Daily_Std": "0.776w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "95.980w", "Max_Drawdown": "8.787w", "Ann_Sharpe": "3.441", "Daily_Std": "0.913w"}, "kpi_6m": {"Net_Profit": "4.703w", "Max_Drawdown": "8.787w", "Ann_Sharpe": "0.710", "Daily_Std": "0.911w"}}, "children": [], "ratio": 0.0}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "486.781w", "Max_Drawdown": "44.413w", "Ann_Sharpe": "2.955", "Daily_Std": "5.392w"}, "kpi_6m": {"Net_Profit": "79.758w", "Max_Drawdown": "43.401w", "Ann_Sharpe": "1.817", "Daily_Std": "6.035w"}}, "children": [], "ratio": 0.0}]};
 const DATA_DATE = '2026-06-04';
 const PARENT_MAP = {};
 const NAV_TREE = {"name": "group", "children": []};
 const ALL_DATA = {};
 let ALL_COMPARE = {};
-const FILE_HASHES = {"charts/Deap_comm_daynight_combine_Equal.json": "8b875dff", "charts/Deap_comm_daynight_combine_Equal_opt.json": "2303c2af", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "b1c0fef5", "charts/Deap_comm_daynight_combine_ML_opt.json": "39cdc9b0", "charts/Deap_benchmark_v8_daxin_opt.json": "4ffe1f48", "charts/Deap_comm_daynight_v6_opt.json": "e913cbda", "charts/Deap_benchmark_v7_ML_opt.json": "7bf8577e", "charts/CTA_hs_ltor.json": "8b9bc3e0", "charts/CTA_ts_ltor.json": "84ab5099", "charts/CTA_ts_mtor_v2.json": "fd299386", "charts/CTA_ts_HTOR_v2.json": "2cbb9a3a", "charts/xiaowengroup_202509.json": "b29aaf9e", "charts/CTA_1000w.json": "1d2e285a", "charts/kmf_atr.json": "288dfe3d", "charts/kfs_group.json": "33829ef6", "charts/macro_group.json": "8e4af4a8", "charts/ifp_complex_group.json": "dc51a768", "charts/daydeapcomm500_neubeta.json": "cca37559", "charts/zlw_1000w.json": "3f21f359", "charts/FuxingGroup_202601.json": "84bec4c7", "charts/QMF_Group.json": "f2a8e28a", "charts/tengfeng_1000w.json": "c0d50825", "compare/group.json": "4fe45fac", "compare_bundle.json": "1df411e0"};
+const FILE_HASHES = {"charts/Deap_comm_daynight_combine_Equal.json": "8b875dff", "charts/Deap_comm_daynight_combine_Equal_opt.json": "2303c2af", "charts/Deap_comm_daynight_combine_rSharpe_opt.json": "b1c0fef5", "charts/Deap_comm_daynight_combine_ML_opt.json": "39cdc9b0", "charts/Deap_benchmark_v8_daxin_opt.json": "4ffe1f48", "charts/Deap_comm_daynight_v6_opt.json": "e913cbda", "charts/Deap_benchmark_v7_ML_opt.json": "7bf8577e", "charts/CTA_hs_ltor.json": "8b9bc3e0", "charts/CTA_ts_ltor.json": "84ab5099", "charts/CTA_ts_mtor_v2.json": "fd299386", "charts/CTA_ts_HTOR_v2.json": "2cbb9a3a", "charts/xiaowengroup_202509.json": "b29aaf9e", "charts/CTA_1000w.json": "1d2e285a", "charts/kmf_atr.json": "288dfe3d", "charts/kfs_group.json": "33829ef6", "charts/macro_group.json": "8e4af4a8", "charts/ifp_complex_group.json": "dc51a768", "charts/daydeapcomm500_neubeta.json": "cca37559", "charts/zlw_1000w.json": "3f21f359", "charts/FuxingGroup_202601.json": "84bec4c7", "charts/QMF_Group.json": "f2a8e28a", "charts/tengfeng_1000w.json": "74007f40", "compare/group.json": "ea8baed5", "compare_bundle.json": "efa2a4fd"};
 const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
 const COLORS = [
   '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
@@ -401,12 +402,16 @@ function heroKpiHtml(kpi) {
 
 const charts = {};
 
+// A curve is hidden only when a selection is active and it is not part of it.
+// Empty selection => everything shows (default state).
+function curveHidden(st, ci) { return st.selected.size > 0 && !st.selected.has(ci); }
+
 function drawChart(id, hoverCol, highlightIdx) {
   const st = charts[id];
   if (!st) return;
   const canvas = document.getElementById(id);
   if (!canvas) return;
-  const { aligned, refDates, N, pad, hidden } = st;
+  const { aligned, refDates, N, pad } = st;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
   const W = canvas.clientWidth;
@@ -419,7 +424,7 @@ function drawChart(id, hoverCol, highlightIdx) {
 
   let yMin = 0, yMax = 0;
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci)) return;
+    if (curveHidden(st, ci)) return;
     for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
   });
   if (yMin === yMax) { yMin -= 1; yMax += 1; }
@@ -444,7 +449,7 @@ function drawChart(id, hoverCol, highlightIdx) {
 
   st.paths = [];
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci)) { st.paths.push(null); return; }
+    if (curveHidden(st, ci)) { st.paths.push(null); return; }
     const isHL = (highlightIdx === ci);
     ctx.strokeStyle = COLORS[ci % COLORS.length];
     ctx.lineWidth = isHL ? 3.5 : (ci === 0 ? 2.5 : 1.5);
@@ -486,7 +491,7 @@ function drawChart(id, hoverCol, highlightIdx) {
     ctx.setLineDash([]);
     // Dots on curves at hover column
     aligned.forEach((c, ci) => {
-      if (hidden.has(ci) || c.data[hoverCol] === null) return;
+      if (curveHidden(st, ci) || c.data[hoverCol] === null) return;
       const y = yOf(c.data[hoverCol]);
       ctx.fillStyle = COLORS[ci % COLORS.length];
       ctx.beginPath(); ctx.arc(hx, y, 3.5, 0, Math.PI * 2); ctx.fill();
@@ -523,10 +528,10 @@ function getOrCreateTooltip(id) {
 function buildTooltipHtml(id, col) {
   const st = charts[id];
   if (!st || col < 0) return null;
-  const { aligned, refDates, hidden } = st;
+  const { aligned, refDates } = st;
   const rows = [];
   aligned.forEach((c, ci) => {
-    if (hidden.has(ci) || c.data[col] === null) return;
+    if (curveHidden(st, ci) || c.data[col] === null) return;
     rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
   });
   rows.sort((a, b) => b.val - a.val);
@@ -594,7 +599,7 @@ function buildLegend(id) {
   const el = document.getElementById(id + '-legend');
   if (!el || !st) return;
   el.innerHTML = st.aligned.map((c, ci) =>
-    `<span class="compare-legend-item${st.hidden.has(ci) ? ' hidden' : ''}" data-ci="${ci}">
+    `<span class="compare-legend-item${curveHidden(st, ci) ? ' hidden' : ''}${st.selected.has(ci) ? ' selected' : ''}" data-ci="${ci}">
       <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
       <span style="font-weight:600;">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${fmtPct1(c.display_ratio)}%)` : ''}</span>
     </span>`
@@ -602,8 +607,9 @@ function buildLegend(id) {
   el.querySelectorAll('.compare-legend-item').forEach(item => {
     const ci = parseInt(item.dataset.ci);
     item.addEventListener('click', () => {
-      if (st.hidden.has(ci)) st.hidden.delete(ci); else st.hidden.add(ci);
-      item.classList.toggle('hidden');
+      // Click to keep a curve; click more to compare several. Empty => show all.
+      if (st.selected.has(ci)) st.selected.delete(ci); else st.selected.add(ci);
+      buildLegend(id);
       drawChart(id);
     });
     item.addEventListener('mouseenter', () => {
@@ -656,8 +662,8 @@ function initChartFromCompare(id, compareKey, cmpData) {
   if (!d || !d.aligned || d.aligned.length === 0) return;
   const { refDates, aligned } = d;
   const N = refDates.length;
-  const prevHidden = charts[id] ? charts[id].hidden : new Set();
-  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, hidden: prevHidden };
+  const prevSelected = charts[id] ? charts[id].selected : new Set();
+  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, selected: prevSelected };
   buildLegend(id);
   drawChart(id);
   setupEvents(id);
