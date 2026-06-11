@@ -7,13 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <title>zlw_1000w Strategy Dashboard - 2026-06-11</title>
 <script>
-if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(function(reg){
-  reg.addEventListener('updatefound',function(){var nw=reg.installing;
-    nw.addEventListener('statechange',function(){
-      if(nw.state==='activated'&&navigator.serviceWorker.controller)location.reload();
-    });
-  });
-}).catch(function(){});}</script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
@@ -293,14 +287,14 @@ function initSidebar() {
 
 function hashUrl(url) {
   const h = FILE_HASHES[url];
-  return url + '?v=' + (h || Date.now());
+  return url + '?v=' + (h || DATA_DATE);
 }
 
 async function fetchRetry(url, retries) {
   for (let i = 0; i <= retries; i++) {
     try {
       const ac = new AbortController();
-      const tid = setTimeout(() => ac.abort(), 8000);
+      const tid = setTimeout(() => ac.abort(), 4000);
       const r = await fetch(url, {signal: ac.signal});
       clearTimeout(tid);
       if (r.ok) return await r.json();
@@ -309,6 +303,19 @@ async function fetchRetry(url, retries) {
     if (i < retries) await new Promise(r => setTimeout(r, 500 * (i + 1)));
   }
   return null;
+}
+
+const scheduleIdle = (typeof requestIdleCallback !== 'undefined')
+  ? requestIdleCallback : (fn => setTimeout(fn, 2000));
+
+let bundlePromise = null;
+function loadBundle() {
+  if (!bundlePromise) {
+    bundlePromise = fetchRetry(hashUrl('compare_bundle.json'), 1).then(raw => {
+      if (raw) unpackCompare(raw);
+    });
+  }
+  return bundlePromise;
 }
 
 function loadNodeData(name) {
@@ -320,7 +327,7 @@ function loadNodeData(name) {
 
 async function loadChartData(name) {
   if (chartCache[name]) return chartCache[name];
-  const data = await fetchRetry(hashUrl('charts/' + encodeURIComponent(name) + '.json'), 2);
+  const data = await fetchRetry(hashUrl('charts/' + encodeURIComponent(name) + '.json'), 1);
   if (data) chartCache[name] = data;
   return data;
 }
@@ -981,21 +988,21 @@ function renderPage(node) {
         initChartFromCompare('chart-2y', 'c2y', cmpData);
       } else {
         // Not in cache yet — fetch this page's compare data
-        fetchRetry(hashUrl('compare/' + encodeURIComponent(node.name) + '.json'), 2).then(d => {
+        fetchRetry(hashUrl('compare/' + encodeURIComponent(node.name) + '.json'), 1).then(d => {
           if (d) { ALL_COMPARE[node.name] = d; renderCompareIfReady(); }
         });
       }
-      // Prefetch chart data for top children in background
-      if (node._sorted && typeof requestIdleCallback !== 'undefined') {
+      // Prefetch chart data for top children once the compare bundle is done,
+      // one request at a time so it never competes with foreground fetches
+      if (node._sorted) {
         const toPreload = node._sorted.slice(0, 8).map(c => c.name);
-        let idx = 0;
-        function preloadNext(deadline) {
-          while (idx < toPreload.length && deadline.timeRemaining() > 5) {
-            loadChartData(toPreload[idx++]);
+        scheduleIdle(() => loadBundle().then(() => {
+          let idx = 0;
+          function preloadNext() {
+            if (idx < toPreload.length) loadChartData(toPreload[idx++]).then(preloadNext);
           }
-          if (idx < toPreload.length) requestIdleCallback(preloadNext);
-        }
-        requestIdleCallback(preloadNext);
+          preloadNext();
+        }));
       }
     }
   });
@@ -1150,14 +1157,13 @@ function renderCompareIfReady() {
 navigateToHash();
 // Phase 1: fetch current page's compare (~50K, fast)
 if (currentNode.name) {
-  fetchRetry(hashUrl('compare/' + encodeURIComponent(currentNode.name) + '.json'), 2).then(d => {
+  fetchRetry(hashUrl('compare/' + encodeURIComponent(currentNode.name) + '.json'), 1).then(d => {
     if (d) { ALL_COMPARE[currentNode.name] = d; renderCompareIfReady(); }
   });
 }
-// Phase 2: fetch full bundle in background (1.3M, fills ALL_COMPARE for all pages)
-fetchRetry(hashUrl('compare_bundle.json'), 2).then(raw => {
-  if (raw) unpackCompare(raw);
-});
+// Phase 2: full bundle (fills ALL_COMPARE for all pages) — deferred to idle
+// so it never competes with first-paint requests
+scheduleIdle(() => loadBundle());
 window.addEventListener('hashchange', () => { navigateToHash(); updateNavActive(); });
 let resizeTimer = 0;
 window.addEventListener('resize', () => {
