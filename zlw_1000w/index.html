@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>zlw_1000w Strategy Dashboard - 2026-07-02</title>
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(function(){});}</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       background: #f0f2f5; color: #333; padding: 0; margin: 0; display: flex; min-height: 100vh; }
+.sidebar-wrap { display: flex; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+.sidebar { width: 260px; min-width: 180px; background: #fff;
+            padding: 12px 0; overflow-y: auto; overflow-x: hidden; height: 100%;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04); font-size: 13px; }
+.sidebar-resizer { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0;
+                    border-right: 1px solid #e0e0e0; transition: background 0.15s; }
+.sidebar-resizer:hover, .sidebar-resizer.active { background: #4363d8; border-right-color: #4363d8; }
+.sidebar-title { font-size: 14px; font-weight: 700; color: #1a1a2e; padding: 8px 16px 12px;
+                  border-bottom: 1px solid #eee; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; cursor: pointer; padding: 5px 12px 5px 0;
+             color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+             border-radius: 0 6px 6px 0; margin-right: 8px; user-select: none; }
+.nav-item:hover { background: #f0f2f5; color: #4363d8; }
+.nav-item.active { background: #e3eafc; color: #4363d8; font-weight: 600; }
+.nav-toggle { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+               flex-shrink: 0; font-size: 10px; color: #aaa; transition: transform 0.15s; }
+.nav-toggle.expanded { transform: rotate(90deg); }
+.nav-toggle.empty { visibility: hidden; }
+.nav-children { display: none; }
+.nav-children.expanded { display: block; }
+.main-content { flex: 1; padding: 20px; max-width: 1400px; min-width: 0; }
+.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+              margin-bottom: 16px; font-size: 14px; color: #666; }
+.breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: #bbb; margin: 0 2px; }
+.breadcrumb .current { color: #333; font-weight: 600; }
+.compare-box { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+               box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: visible; -webkit-overflow-scrolling: touch; }
+.compare-title { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 12px; }
+.compare-canvas { min-width: 800px; width: 100%; border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
+.compare-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; font-size: 13px; }
+.compare-legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer;
+                        padding: 2px 8px; border-radius: 4px; user-select: none; }
+.compare-legend-item:hover { background: #f0f2f5; }
+.compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.compare-legend-item.highlight { background: #e3eafc; }
+.compare-legend-item.selected { background: #e3eafc; box-shadow: inset 0 0 0 1px #b4c7f0; }
+.chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
+                  border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
+                  scrollbar-width: thin; }
+.chart-tooltip.pinned { pointer-events: auto; }
+.chart-tooltip .tt-date { font-weight: 700; margin-bottom: 4px; color: #333; }
+.chart-tooltip .tt-row { display: flex; align-items: center; gap: 6px; padding: 1px 0; white-space: nowrap; }
+.chart-tooltip .tt-swatch { width: 10px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+.chart-tooltip .tt-name { flex: 1; }
+.chart-tooltip .tt-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+.compare-legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
+.hero { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+         box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+.hero-header { display: flex; align-items: center; justify-content: space-between;
+               margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.hero-title { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.hero-kpi { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-kpi-item { text-align: center; }
+.hero-kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.hero-kpi-val { font-size: 16px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; }
+.section-header { display: flex; align-items: center; justify-content: space-between;
+                   margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e8e8e8; }
+.section-title { font-size: 16px; font-weight: 600; color: #555; }
+.expand-btn { padding: 6px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff;
+              cursor: pointer; font-size: 13px; font-weight: 500; color: #4363d8; }
+.expand-btn:hover { background: #f0f2f5; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+         overflow: hidden; transition: box-shadow 0.2s; }
+.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.card-header { display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+               user-select: none; gap: 12px; border-bottom: 1px solid transparent; }
+.card-header:hover { background: #fafbff; }
+.card.expanded .card-header { border-bottom-color: #f0f0f0; }
+.card-rank { font-weight: 700; font-size: 16px; color: #4363d8; min-width: 36px; }
+.card-name { font-weight: 600; font-size: 15px; flex: 1; color: #222; }
+.card-name.drillable { color: #4363d8; cursor: pointer; }
+.card-name.drillable:hover { text-decoration: underline; }
+.card-ratio { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+              background: #f3e8ff; color: #7c3aed; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-profit { background: #e8f5e9; color: #2e7d32; }
+.badge-sharpe { background: #e3f2fd; color: #1565c0; }
+.badge-dd { background: #fce4ec; color: #c62828; }
+.card-arrow { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+.card.expanded .card-arrow { transform: rotate(90deg); }
+.drill-icon { font-size: 14px; color: #4363d8; margin-left: 4px; }
+.card-body { display: none; padding: 16px 20px; }
+.card.expanded .card-body { display: block; }
+.card-kpi-row { display: flex; gap: 24px; margin-bottom: 12px; }
+.kpi-table { border-collapse: collapse; font-size: 13px; }
+.kpi-table th { background: #f5f6fa; padding: 6px 12px; text-align: center;
+                border: 1px solid #e8e8e8; font-weight: 600; color: #555; }
+.kpi-table td { padding: 5px 12px; border: 1px solid #e8e8e8; }
+.kpi-label { color: #777; font-weight: 500; }
+.kpi-val { font-weight: 600; color: #222; font-family: "SF Mono", Consolas, monospace; }
+.card-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card-chart-wrap { cursor: pointer; }
+.card-chart { width: 100%; height: 200px; border-radius: 6px; border: 1px solid #eee; display: block; }
+.hero-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero-chart-wrap { cursor: pointer; }
+.hero-chart { width: 100%; height: 240px; border-radius: 8px; border: 1px solid #eee; display: block; }
+.overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+           background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.overlay canvas { max-width: 95vw; max-height: 90vh; background: #fff; border-radius: 8px; }
+.overlay-close { position: fixed; top: 12px; right: 18px; color: #fff; font-size: 32px;
+                  cursor: pointer; z-index: 10000; font-weight: bold; line-height: 1; }
+.loading { text-align: center; padding: 40px; color: #888; font-size: 15px; }
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar-wrap { height: auto; position: relative; flex-direction: column; }
+  .sidebar { width: 100% !important; min-width: 100%; height: auto; max-height: 50vh; }
+  .sidebar-resizer { display: none; }
+  .main-content { padding: 10px; }
+  .hero-title { font-size: 18px; }
+  .hero-kpi { gap: 10px; }
+  .hero-kpi-val { font-size: 14px; }
+  .card-header { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+  .card-rank { font-size: 14px; min-width: 28px; }
+  .card-name { font-size: 13px; }
+  .badge, .card-ratio { font-size: 11px; padding: 2px 6px; }
+  .card-body { padding: 10px 12px; }
+  .card-kpi-row { flex-direction: column; gap: 8px; }
+  .kpi-table { width: 100%; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-wrap">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-title">zlw_1000w</div>
+    <div id="nav-tree"></div>
+  </div>
+  <div class="sidebar-resizer" id="sidebar-resizer"></div>
+</div>
+<div class="main-content">
+<div id="app"></div>
+<div class="overlay" id="overlay" onclick="closeOverlay()">
+  <span class="overlay-close" onclick="closeOverlay()">&times;</span>
+  <canvas id="overlay-canvas"></canvas>
+</div>
+<script>
+const TREE = {"name": "zlw_1000w", "kpi": {"kpi_2y": {"Net_Profit": "1027.222w", "Max_Drawdown": "211.302w", "Ann_Sharpe": "1.523", "Daily_Std": "22.073w"}, "kpi_6m": {"Net_Profit": "264.948w", "Max_Drawdown": "160.912w", "Ann_Sharpe": "1.700", "Daily_Std": "21.243w"}}, "children": [{"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "94.117w", "Max_Drawdown": "5.363w", "Ann_Sharpe": "4.138", "Daily_Std": "0.745w"}, "kpi_6m": {"Net_Profit": "9.496w", "Max_Drawdown": "5.363w", "Ann_Sharpe": "1.791", "Daily_Std": "0.723w"}}, "children": [], "ratio": 3000.0, "_drillable": true}]};
+const DATA_DATE = '2026-07-02';
+const PARENT_MAP = {"FuxingGroup_202601": "zlw_1000w", "FM_202601": "FuxingGroup_202601", "tengfeng_1000w": "FuxingGroup_202601", "tengfeng_500w_20241008": "tengfeng_1000w", "FFT_cycle_group_20241009": "tengfeng_500w_20241008", "CTA_14comms_20240815": "tengfeng_500w_202606", "pyelf_TTFDTMorning_Index_twap": "CTA_14comms_20240815", "Enet_Tonly_index_1W": "pyelf_TTF_Index", "BondCycle_Group_20240428": "tengfeng_500w_20241008", "KeyExplainFactor_Group_20240926": "tengfeng_500w_20241008", "peng_1000w": "tengfeng_1000w", "tengfeng_500w_202603": "tengfeng_1000w", "all_weather_group_202512": "tengfeng_500w_202603", "all_weather_group_202603": "tengfeng_500w_202603", "sentiment_group_202512": "tengfeng_500w_202603", "volume_price_202511": "tengfeng_500w_202603", "cta_4_tengfeng_20250308": "volume_price_202603", "volume_price_202603": "tengfeng_500w_202603", "multi_factor_202511": "tengfeng_500w_202603", "multi_factor_202512": "tengfeng_500w_202603", "event_driven_202603": "tengfeng_500w_202603", "tengfeng_500w_202606": "tengfeng_1000w", "minblock_sif_vp_202507": "FuxingGroup_202601", "minblock_sif_vp_202409": "minblock_sif_vp_202507", "pyelf_StockDTMorning_Index": "minblock_sif_vp_202409", "Enet_StockIndex_Fierce_3W": "minblock_sif_vp_202409", "pyelf_stocks_sif": "minblock_sif_vp_202409", "minblock_sif_vp_202605": "minblock_sif_vp_202507", "minblock_ttf_202501": "FuxingGroup_202601", "pyelf_TTF_Index": "minblock_ttf_202501", "pyelf_TTFDTMorning_Index": "pyelf_TTF_Index", "pyelf_21ENetBond_2024wf": "pyelf_TTF_Index", "pyelf_21ENetBond_MonthDiff_2024wf": "pyelf_21ENetBond_2024wf", "pyelf_21ENetBond_WeekDiff_2024wf": "pyelf_21ENetBond_2024wf", "ifp_complex_group": "FuxingGroup_202601", "ifp_alpha_group": "ifp_complex_group", "ifp_beta_group": "ifp_complex_group", "ifp_longonly_group": "ifp_complex_group"};
+const NAV_TREE = {"name": "zlw_1000w", "children": [{"name": "FuxingGroup_202601", "children": [{"name": "FM_202601", "children": []}, {"name": "tengfeng_1000w", "children": [{"name": "tengfeng_500w_20241008", "children": [{"name": "FFT_cycle_group_20241009", "children": []}, {"name": "CTA_14comms_20240815", "children": [{"name": "pyelf_TTFDTMorning_Index_twap", "children": []}, {"name": "Enet_Tonly_index_1W", "children": []}]}, {"name": "BondCycle_Group_20240428", "children": []}, {"name": "KeyExplainFactor_Group_20240926", "children": []}]}, {"name": "peng_1000w", "children": []}, {"name": "tengfeng_500w_202603", "children": [{"name": "all_weather_group_202512", "children": []}, {"name": "all_weather_group_202603", "children": []}, {"name": "sentiment_group_202512", "children": []}, {"name": "volume_price_202511", "children": [{"name": "cta_4_tengfeng_20250308", "children": []}, {"name": "CTA_14comms_20240815", "children": [{"name": "pyelf_TTFDTMorning_Index_twap", "children": []}, {"name": "Enet_Tonly_index_1W", "children": []}]}]}, {"name": "volume_price_202603", "children": [{"name": "cta_4_tengfeng_20250308", "children": []}, {"name": "CTA_14comms_20240815", "children": [{"name": "pyelf_TTFDTMorning_Index_twap", "children": []}, {"name": "Enet_Tonly_index_1W", "children": []}]}]}, {"name": "multi_factor_202511", "children": []}, {"name": "multi_factor_202512", "children": []}, {"name": "event_driven_202603", "children": []}]}, {"name": "tengfeng_500w_202606", "children": [{"name": "CTA_14comms_20240815", "children": [{"name": "pyelf_TTFDTMorning_Index_twap", "children": []}, {"name": "Enet_Tonly_index_1W", "children": []}]}]}]}, {"name": "minblock_sif_vp_202507", "children": [{"name": "minblock_sif_vp_202409", "children": [{"name": "pyelf_StockDTMorning_Index", "children": []}, {"name": "Enet_StockIndex_Fierce_3W", "children": []}, {"name": "pyelf_stocks_sif", "children": []}]}, {"name": "minblock_sif_vp_202605", "children": []}]}, {"name": "minblock_ttf_202501", "children": [{"name": "pyelf_TTF_Index", "children": [{"name": "pyelf_TTFDTMorning_Index", "children": []}, {"name": "Enet_Tonly_index_1W", "children": []}, {"name": "pyelf_21ENetBond_2024wf", "children": [{"name": "pyelf_21ENetBond_MonthDiff_2024wf", "children": []}, {"name": "pyelf_21ENetBond_WeekDiff_2024wf", "children": []}]}]}]}, {"name": "ifp_complex_group", "children": [{"name": "ifp_alpha_group", "children": []}, {"name": "ifp_beta_group", "children": []}, {"name": "ifp_longonly_group", "children": []}]}]}]};
+const ALL_DATA = {"FuxingGroup_202601": {"name": "FuxingGroup_202601", "kpi": {"kpi_2y": {"Net_Profit": "94.117w", "Max_Drawdown": "5.363w", "Ann_Sharpe": "4.138", "Daily_Std": "0.745w"}, "kpi_6m": {"Net_Profit": "9.496w", "Max_Drawdown": "5.363w", "Ann_Sharpe": "1.791", "Daily_Std": "0.723w"}}, "children": [{"name": "FM_202601", "kpi": {"kpi_2y": {"Net_Profit": "89.972w", "Max_Drawdown": "10.136w", "Ann_Sharpe": "3.205", "Daily_Std": "0.919w"}, "kpi_6m": {"Net_Profit": "4.340w", "Max_Drawdown": "10.136w", "Ann_Sharpe": "0.662", "Daily_Std": "0.893w"}}, "children": [], "ratio": 42.697994858148405, "_drillable": true}, {"name": "CTA_202503II_TW", "kpi": {"kpi_2y": {"Net_Profit": "86.958w", "Max_Drawdown": "5.112w", "Ann_Sharpe": "3.572", "Daily_Std": "0.797w"}, "kpi_6m": {"Net_Profit": "13.278w", "Max_Drawdown": "5.112w", "Ann_Sharpe": "2.339", "Daily_Std": "0.774w"}}, "children": [], "ratio": 41.42790091418363}, {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "444.001w", "Max_Drawdown": "44.973w", "Ann_Sharpe": "2.748", "Daily_Std": "5.289w"}, "kpi_6m": {"Net_Profit": "33.386w", "Max_Drawdown": "44.973w", "Ann_Sharpe": "0.846", "Daily_Std": "5.380w"}}, "children": [], "ratio": 1.4998965185830808, "_drillable": true}, {"name": "minblock_sif_vp_202507", "kpi": {"kpi_2y": {"Net_Profit": "59.376w", "Max_Drawdown": "15.917w", "Ann_Sharpe": "1.857", "Daily_Std": "1.047w"}, "kpi_6m": {"Net_Profit": "12.497w", "Max_Drawdown": "9.828w", "Ann_Sharpe": "1.354", "Daily_Std": "1.258w"}}, "children": [], "ratio": 8.175025487609625, "_drillable": true}, {"name": "minblock_ttf_202501", "kpi": {"kpi_2y": {"Net_Profit": "12.203w", "Max_Drawdown": "25.412w", "Ann_Sharpe": "0.456", "Daily_Std": "0.876w"}, "kpi_6m": {"Net_Profit": "-5.915w", "Max_Drawdown": "9.393w", "Ann_Sharpe": "-1.776", "Daily_Std": "0.454w"}}, "children": [], "ratio": 1.871354373147577, "_drillable": true}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "130.750w", "Max_Drawdown": "8.243w", "Ann_Sharpe": "3.530", "Daily_Std": "1.212w"}, "kpi_6m": {"Net_Profit": "13.322w", "Max_Drawdown": "8.243w", "Ann_Sharpe": "1.705", "Daily_Std": "1.065w"}}, "children": [], "ratio": 3.141, "_drillable": true}], "ratio": 3000.0}, "FM_202601": {"name": "FM_202601", "kpi": {"kpi_2y": {"Net_Profit": "89.972w", "Max_Drawdown": "10.136w", "Ann_Sharpe": "3.205", "Daily_Std": "0.919w"}, "kpi_6m": {"Net_Profit": "4.340w", "Max_Drawdown": "10.136w", "Ann_Sharpe": "0.662", "Daily_Std": "0.893w"}}, "children": [{"name": "KMF_atr", "kpi": {"kpi_2y": {"Net_Profit": "81.614w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "2.706", "Daily_Std": "0.987w"}, "kpi_6m": {"Net_Profit": "25.559w", "Max_Drawdown": "7.266w", "Ann_Sharpe": "2.519", "Daily_Std": "1.383w"}}, "children": [], "ratio": 12.88}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "83.107w", "Max_Drawdown": "11.623w", "Ann_Sharpe": "3.007", "Daily_Std": "0.905w"}, "kpi_6m": {"Net_Profit": "2.851w", "Max_Drawdown": "11.623w", "Ann_Sharpe": "0.430", "Daily_Std": "0.904w"}}, "children": [], "ratio": 58.88}, {"name": "CMF21_FM_atr_momentumfilter", "kpi": {"kpi_2y": {"Net_Profit": "73.536w", "Max_Drawdown": "6.505w", "Ann_Sharpe": "3.099", "Daily_Std": "0.777w"}, "kpi_6m": {"Net_Profit": "15.657w", "Max_Drawdown": "4.243w", "Ann_Sharpe": "2.629", "Daily_Std": "0.812w"}}, "children": [], "ratio": 8.88}], "ratio": 42.697994858148405}, "tengfeng_1000w": {"name": "tengfeng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "444.001w", "Max_Drawdown": "44.973w", "Ann_Sharpe": "2.748", "Daily_Std": "5.289w"}, "kpi_6m": {"Net_Profit": "33.386w", "Max_Drawdown": "44.973w", "Ann_Sharpe": "0.846", "Daily_Std": "5.380w"}}, "children": [{"name": "tengfeng_500w_20241008", "kpi": {"kpi_2y": {"Net_Profit": "247.411w", "Max_Drawdown": "28.009w", "Ann_Sharpe": "2.930", "Daily_Std": "2.764w"}, "kpi_6m": {"Net_Profit": "11.298w", "Max_Drawdown": "11.847w", "Ann_Sharpe": "1.033", "Daily_Std": "1.491w"}}, "children": [], "ratio": 38.0, "_drillable": true}, {"name": "peng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "198.611w", "Max_Drawdown": "170.358w", "Ann_Sharpe": "1.365", "Daily_Std": "30.666w"}, "kpi_6m": {"Net_Profit": "198.611w", "Max_Drawdown": "170.358w", "Ann_Sharpe": "1.365", "Daily_Std": "30.666w"}}, "children": [], "ratio": 2.0, "_drillable": true}, {"name": "tengfeng_500w_202603", "kpi": {"kpi_2y": {"Net_Profit": "357.971w", "Max_Drawdown": "32.841w", "Ann_Sharpe": "3.194", "Daily_Std": "3.669w"}, "kpi_6m": {"Net_Profit": "22.715w", "Max_Drawdown": "32.841w", "Ann_Sharpe": "0.861", "Daily_Std": "3.594w"}}, "children": [], "ratio": 82.0, "_drillable": true}, {"name": "tengfeng_500w_202606", "kpi": {"kpi_2y": {"Net_Profit": "241.114w", "Max_Drawdown": "22.879w", "Ann_Sharpe": "3.030", "Daily_Std": "2.605w"}, "kpi_6m": {"Net_Profit": "81.683w", "Max_Drawdown": "22.879w", "Ann_Sharpe": "3.396", "Daily_Std": "3.278w"}}, "children": [], "ratio": 26.0, "_drillable": true}], "ratio": 1.4998965185830808}, "tengfeng_500w_20241008": {"name": "tengfeng_500w_20241008", "kpi": {"kpi_2y": {"Net_Profit": "247.411w", "Max_Drawdown": "28.009w", "Ann_Sharpe": "2.930", "Daily_Std": "2.764w"}, "kpi_6m": {"Net_Profit": "11.298w", "Max_Drawdown": "11.847w", "Ann_Sharpe": "1.033", "Daily_Std": "1.491w"}}, "children": [{"name": "Comb_EconCycle_CN_5comms", "kpi": {"kpi_2y": {"Net_Profit": "147.831w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "1.260", "Daily_Std": "3.841w"}, "kpi_6m": {"Net_Profit": "-37.627w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "-1.478", "Daily_Std": "3.471w"}}, "children": [], "ratio": 7.82072924}, {"name": "CN_EconCycle_CN_10comms", "kpi": {"kpi_2y": {"Net_Profit": "316.412w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "1.684", "Daily_Std": "6.151w"}, "kpi_6m": {"Net_Profit": "14.873w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "0.487", "Daily_Std": "4.165w"}}, "children": [], "ratio": 3.882291119}, {"name": "US_EconCycle_CN_10comms", "kpi": {"kpi_2y": {"Net_Profit": "-23.579w", "Max_Drawdown": "113.743w", "Ann_Sharpe": "-0.167", "Daily_Std": "4.620w"}, "kpi_6m": {"Net_Profit": "-54.014w", "Max_Drawdown": "70.526w", "Ann_Sharpe": "-1.472", "Daily_Std": "5.001w"}}, "children": [], "ratio": 3.445634416}, {"name": "FFT_cycle_group_20241009", "kpi": {"kpi_2y": {"Net_Profit": "9.754w", "Max_Drawdown": "13.245w", "Ann_Sharpe": "0.530", "Daily_Std": "0.602w"}, "kpi_6m": {"Net_Profit": "0.073w", "Max_Drawdown": "7.446w", "Ann_Sharpe": "0.020", "Daily_Std": "0.507w"}}, "children": [], "ratio": 5.24657534, "_drillable": true}, {"name": "Risk_CN_5comms", "kpi": {"kpi_2y": {"Net_Profit": "168.432w", "Max_Drawdown": "128.895w", "Ann_Sharpe": "0.777", "Daily_Std": "7.097w"}, "kpi_6m": {"Net_Profit": "24.825w", "Max_Drawdown": "24.220w", "Ann_Sharpe": "0.910", "Daily_Std": "3.719w"}}, "children": [], "ratio": 0.008}, {"name": "CTA_14comms_20240815", "kpi": {"kpi_2y": {"Net_Profit": "84.570w", "Max_Drawdown": "11.269w", "Ann_Sharpe": "2.144", "Daily_Std": "1.291w"}, "kpi_6m": {"Net_Profit": "18.896w", "Max_Drawdown": "5.555w", "Ann_Sharpe": "2.374", "Daily_Std": "1.085w"}}, "children": [], "ratio": 88.8, "_drillable": true}, {"name": "BondCycle_Group_20240428", "kpi": {"kpi_2y": {"Net_Profit": "136.492w", "Max_Drawdown": "26.897w", "Ann_Sharpe": "2.372", "Daily_Std": "1.884w"}, "kpi_6m": {"Net_Profit": "-3.698w", "Max_Drawdown": "26.897w", "Ann_Sharpe": "-0.297", "Daily_Std": "1.695w"}}, "children": [], "ratio": 26.59797608, "_drillable": true}, {"name": "Macro_LeadFactor_Explain_RollCorr", "kpi": {"kpi_2y": {"Net_Profit": "13.580w", "Max_Drawdown": "34.211w", "Ann_Sharpe": "0.400", "Daily_Std": "1.111w"}, "kpi_6m": {"Net_Profit": "0.165w", "Max_Drawdown": "13.129w", "Ann_Sharpe": "0.022", "Daily_Std": "1.005w"}}, "children": [], "ratio": 0.69858713}, {"name": "KeyExplainFactor_Group_20240926", "kpi": {"kpi_2y": {"Net_Profit": "89.280w", "Max_Drawdown": "42.141w", "Ann_Sharpe": "1.037", "Daily_Std": "2.818w"}, "kpi_6m": {"Net_Profit": "-4.077w", "Max_Drawdown": "23.274w", "Ann_Sharpe": "-0.264", "Daily_Std": "2.103w"}}, "children": [], "ratio": 5.12825742, "_drillable": true}], "ratio": 38.0}, "FFT_cycle_group_20241009": {"name": "FFT_cycle_group_20241009", "kpi": {"kpi_2y": {"Net_Profit": "9.754w", "Max_Drawdown": "13.245w", "Ann_Sharpe": "0.530", "Daily_Std": "0.602w"}, "kpi_6m": {"Net_Profit": "0.073w", "Max_Drawdown": "7.446w", "Ann_Sharpe": "0.020", "Daily_Std": "0.507w"}}, "children": [{"name": "FFT_US_EconCycle", "kpi": {"kpi_2y": {"Net_Profit": "27.193w", "Max_Drawdown": "20.054w", "Ann_Sharpe": "0.763", "Daily_Std": "1.166w"}, "kpi_6m": {"Net_Profit": "1.450w", "Max_Drawdown": "13.666w", "Ann_Sharpe": "0.211", "Daily_Std": "0.934w"}}, "children": [], "ratio": 21.39364303}, {"name": "FFT_CN_EconCycle", "kpi": {"kpi_2y": {"Net_Profit": "33.712w", "Max_Drawdown": "17.840w", "Ann_Sharpe": "1.004", "Daily_Std": "1.100w"}, "kpi_6m": {"Net_Profit": "-1.266w", "Max_Drawdown": "16.880w", "Ann_Sharpe": "-0.168", "Daily_Std": "1.029w"}}, "children": [], "ratio": 24.91694352}, {"name": "FFT_CNindust23_EconCycle", "kpi": {"kpi_2y": {"Net_Profit": "3.360w", "Max_Drawdown": "28.916w", "Ann_Sharpe": "0.103", "Daily_Std": "1.071w"}, "kpi_6m": {"Net_Profit": "-0.304w", "Max_Drawdown": "13.703w", "Ann_Sharpe": "-0.045", "Daily_Std": "0.926w"}}, "children": [], "ratio": 13.53179973}, {"name": "FFT_MultiPeriod_model_wf", "kpi": {"kpi_2y": {"Net_Profit": "-32.426w", "Max_Drawdown": "80.152w", "Ann_Sharpe": "-0.548", "Daily_Std": "1.936w"}, "kpi_6m": {"Net_Profit": "20.868w", "Max_Drawdown": "26.018w", "Ann_Sharpe": "1.110", "Daily_Std": "2.563w"}}, "children": [], "ratio": 3.293807642}], "ratio": 5.24657534}, "CTA_14comms_20240815": {"name": "CTA_14comms_20240815", "kpi": {"kpi_2y": {"Net_Profit": "84.570w", "Max_Drawdown": "11.269w", "Ann_Sharpe": "2.144", "Daily_Std": "1.291w"}, "kpi_6m": {"Net_Profit": "18.896w", "Max_Drawdown": "5.555w", "Ann_Sharpe": "2.374", "Daily_Std": "1.085w"}}, "children": [{"name": "pyelf_TTFDTMorning_Index_twap", "kpi": {}, "children": [], "ratio": 0.5, "_drillable": true}, {"name": "Enet_Tonly_index_1W", "kpi": {"kpi_2y": {"Net_Profit": "0.395w", "Max_Drawdown": "28.289w", "Ann_Sharpe": "0.018", "Daily_Std": "0.736w"}, "kpi_6m": {"Net_Profit": "-6.971w", "Max_Drawdown": "10.306w", "Ann_Sharpe": "-1.601", "Daily_Std": "0.594w"}}, "children": [], "ratio": 12.8, "_drillable": true}, {"name": "Enet_StockIndex_Fierce_3W_IF", "kpi": {"kpi_2y": {"Net_Profit": "38.805w", "Max_Drawdown": "19.547w", "Ann_Sharpe": "0.811", "Daily_Std": "1.566w"}, "kpi_6m": {"Net_Profit": "-2.476w", "Max_Drawdown": "19.547w", "Ann_Sharpe": "-0.222", "Daily_Std": "1.520w"}}, "children": [], "ratio": 18.0}, {"name": "CTA_TS_HTOR_V2_CU", "kpi": {"kpi_2y": {"Net_Profit": "4.374w", "Max_Drawdown": "2.342w", "Ann_Sharpe": "0.684", "Daily_Std": "0.209w"}, "kpi_6m": {"Net_Profit": "-0.019w", "Max_Drawdown": "1.964w", "Ann_Sharpe": "-0.011", "Daily_Std": "0.233w"}}, "children": [], "ratio": 32.537957696203904}, {"name": "CTA_TS_HTOR_V2_AU", "kpi": {"kpi_2y": {"Net_Profit": "31.722w", "Max_Drawdown": "4.312w", "Ann_Sharpe": "2.330", "Daily_Std": "0.446w"}, "kpi_6m": {"Net_Profit": "10.337w", "Max_Drawdown": "3.222w", "Ann_Sharpe": "2.847", "Daily_Std": "0.495w"}}, "children": [], "ratio": 88.879995112}, {"name": "CTA_TS_HTOR_V2_AG", "kpi": {"kpi_2y": {"Net_Profit": "14.469w", "Max_Drawdown": "0.998w", "Ann_Sharpe": "2.166", "Daily_Std": "0.219w"}, "kpi_6m": {"Net_Profit": "7.673w", "Max_Drawdown": "0.998w", "Ann_Sharpe": "3.060", "Daily_Std": "0.342w"}}, "children": [], "ratio": 48.537957696203904}, {"name": "CTA_TS_HTOR_V2_RB", "kpi": {"kpi_2y": {"Net_Profit": "0.448w", "Max_Drawdown": "0.636w", "Ann_Sharpe": "0.627", "Daily_Std": "0.023w"}, "kpi_6m": {"Net_Profit": "-0.095w", "Max_Drawdown": "0.154w", "Ann_Sharpe": "-1.857", "Daily_Std": "0.007w"}}, "children": [], "ratio": 32.537957696203904}, {"name": "CTA_TS_HTOR_V2_M", "kpi": {"kpi_2y": {"Net_Profit": "-1.961w", "Max_Drawdown": "3.060w", "Ann_Sharpe": "-0.785", "Daily_Std": "0.082w"}, "kpi_6m": {"Net_Profit": "-0.375w", "Max_Drawdown": "0.453w", "Ann_Sharpe": "-1.266", "Daily_Std": "0.040w"}}, "children": [], "ratio": 32.537957696203904}, {"name": "CTA_TS_HTOR_V2_I", "kpi": {"kpi_2y": {"Net_Profit": "-1.381w", "Max_Drawdown": "1.642w", "Ann_Sharpe": "-1.223", "Daily_Std": "0.037w"}, "kpi_6m": {"Net_Profit": "0.049w", "Max_Drawdown": "0.183w", "Ann_Sharpe": "0.228", "Daily_Std": "0.029w"}}, "children": [], "ratio": 32.537957696203904}, {"name": "CTA_TS_HTOR_V2_SC", "kpi": {"kpi_2y": {"Net_Profit": "0.698w", "Max_Drawdown": "4.837w", "Ann_Sharpe": "0.113", "Daily_Std": "0.202w"}, "kpi_6m": {"Net_Profit": "0.204w", "Max_Drawdown": "2.322w", "Ann_Sharpe": "0.103", "Daily_Std": "0.271w"}}, "children": [], "ratio": 32.537957696203904}, {"name": "CTA_TS_MTOR_V2_CU", "kpi": {"kpi_2y": {"Net_Profit": "3.411w", "Max_Drawdown": "1.482w", "Ann_Sharpe": "0.818", "Daily_Std": "0.137w"}, "kpi_6m": {"Net_Profit": "-0.367w", "Max_Drawdown": "1.482w", "Ann_Sharpe": "-0.380", "Daily_Std": "0.132w"}}, "children": [], "ratio": 27.90697674}, {"name": "CTA_TS_MTOR_V2_AU", "kpi": {"kpi_2y": {"Net_Profit": "14.199w", "Max_Drawdown": "2.246w", "Ann_Sharpe": "1.877", "Daily_Std": "0.248w"}, "kpi_6m": {"Net_Profit": "3.664w", "Max_Drawdown": "1.185w", "Ann_Sharpe": "2.180", "Daily_Std": "0.229w"}}, "children": [], "ratio": 45.90697674}, {"name": "CTA_TS_MTOR_V2_AG", "kpi": {"kpi_2y": {"Net_Profit": "7.838w", "Max_Drawdown": "0.735w", "Ann_Sharpe": "2.343", "Daily_Std": "0.110w"}, "kpi_6m": {"Net_Profit": "0.429w", "Max_Drawdown": "0.735w", "Ann_Sharpe": "0.728", "Daily_Std": "0.080w"}}, "children": [], "ratio": 38.90697674}, {"name": "CTA_TS_MTOR_V2_RB", "kpi": {"kpi_2y": {"Net_Profit": "-1.165w", "Max_Drawdown": "1.652w", "Ann_Sharpe": "-0.711", "Daily_Std": "0.054w"}, "kpi_6m": {"Net_Profit": "-0.832w", "Max_Drawdown": "0.949w", "Ann_Sharpe": "-1.902", "Daily_Std": "0.060w"}}, "children": [], "ratio": 27.90697674}, {"name": "CTA_TS_MTOR_V2_M", "kpi": {"kpi_2y": {"Net_Profit": "1.005w", "Max_Drawdown": "1.611w", "Ann_Sharpe": "0.434", "Daily_Std": "0.076w"}, "kpi_6m": {"Net_Profit": "0.147w", "Max_Drawdown": "0.178w", "Ann_Sharpe": "0.643", "Daily_Std": "0.031w"}}, "children": [], "ratio": 27.90697674}, {"name": "CTA_TS_MTOR_V2_I", "kpi": {"kpi_2y": {"Net_Profit": "0.564w", "Max_Drawdown": "0.744w", "Ann_Sharpe": "0.523", "Daily_Std": "0.035w"}, "kpi_6m": {"Net_Profit": "0.041w", "Max_Drawdown": "0.060w", "Ann_Sharpe": "0.732", "Daily_Std": "0.008w"}}, "children": [], "ratio": 27.90697674}, {"name": "CTA_TS_MTOR_V2_SC", "kpi": {"kpi_2y": {"Net_Profit": "1.858w", "Max_Drawdown": "0.849w", "Ann_Sharpe": "0.957", "Daily_Std": "0.064w"}, "kpi_6m": {"Net_Profit": "0.213w", "Max_Drawdown": "0.207w", "Ann_Sharpe": "0.811", "Daily_Std": "0.036w"}}, "children": [], "ratio": 27.90697674}, {"name": "CTA_TS_LTOR_CU", "kpi": {"kpi_2y": {"Net_Profit": "1.927w", "Max_Drawdown": "0.779w", "Ann_Sharpe": "0.779", "Daily_Std": "0.081w"}, "kpi_6m": {"Net_Profit": "0.134w", "Max_Drawdown": "0.718w", "Ann_Sharpe": "0.183", "Daily_Std": "0.100w"}}, "children": [], "ratio": 19.49317739}, {"name": "CTA_TS_LTOR_AU", "kpi": {"kpi_2y": {"Net_Profit": "4.662w", "Max_Drawdown": "1.740w", "Ann_Sharpe": "1.148", "Daily_Std": "0.133w"}, "kpi_6m": {"Net_Profit": "0.395w", "Max_Drawdown": "1.067w", "Ann_Sharpe": "0.657", "Daily_Std": "0.082w"}}, "children": [], "ratio": 26.49317739}, {"name": "CTA_TS_LTOR_AG", "kpi": {"kpi_2y": {"Net_Profit": "1.336w", "Max_Drawdown": "0.949w", "Ann_Sharpe": "0.681", "Daily_Std": "0.064w"}, "kpi_6m": {"Net_Profit": "0.127w", "Max_Drawdown": "0.347w", "Ann_Sharpe": "0.418", "Daily_Std": "0.041w"}}, "children": [], "ratio": 19.49317739}, {"name": "CTA_TS_LTOR_RB", "kpi": {"kpi_2y": {"Net_Profit": "0.598w", "Max_Drawdown": "1.165w", "Ann_Sharpe": "0.466", "Daily_Std": "0.042w"}, "kpi_6m": {"Net_Profit": "-0.290w", "Max_Drawdown": "0.450w", "Ann_Sharpe": "-1.558", "Daily_Std": "0.025w"}}, "children": [], "ratio": 19.49317739}, {"name": "CTA_TS_LTOR_M", "kpi": {"kpi_2y": {"Net_Profit": "-0.694w", "Max_Drawdown": "1.641w", "Ann_Sharpe": "-0.438", "Daily_Std": "0.052w"}, "kpi_6m": {"Net_Profit": "-0.204w", "Max_Drawdown": "0.410w", "Ann_Sharpe": "-0.573", "Daily_Std": "0.049w"}}, "children": [], "ratio": 19.49317739}, {"name": "CTA_TS_LTOR_I", "kpi": {"kpi_2y": {"Net_Profit": "-0.502w", "Max_Drawdown": "1.170w", "Ann_Sharpe": "-0.474", "Daily_Std": "0.035w"}, "kpi_6m": {"Net_Profit": "-0.122w", "Max_Drawdown": "0.260w", "Ann_Sharpe": "-0.969", "Daily_Std": "0.017w"}}, "children": [], "ratio": 19.49317739}, {"name": "CTA_TS_LTOR_SC", "kpi": {"kpi_2y": {"Net_Profit": "0.850w", "Max_Drawdown": "0.353w", "Ann_Sharpe": "0.839", "Daily_Std": "0.033w"}, "kpi_6m": {"Net_Profit": "0.320w", "Max_Drawdown": "0.282w", "Ann_Sharpe": "1.021", "Daily_Std": "0.043w"}}, "children": [], "ratio": 19.49317739}, {"name": "Enet_StockIndex_Fierce_3W_IC", "kpi": {"kpi_2y": {"Net_Profit": "98.757w", "Max_Drawdown": "13.509w", "Ann_Sharpe": "2.247", "Daily_Std": "1.439w"}, "kpi_6m": {"Net_Profit": "26.566w", "Max_Drawdown": "5.159w", "Ann_Sharpe": "2.535", "Daily_Std": "1.429w"}}, "children": [], "ratio": 18.8}, {"name": "Enet_StockIndex_Fierce_3W_IH", "kpi": {"kpi_2y": {"Net_Profit": "-17.703w", "Max_Drawdown": "38.940w", "Ann_Sharpe": "-0.429", "Daily_Std": "1.349w"}, "kpi_6m": {"Net_Profit": "4.711w", "Max_Drawdown": "9.819w", "Ann_Sharpe": "0.500", "Daily_Std": "1.285w"}}, "children": [], "ratio": 8.8}, {"name": "Enet_StockIndex_Fierce_3W_IM", "kpi": {"kpi_2y": {"Net_Profit": "85.498w", "Max_Drawdown": "14.542w", "Ann_Sharpe": "1.937", "Daily_Std": "1.445w"}, "kpi_6m": {"Net_Profit": "24.440w", "Max_Drawdown": "6.805w", "Ann_Sharpe": "2.539", "Daily_Std": "1.312w"}}, "children": [], "ratio": 26.0}], "ratio": 46.18473896}, "pyelf_TTFDTMorning_Index_twap": {"name": "pyelf_TTFDTMorning_Index_twap", "kpi": {}, "children": [{"name": "pyelf_TTFDTTurMorning_day_2020_twap", "kpi": {"kpi_2y": {"Net_Profit": "11.986w", "Max_Drawdown": "32.381w", "Ann_Sharpe": "0.518", "Daily_Std": "1.498w"}, "kpi_6m": {"Net_Profit": "-22.053w", "Max_Drawdown": "32.381w", "Ann_Sharpe": "-2.483", "Daily_Std": "1.211w"}}, "children": [], "ratio": 9.3}, {"name": "pyelf_TTFDTTurMorningII_day_2020_twap", "kpi": {"kpi_2y": {"Net_Profit": "-3.795w", "Max_Drawdown": "34.656w", "Ann_Sharpe": "-0.175", "Daily_Std": "1.404w"}, "kpi_6m": {"Net_Profit": "-23.130w", "Max_Drawdown": "30.559w", "Ann_Sharpe": "-3.156", "Daily_Std": "0.999w"}}, "children": [], "ratio": 9.3}, {"name": "pyelf_TTFDTTurMorningIII_day_2020_twap", "kpi": {"kpi_2y": {"Net_Profit": "-8.012w", "Max_Drawdown": "27.248w", "Ann_Sharpe": "-0.609", "Daily_Std": "0.852w"}, "kpi_6m": {"Net_Profit": "-15.320w", "Max_Drawdown": "24.875w", "Ann_Sharpe": "-3.260", "Daily_Std": "0.640w"}}, "children": [], "ratio": 9.3}, {"name": "pyelf_TTFDTMorningKN_day_2022", "kpi": {"kpi_2y": {"Net_Profit": "41.106w", "Max_Drawdown": "34.382w", "Ann_Sharpe": "0.644", "Daily_Std": "2.090w"}, "kpi_6m": {"Net_Profit": "3.439w", "Max_Drawdown": "11.846w", "Ann_Sharpe": "0.434", "Daily_Std": "1.079w"}}, "children": [], "ratio": 34.3}, {"name": "pyelf_TTFDTMorningKNTSFactor_day_2022", "kpi": {"kpi_2y": {"Net_Profit": "-12.253w", "Max_Drawdown": "29.034w", "Ann_Sharpe": "-0.449", "Daily_Std": "0.893w"}, "kpi_6m": {"Net_Profit": "-0.151w", "Max_Drawdown": "5.165w", "Ann_Sharpe": "-0.064", "Daily_Std": "0.320w"}}, "children": [], "ratio": 35.8}], "ratio": 0.5}, "Enet_Tonly_index_1W": {"name": "Enet_Tonly_index_1W", "kpi": {"kpi_2y": {"Net_Profit": "0.395w", "Max_Drawdown": "28.289w", "Ann_Sharpe": "0.018", "Daily_Std": "0.736w"}, "kpi_6m": {"Net_Profit": "-6.971w", "Max_Drawdown": "10.306w", "Ann_Sharpe": "-1.601", "Daily_Std": "0.594w"}}, "children": [{"name": "pyelf_EnetTrendTonly_day_2020wf", "kpi": {"kpi_2y": {"Net_Profit": "-5.902w", "Max_Drawdown": "20.545w", "Ann_Sharpe": "-0.467", "Daily_Std": "0.414w"}, "kpi_6m": {"Net_Profit": "-4.999w", "Max_Drawdown": "5.954w", "Ann_Sharpe": "-2.461", "Daily_Std": "0.277w"}}, "children": [], "ratio": 111.0}, {"name": "pyelf_ENetMultiFactor_onlyT_day_2020wf", "kpi": {"kpi_2y": {"Net_Profit": "0.543w", "Max_Drawdown": "0.540w", "Ann_Sharpe": "0.659", "Daily_Std": "0.027w"}, "kpi_6m": {"Net_Profit": "-0.093w", "Max_Drawdown": "0.342w", "Ann_Sharpe": "-0.472", "Daily_Std": "0.027w"}}, "children": [], "ratio": 1315.0}], "ratio": 0.0}, "BondCycle_Group_20240428": {"name": "BondCycle_Group_20240428", "kpi": {"kpi_2y": {"Net_Profit": "136.492w", "Max_Drawdown": "26.897w", "Ann_Sharpe": "2.372", "Daily_Std": "1.884w"}, "kpi_6m": {"Net_Profit": "-3.698w", "Max_Drawdown": "26.897w", "Ann_Sharpe": "-0.297", "Daily_Std": "1.695w"}}, "children": [{"name": "BondCycle_US_LongShort", "kpi": {"kpi_2y": {"Net_Profit": "202.285w", "Max_Drawdown": "30.163w", "Ann_Sharpe": "2.437", "Daily_Std": "2.717w"}, "kpi_6m": {"Net_Profit": "-7.237w", "Max_Drawdown": "30.163w", "Ann_Sharpe": "-0.493", "Daily_Std": "1.999w"}}, "children": [], "ratio": 12.89767842}, {"name": "BondCycle_US_CmpyShort", "kpi": {"kpi_2y": {"Net_Profit": "239.196w", "Max_Drawdown": "33.198w", "Ann_Sharpe": "2.843", "Daily_Std": "2.754w"}, "kpi_6m": {"Net_Profit": "4.552w", "Max_Drawdown": "33.198w", "Ann_Sharpe": "0.243", "Daily_Std": "2.553w"}}, "children": [], "ratio": 15.22070015}, {"name": "BondCycle_US_RealIR_LongShort", "kpi": {"kpi_2y": {"Net_Profit": "171.324w", "Max_Drawdown": "44.743w", "Ann_Sharpe": "1.366", "Daily_Std": "4.105w"}, "kpi_6m": {"Net_Profit": "-5.458w", "Max_Drawdown": "44.743w", "Ann_Sharpe": "-0.257", "Daily_Std": "2.894w"}}, "children": [], "ratio": 20.40122407}, {"name": "BondCycle_CN_LongShort", "kpi": {"kpi_2y": {"Net_Profit": "100.941w", "Max_Drawdown": "26.097w", "Ann_Sharpe": "1.507", "Daily_Std": "2.193w"}, "kpi_6m": {"Net_Profit": "-11.294w", "Max_Drawdown": "26.097w", "Ann_Sharpe": "-0.787", "Daily_Std": "1.955w"}}, "children": [], "ratio": 10.03512293}, {"name": "BondCycle_CN_CmpyShort", "kpi": {"kpi_2y": {"Net_Profit": "124.329w", "Max_Drawdown": "36.901w", "Ann_Sharpe": "1.753", "Daily_Std": "2.321w"}, "kpi_6m": {"Net_Profit": "-13.887w", "Max_Drawdown": "36.901w", "Ann_Sharpe": "-0.801", "Daily_Std": "2.364w"}}, "children": [], "ratio": 20.13693113}, {"name": "BondCycle_CN_diff_US", "kpi": {"kpi_2y": {"Net_Profit": "66.065w", "Max_Drawdown": "42.739w", "Ann_Sharpe": "1.064", "Daily_Std": "2.033w"}, "kpi_6m": {"Net_Profit": "32.083w", "Max_Drawdown": "11.751w", "Ann_Sharpe": "2.506", "Daily_Std": "1.745w"}}, "children": [], "ratio": 5.219206681}], "ratio": 26.59797608}, "KeyExplainFactor_Group_20240926": {"name": "KeyExplainFactor_Group_20240926", "kpi": {"kpi_2y": {"Net_Profit": "89.280w", "Max_Drawdown": "42.141w", "Ann_Sharpe": "1.037", "Daily_Std": "2.818w"}, "kpi_6m": {"Net_Profit": "-4.077w", "Max_Drawdown": "23.274w", "Ann_Sharpe": "-0.264", "Daily_Std": "2.103w"}}, "children": [{"name": "KeyExplainFactor_All", "kpi": {"kpi_2y": {"Net_Profit": "67.764w", "Max_Drawdown": "40.644w", "Ann_Sharpe": "0.841", "Daily_Std": "2.638w"}, "kpi_6m": {"Net_Profit": "-2.344w", "Max_Drawdown": "15.407w", "Ann_Sharpe": "-0.170", "Daily_Std": "1.881w"}}, "children": [], "ratio": 54.05405405}, {"name": "KeyExplainFactor_Sif", "kpi": {"kpi_2y": {"Net_Profit": "5.727w", "Max_Drawdown": "38.103w", "Ann_Sharpe": "0.129", "Daily_Std": "1.457w"}, "kpi_6m": {"Net_Profit": "3.376w", "Max_Drawdown": "7.018w", "Ann_Sharpe": "0.553", "Daily_Std": "0.833w"}}, "children": [], "ratio": 18.37684449}, {"name": "KeyExplainFactor_Treasury", "kpi": {"kpi_2y": {"Net_Profit": "27.476w", "Max_Drawdown": "40.540w", "Ann_Sharpe": "0.534", "Daily_Std": "1.683w"}, "kpi_6m": {"Net_Profit": "-7.217w", "Max_Drawdown": "16.044w", "Ann_Sharpe": "-0.728", "Daily_Std": "1.351w"}}, "children": [], "ratio": 11.15059222}, {"name": "KeyExplainFactor_5comms", "kpi": {"kpi_2y": {"Net_Profit": "611.575w", "Max_Drawdown": "194.015w", "Ann_Sharpe": "1.160", "Daily_Std": "17.263w"}, "kpi_6m": {"Net_Profit": "-27.187w", "Max_Drawdown": "153.136w", "Ann_Sharpe": "-0.348", "Daily_Std": "10.638w"}}, "children": [], "ratio": 4.283389017}, {"name": "KeyExplainFactor_XS", "kpi": {"kpi_2y": {"Net_Profit": "78.655w", "Max_Drawdown": "27.334w", "Ann_Sharpe": "1.245", "Daily_Std": "2.069w"}, "kpi_6m": {"Net_Profit": "2.517w", "Max_Drawdown": "14.348w", "Ann_Sharpe": "0.228", "Daily_Std": "1.507w"}}, "children": [], "ratio": 23.43017807}, {"name": "KeyExplainFactor_All_XS", "kpi": {"kpi_2y": {"Net_Profit": "4.840w", "Max_Drawdown": "21.052w", "Ann_Sharpe": "0.154", "Daily_Std": "1.030w"}, "kpi_6m": {"Net_Profit": "-4.635w", "Max_Drawdown": "14.288w", "Ann_Sharpe": "-0.613", "Daily_Std": "1.031w"}}, "children": [], "ratio": 35.05696757}, {"name": "KeyExplainFactor_Sif_XS", "kpi": {"kpi_2y": {"Net_Profit": "-5.997w", "Max_Drawdown": "10.378w", "Ann_Sharpe": "-0.975", "Daily_Std": "0.201w"}, "kpi_6m": {"Net_Profit": "-2.044w", "Max_Drawdown": "2.644w", "Ann_Sharpe": "-1.615", "Daily_Std": "0.172w"}}, "children": [], "ratio": 17.85714286}, {"name": "KeyExplainFactor_Treasury_XS", "kpi": {"kpi_2y": {"Net_Profit": "-4.745w", "Max_Drawdown": "6.258w", "Ann_Sharpe": "-0.773", "Daily_Std": "0.201w"}, "kpi_6m": {"Net_Profit": "-2.268w", "Max_Drawdown": "3.857w", "Ann_Sharpe": "-1.172", "Daily_Std": "0.264w"}}, "children": [], "ratio": 18.65671642}], "ratio": 5.12825742}, "peng_1000w": {"name": "peng_1000w", "kpi": {"kpi_2y": {"Net_Profit": "198.611w", "Max_Drawdown": "170.358w", "Ann_Sharpe": "1.365", "Daily_Std": "30.666w"}, "kpi_6m": {"Net_Profit": "198.611w", "Max_Drawdown": "170.358w", "Ann_Sharpe": "1.365", "Daily_Std": "30.666w"}}, "children": [{"name": "PengPriceIndex_agri", "kpi": {"kpi_2y": {"Net_Profit": "38.810w", "Max_Drawdown": "128.583w", "Ann_Sharpe": "0.168", "Daily_Std": "7.555w"}, "kpi_6m": {"Net_Profit": "65.832w", "Max_Drawdown": "57.557w", "Ann_Sharpe": "1.209", "Daily_Std": "7.422w"}}, "children": [], "ratio": 12.0}, {"name": "PengPriceIndex_auag", "kpi": {"kpi_2y": {"Net_Profit": "554.709w", "Max_Drawdown": "473.341w", "Ann_Sharpe": "1.001", "Daily_Std": "18.144w"}, "kpi_6m": {"Net_Profit": "-115.860w", "Max_Drawdown": "473.341w", "Ann_Sharpe": "-0.516", "Daily_Std": "30.628w"}}, "children": [], "ratio": 8.0}, {"name": "PengPriceIndex_black", "kpi": {"kpi_2y": {"Net_Profit": "-168.732w", "Max_Drawdown": "270.367w", "Ann_Sharpe": "-0.468", "Daily_Std": "11.794w"}, "kpi_6m": {"Net_Profit": "-9.636w", "Max_Drawdown": "72.852w", "Ann_Sharpe": "-0.147", "Daily_Std": "8.920w"}}, "children": [], "ratio": 10.0}, {"name": "PengPriceIndex_chem", "kpi": {"kpi_2y": {"Net_Profit": "-222.017w", "Max_Drawdown": "363.057w", "Ann_Sharpe": "-0.594", "Daily_Std": "12.226w"}, "kpi_6m": {"Net_Profit": "79.178w", "Max_Drawdown": "182.738w", "Ann_Sharpe": "0.635", "Daily_Std": "16.997w"}}, "children": [], "ratio": 10.0}, {"name": "PengPriceIndex_metal", "kpi": {"kpi_2y": {"Net_Profit": "189.178w", "Max_Drawdown": "153.132w", "Ann_Sharpe": "0.590", "Daily_Std": "10.490w"}, "kpi_6m": {"Net_Profit": "-5.428w", "Max_Drawdown": "153.132w", "Ann_Sharpe": "-0.050", "Daily_Std": "14.888w"}}, "children": [], "ratio": 10.0}, {"name": "PengPriceIndex_sc", "kpi": {"kpi_2y": {"Net_Profit": "15.003w", "Max_Drawdown": "502.595w", "Ann_Sharpe": "0.020", "Daily_Std": "24.096w"}, "kpi_6m": {"Net_Profit": "209.740w", "Max_Drawdown": "502.595w", "Ann_Sharpe": "0.704", "Daily_Std": "40.623w"}}, "children": [], "ratio": 8.0}, {"name": "PengPriceIndex_sif", "kpi": {"kpi_2y": {"Net_Profit": "716.154w", "Max_Drawdown": "142.665w", "Ann_Sharpe": "1.554", "Daily_Std": "15.087w"}, "kpi_6m": {"Net_Profit": "140.547w", "Max_Drawdown": "120.373w", "Ann_Sharpe": "1.291", "Daily_Std": "14.838w"}}, "children": [], "ratio": 388.0}, {"name": "PengPriceIndex_ttf", "kpi": {"kpi_2y": {"Net_Profit": "24.166w", "Max_Drawdown": "33.580w", "Ann_Sharpe": "0.481", "Daily_Std": "1.645w"}, "kpi_6m": {"Net_Profit": "10.410w", "Max_Drawdown": "7.819w", "Ann_Sharpe": "1.353", "Daily_Std": "1.048w"}}, "children": [], "ratio": 0.0}], "ratio": 2.0}, "tengfeng_500w_202603": {"name": "tengfeng_500w_202603", "kpi": {"kpi_2y": {"Net_Profit": "357.971w", "Max_Drawdown": "32.841w", "Ann_Sharpe": "3.194", "Daily_Std": "3.669w"}, "kpi_6m": {"Net_Profit": "22.715w", "Max_Drawdown": "32.841w", "Ann_Sharpe": "0.861", "Daily_Std": "3.594w"}}, "children": [{"name": "all_weather_group_202512", "kpi": {"kpi_2y": {"Net_Profit": "266.327w", "Max_Drawdown": "36.209w", "Ann_Sharpe": "2.151", "Daily_Std": "4.053w"}, "kpi_6m": {"Net_Profit": "9.488w", "Max_Drawdown": "36.209w", "Ann_Sharpe": "0.293", "Daily_Std": "4.412w"}}, "children": [], "ratio": 23.59046945, "_drillable": true}, {"name": "all_weather_group_202603", "kpi": {"kpi_2y": {"Net_Profit": "223.122w", "Max_Drawdown": "31.653w", "Ann_Sharpe": "2.100", "Daily_Std": "3.478w"}, "kpi_6m": {"Net_Profit": "5.035w", "Max_Drawdown": "31.395w", "Ann_Sharpe": "0.193", "Daily_Std": "3.550w"}}, "children": [], "ratio": 35.73251659, "_drillable": true}, {"name": "sentiment_group_202512", "kpi": {"kpi_2y": {"Net_Profit": "273.459w", "Max_Drawdown": "14.012w", "Ann_Sharpe": "3.100", "Daily_Std": "2.888w"}, "kpi_6m": {"Net_Profit": "18.253w", "Max_Drawdown": "14.012w", "Ann_Sharpe": "1.161", "Daily_Std": "2.143w"}}, "children": [], "ratio": 36.21876132, "_drillable": true}, {"name": "volume_price_202511", "kpi": {"kpi_2y": {"Net_Profit": "297.880w", "Max_Drawdown": "31.849w", "Ann_Sharpe": "2.872", "Daily_Std": "3.395w"}, "kpi_6m": {"Net_Profit": "21.732w", "Max_Drawdown": "31.849w", "Ann_Sharpe": "0.922", "Daily_Std": "3.212w"}}, "children": [], "ratio": 3.825554705, "_drillable": true}, {"name": "volume_price_202603", "kpi": {"kpi_2y": {"Net_Profit": "307.161w", "Max_Drawdown": "22.377w", "Ann_Sharpe": "3.201", "Daily_Std": "3.141w"}, "kpi_6m": {"Net_Profit": "49.138w", "Max_Drawdown": "22.377w", "Ann_Sharpe": "1.958", "Daily_Std": "3.421w"}}, "children": [], "ratio": 24.62380301, "_drillable": true}, {"name": "multi_factor_202511", "kpi": {"kpi_2y": {"Net_Profit": "395.596w", "Max_Drawdown": "39.501w", "Ann_Sharpe": "2.656", "Daily_Std": "4.877w"}, "kpi_6m": {"Net_Profit": "27.338w", "Max_Drawdown": "38.555w", "Ann_Sharpe": "1.044", "Daily_Std": "3.570w"}}, "children": [], "ratio": 6.139991813, "_drillable": true}, {"name": "multi_factor_202512", "kpi": {"kpi_2y": {"Net_Profit": "97.290w", "Max_Drawdown": "12.912w", "Ann_Sharpe": "2.924", "Daily_Std": "1.089w"}, "kpi_6m": {"Net_Profit": "-4.101w", "Max_Drawdown": "12.912w", "Ann_Sharpe": "-0.696", "Daily_Std": "0.803w"}}, "children": [], "ratio": 15.61912895, "_drillable": true}, {"name": "event_driven_202603", "kpi": {"kpi_2y": {"Net_Profit": "153.746w", "Max_Drawdown": "50.700w", "Ann_Sharpe": "1.725", "Daily_Std": "2.917w"}, "kpi_6m": {"Net_Profit": "1.182w", "Max_Drawdown": "50.700w", "Ann_Sharpe": "0.039", "Daily_Std": "4.102w"}}, "children": [], "ratio": 1.8638806949, "_drillable": true}], "ratio": 82.0}, "all_weather_group_202512": {"name": "all_weather_group_202512", "kpi": {"kpi_2y": {"Net_Profit": "266.327w", "Max_Drawdown": "36.209w", "Ann_Sharpe": "2.151", "Daily_Std": "4.053w"}, "kpi_6m": {"Net_Profit": "9.488w", "Max_Drawdown": "36.209w", "Ann_Sharpe": "0.293", "Daily_Std": "4.412w"}}, "children": [{"name": "CN_EconCycle_CN_10comms", "kpi": {"kpi_2y": {"Net_Profit": "316.412w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "1.684", "Daily_Std": "6.151w"}, "kpi_6m": {"Net_Profit": "14.873w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "0.487", "Daily_Std": "4.165w"}}, "children": [], "ratio": 3.822629969}, {"name": "CN_EconCycle_CN_v3", "kpi": {"kpi_2y": {"Net_Profit": "288.702w", "Max_Drawdown": "84.270w", "Ann_Sharpe": "1.371", "Daily_Std": "6.893w"}, "kpi_6m": {"Net_Profit": "15.415w", "Max_Drawdown": "63.397w", "Ann_Sharpe": "0.451", "Daily_Std": "4.654w"}}, "children": [], "ratio": 6.897344522}, {"name": "cn_cycle_2_cn_futures", "kpi": {"kpi_2y": {"Net_Profit": "269.701w", "Max_Drawdown": "38.913w", "Ann_Sharpe": "1.910", "Daily_Std": "4.623w"}, "kpi_6m": {"Net_Profit": "16.895w", "Max_Drawdown": "27.364w", "Ann_Sharpe": "0.715", "Daily_Std": "3.219w"}}, "children": [], "ratio": 2.587991718}, {"name": "CN_EconCycle_CN_v4", "kpi": {"kpi_2y": {"Net_Profit": "376.846w", "Max_Drawdown": "72.779w", "Ann_Sharpe": "2.148", "Daily_Std": "5.744w"}, "kpi_6m": {"Net_Profit": "22.753w", "Max_Drawdown": "72.779w", "Ann_Sharpe": "0.503", "Daily_Std": "6.171w"}}, "children": [], "ratio": 20.66115702}, {"name": "US_EconCycle_CN_10comms", "kpi": {"kpi_2y": {"Net_Profit": "-23.579w", "Max_Drawdown": "113.743w", "Ann_Sharpe": "-0.167", "Daily_Std": "4.620w"}, "kpi_6m": {"Net_Profit": "-54.014w", "Max_Drawdown": "70.526w", "Ann_Sharpe": "-1.472", "Daily_Std": "5.001w"}}, "children": [], "ratio": 2.409058058}, {"name": "US_EconCycle_CN_v3", "kpi": {"kpi_2y": {"Net_Profit": "304.519w", "Max_Drawdown": "74.476w", "Ann_Sharpe": "1.491", "Daily_Std": "6.686w"}, "kpi_6m": {"Net_Profit": "-3.254w", "Max_Drawdown": "67.455w", "Ann_Sharpe": "-0.058", "Daily_Std": "7.607w"}}, "children": [], "ratio": 9.632055481}, {"name": "us_cycle_2_cn_futures", "kpi": {"kpi_2y": {"Net_Profit": "166.678w", "Max_Drawdown": "35.111w", "Ann_Sharpe": "1.421", "Daily_Std": "3.841w"}, "kpi_6m": {"Net_Profit": "-13.323w", "Max_Drawdown": "27.091w", "Ann_Sharpe": "-0.627", "Daily_Std": "2.897w"}}, "children": [], "ratio": 5.260389269}, {"name": "US_EconCycle_CN_v4", "kpi": {"kpi_2y": {"Net_Profit": "283.417w", "Max_Drawdown": "71.445w", "Ann_Sharpe": "1.612", "Daily_Std": "5.755w"}, "kpi_6m": {"Net_Profit": "-19.975w", "Max_Drawdown": "61.340w", "Ann_Sharpe": "-0.628", "Daily_Std": "4.333w"}}, "children": [], "ratio": 10.74113856}, {"name": "Comb_EconCycle_CN_5comms", "kpi": {"kpi_2y": {"Net_Profit": "147.831w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "1.260", "Daily_Std": "3.841w"}, "kpi_6m": {"Net_Profit": "-37.627w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "-1.478", "Daily_Std": "3.471w"}}, "children": [], "ratio": 6.628369421}, {"name": "PortfolioOPt_risk_parity_future", "kpi": {"kpi_2y": {"Net_Profit": "9.698w", "Max_Drawdown": "3.147w", "Ann_Sharpe": "1.362", "Daily_Std": "0.233w"}, "kpi_6m": {"Net_Profit": "1.039w", "Max_Drawdown": "3.147w", "Ann_Sharpe": "0.411", "Daily_Std": "0.345w"}}, "children": [], "ratio": 368.4324324}, {"name": "LLM_macro_data_xl_20250310", "kpi": {"kpi_2y": {"Net_Profit": "240.741w", "Max_Drawdown": "50.608w", "Ann_Sharpe": "1.814", "Daily_Std": "4.344w"}, "kpi_6m": {"Net_Profit": "39.925w", "Max_Drawdown": "30.957w", "Ann_Sharpe": "1.117", "Daily_Std": "4.874w"}}, "children": [], "ratio": 2.458210423}, {"name": "LLM_agent_macro_xl_20250513", "kpi": {"kpi_2y": {"Net_Profit": "233.870w", "Max_Drawdown": "90.060w", "Ann_Sharpe": "1.494", "Daily_Std": "5.124w"}, "kpi_6m": {"Net_Profit": "-30.661w", "Max_Drawdown": "90.060w", "Ann_Sharpe": "-0.605", "Daily_Std": "6.913w"}}, "children": [], "ratio": 2.011667673}, {"name": "LLM_macropengfactor_Wt", "kpi": {"kpi_2y": {"Net_Profit": "-4.396w", "Max_Drawdown": "67.280w", "Ann_Sharpe": "-0.051", "Daily_Std": "2.840w"}, "kpi_6m": {"Net_Profit": "-36.329w", "Max_Drawdown": "63.209w", "Ann_Sharpe": "-1.242", "Daily_Std": "3.988w"}}, "children": [], "ratio": 2.60631136}, {"name": "FFT_CN_EconCycle", "kpi": {"kpi_2y": {"Net_Profit": "33.712w", "Max_Drawdown": "17.840w", "Ann_Sharpe": "1.004", "Daily_Std": "1.100w"}, "kpi_6m": {"Net_Profit": "-1.266w", "Max_Drawdown": "16.880w", "Ann_Sharpe": "-0.168", "Daily_Std": "1.029w"}}, "children": [], "ratio": 4.105090312}, {"name": "FFT_US_EconCycle", "kpi": {"kpi_2y": {"Net_Profit": "27.193w", "Max_Drawdown": "20.054w", "Ann_Sharpe": "0.763", "Daily_Std": "1.166w"}, "kpi_6m": {"Net_Profit": "1.450w", "Max_Drawdown": "13.666w", "Ann_Sharpe": "0.211", "Daily_Std": "0.934w"}}, "children": [], "ratio": 3.649635036}, {"name": "MLP_State_Predict_LongOnly", "kpi": {"kpi_2y": {"Net_Profit": "129.402w", "Max_Drawdown": "19.527w", "Ann_Sharpe": "1.864", "Daily_Std": "2.273w"}, "kpi_6m": {"Net_Profit": "24.913w", "Max_Drawdown": "19.527w", "Ann_Sharpe": "1.627", "Daily_Std": "2.087w"}}, "children": [], "ratio": 4.572473708}, {"name": "MLP_State_Predict_LongOnly_Smoth", "kpi": {"kpi_2y": {"Net_Profit": "106.771w", "Max_Drawdown": "16.804w", "Ann_Sharpe": "1.819", "Daily_Std": "1.921w"}, "kpi_6m": {"Net_Profit": "20.255w", "Max_Drawdown": "16.804w", "Ann_Sharpe": "1.555", "Daily_Std": "1.776w"}}, "children": [], "ratio": 5.580357143}], "ratio": 23.59046945}, "all_weather_group_202603": {"name": "all_weather_group_202603", "kpi": {"kpi_2y": {"Net_Profit": "223.122w", "Max_Drawdown": "31.653w", "Ann_Sharpe": "2.100", "Daily_Std": "3.478w"}, "kpi_6m": {"Net_Profit": "5.035w", "Max_Drawdown": "31.395w", "Ann_Sharpe": "0.193", "Daily_Std": "3.550w"}}, "children": [{"name": "CN_EconCycle_CN_10comms", "kpi": {"kpi_2y": {"Net_Profit": "316.412w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "1.684", "Daily_Std": "6.151w"}, "kpi_6m": {"Net_Profit": "14.873w", "Max_Drawdown": "59.006w", "Ann_Sharpe": "0.487", "Daily_Std": "4.165w"}}, "children": [], "ratio": 10.1447315}, {"name": "CN_EconCycle_CN_v3", "kpi": {"kpi_2y": {"Net_Profit": "288.702w", "Max_Drawdown": "84.270w", "Ann_Sharpe": "1.371", "Daily_Std": "6.893w"}, "kpi_6m": {"Net_Profit": "15.415w", "Max_Drawdown": "63.397w", "Ann_Sharpe": "0.451", "Daily_Std": "4.654w"}}, "children": [], "ratio": 12.07729469}, {"name": "CN_EconCycle_CN_v4", "kpi": {"kpi_2y": {"Net_Profit": "376.846w", "Max_Drawdown": "72.779w", "Ann_Sharpe": "2.148", "Daily_Std": "5.744w"}, "kpi_6m": {"Net_Profit": "22.753w", "Max_Drawdown": "72.779w", "Ann_Sharpe": "0.503", "Daily_Std": "6.171w"}}, "children": [], "ratio": 8.193363376}, {"name": "us_cycle_2_cn_futures", "kpi": {"kpi_2y": {"Net_Profit": "166.678w", "Max_Drawdown": "35.111w", "Ann_Sharpe": "1.421", "Daily_Std": "3.841w"}, "kpi_6m": {"Net_Profit": "-13.323w", "Max_Drawdown": "27.091w", "Ann_Sharpe": "-0.627", "Daily_Std": "2.897w"}}, "children": [], "ratio": 3.967204443}, {"name": "US_EconCycle_CN_v3", "kpi": {"kpi_2y": {"Net_Profit": "304.519w", "Max_Drawdown": "74.476w", "Ann_Sharpe": "1.491", "Daily_Std": "6.686w"}, "kpi_6m": {"Net_Profit": "-3.254w", "Max_Drawdown": "67.455w", "Ann_Sharpe": "-0.058", "Daily_Std": "7.607w"}}, "children": [], "ratio": 9.795057263}, {"name": "US_EconCycle_CN_v4", "kpi": {"kpi_2y": {"Net_Profit": "283.417w", "Max_Drawdown": "71.445w", "Ann_Sharpe": "1.612", "Daily_Std": "5.755w"}, "kpi_6m": {"Net_Profit": "-19.975w", "Max_Drawdown": "61.340w", "Ann_Sharpe": "-0.628", "Daily_Std": "4.333w"}}, "children": [], "ratio": 8.68960723}, {"name": "Comb_EconCycle_CN_5comms", "kpi": {"kpi_2y": {"Net_Profit": "147.831w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "1.260", "Daily_Std": "3.841w"}, "kpi_6m": {"Net_Profit": "-37.627w", "Max_Drawdown": "49.151w", "Ann_Sharpe": "-1.478", "Daily_Std": "3.471w"}}, "children": [], "ratio": 3.423094477}, {"name": "PortfolioOPt_risk_parity_future", "kpi": {"kpi_2y": {"Net_Profit": "9.698w", "Max_Drawdown": "3.147w", "Ann_Sharpe": "1.362", "Daily_Std": "0.233w"}, "kpi_6m": {"Net_Profit": "1.039w", "Max_Drawdown": "3.147w", "Ann_Sharpe": "0.411", "Daily_Std": "0.345w"}}, "children": [], "ratio": 288.5752896}, {"name": "PORTFOLIOOPT_RISK_PARITY_V3_PICK", "kpi": {"kpi_2y": {"Net_Profit": "21.842w", "Max_Drawdown": "5.359w", "Ann_Sharpe": "1.590", "Daily_Std": "0.450w"}, "kpi_6m": {"Net_Profit": "5.343w", "Max_Drawdown": "5.359w", "Ann_Sharpe": "1.071", "Daily_Std": "0.680w"}}, "children": [], "ratio": 32.96703297}, {"name": "PORTFOLIOOPT_MAX_SHARPE_V3_PICK", "kpi": {"kpi_2y": {"Net_Profit": "15.858w", "Max_Drawdown": "3.839w", "Ann_Sharpe": "1.395", "Daily_Std": "0.372w"}, "kpi_6m": {"Net_Profit": "3.207w", "Max_Drawdown": "3.839w", "Ann_Sharpe": "0.803", "Daily_Std": "0.544w"}}, "children": [], "ratio": 39.68253968}, {"name": "LLM_macro_data_xl_20250310", "kpi": {"kpi_2y": {"Net_Profit": "240.741w", "Max_Drawdown": "50.608w", "Ann_Sharpe": "1.814", "Daily_Std": "4.344w"}, "kpi_6m": {"Net_Profit": "39.925w", "Max_Drawdown": "30.957w", "Ann_Sharpe": "1.117", "Daily_Std": "4.874w"}}, "children": [], "ratio": 2.368545713}, {"name": "LLM_agent_macro_xl_20250513", "kpi": {"kpi_2y": {"Net_Profit": "233.870w", "Max_Drawdown": "90.060w", "Ann_Sharpe": "1.494", "Daily_Std": "5.124w"}, "kpi_6m": {"Net_Profit": "-30.661w", "Max_Drawdown": "90.060w", "Ann_Sharpe": "-0.605", "Daily_Std": "6.913w"}}, "children": [], "ratio": 1.645548791}, {"name": "Claude_Macro_VP_v2_RiskLiquid", "kpi": {"kpi_2y": {"Net_Profit": "24.094w", "Max_Drawdown": "7.163w", "Ann_Sharpe": "2.020", "Daily_Std": "0.390w"}, "kpi_6m": {"Net_Profit": "0.171w", "Max_Drawdown": "7.163w", "Ann_Sharpe": "0.039", "Daily_Std": "0.606w"}}, "children": [], "ratio": 22.98850575}], "ratio": 35.73251659}, "sentiment_group_202512": {"name": "sentiment_group_202512", "kpi": {"kpi_2y": {"Net_Profit": "273.459w", "Max_Drawdown": "14.012w", "Ann_Sharpe": "3.100", "Daily_Std": "2.888w"}, "kpi_6m": {"Net_Profit": "18.253w", "Max_Drawdown": "14.012w", "Ann_Sharpe": "1.161", "Daily_Std": "2.143w"}}, "children": [{"name": "BondCycle_CN_CmpyShort_AU", "kpi": {"kpi_2y": {"Net_Profit": "114.251w", "Max_Drawdown": "32.765w", "Ann_Sharpe": "2.024", "Daily_Std": "1.848w"}, "kpi_6m": {"Net_Profit": "-17.002w", "Max_Drawdown": "32.765w", "Ann_Sharpe": "-1.317", "Daily_Std": "1.760w"}}, "children": [], "ratio": 3.216123499}, {"name": "BondCycle_CN_CmpyShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "1.423w", "Max_Drawdown": "0.239w", "Ann_Sharpe": "1.393", "Daily_Std": "0.033w"}, "kpi_6m": {"Net_Profit": "-0.011w", "Max_Drawdown": "0.223w", "Ann_Sharpe": "-0.061", "Daily_Std": "0.024w"}}, "children": [], "ratio": 85.76329331}, {"name": "BondCycle_CN_CmpyShort_RB", "kpi": {"kpi_2y": {"Net_Profit": "-5.377w", "Max_Drawdown": "9.360w", "Ann_Sharpe": "-0.435", "Daily_Std": "0.404w"}, "kpi_6m": {"Net_Profit": "0.154w", "Max_Drawdown": "3.688w", "Ann_Sharpe": "0.067", "Daily_Std": "0.316w"}}, "children": [], "ratio": 1.072041166}, {"name": "BondCycle_CN_CmpyShort_SC", "kpi": {"kpi_2y": {"Net_Profit": "0.133w", "Max_Drawdown": "0.826w", "Ann_Sharpe": "0.117", "Daily_Std": "0.037w"}, "kpi_6m": {"Net_Profit": "0.476w", "Max_Drawdown": "0.341w", "Ann_Sharpe": "1.761", "Daily_Std": "0.037w"}}, "children": [], "ratio": 5.360205832}, {"name": "BondCycle_CN_CmpyShort_IC", "kpi": {"kpi_2y": {"Net_Profit": "7.166w", "Max_Drawdown": "5.859w", "Ann_Sharpe": "0.816", "Daily_Std": "0.287w"}, "kpi_6m": {"Net_Profit": "3.371w", "Max_Drawdown": "1.873w", "Ann_Sharpe": "1.866", "Daily_Std": "0.246w"}}, "children": [], "ratio": 5.360205832}, {"name": "BondCycle_CN_CmpyShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "11.761w", "Max_Drawdown": "5.958w", "Ann_Sharpe": "0.995", "Daily_Std": "0.387w"}, "kpi_6m": {"Net_Profit": "1.135w", "Max_Drawdown": "1.969w", "Ann_Sharpe": "0.574", "Daily_Std": "0.269w"}}, "children": [], "ratio": 6.432246998}, {"name": "BondCycle_CN_CmpyShort_T", "kpi": {"kpi_2y": {"Net_Profit": "0.626w", "Max_Drawdown": "31.510w", "Ann_Sharpe": "0.025", "Daily_Std": "0.805w"}, "kpi_6m": {"Net_Profit": "0.054w", "Max_Drawdown": "5.532w", "Ann_Sharpe": "0.013", "Daily_Std": "0.557w"}}, "children": [], "ratio": 5.360205832}, {"name": "BondCycle_CN_CmpyShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "-5.654w", "Max_Drawdown": "27.400w", "Ann_Sharpe": "-0.288", "Daily_Std": "0.643w"}, "kpi_6m": {"Net_Profit": "-2.065w", "Max_Drawdown": "5.426w", "Ann_Sharpe": "-0.678", "Daily_Std": "0.415w"}}, "children": [], "ratio": 1.216123499}, {"name": "BondCycle_CN_LongShort_AU", "kpi": {"kpi_2y": {"Net_Profit": "73.287w", "Max_Drawdown": "20.674w", "Ann_Sharpe": "2.057", "Daily_Std": "1.166w"}, "kpi_6m": {"Net_Profit": "-8.036w", "Max_Drawdown": "20.674w", "Ann_Sharpe": "-0.955", "Daily_Std": "1.147w"}}, "children": [], "ratio": 10.41666667}, {"name": "BondCycle_CN_LongShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "0.697w", "Max_Drawdown": "1.030w", "Ann_Sharpe": "0.275", "Daily_Std": "0.083w"}, "kpi_6m": {"Net_Profit": "-0.361w", "Max_Drawdown": "0.872w", "Ann_Sharpe": "-0.555", "Daily_Std": "0.089w"}}, "children": [], "ratio": 26.04166667}, {"name": "BondCycle_CN_LongShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "20.233w", "Max_Drawdown": "20.051w", "Ann_Sharpe": "0.624", "Daily_Std": "1.061w"}, "kpi_6m": {"Net_Profit": "4.012w", "Max_Drawdown": "7.466w", "Ann_Sharpe": "0.664", "Daily_Std": "0.823w"}}, "children": [], "ratio": 26.04166667}, {"name": "BondCycle_CN_LongShort_T", "kpi": {"kpi_2y": {"Net_Profit": "10.557w", "Max_Drawdown": "21.745w", "Ann_Sharpe": "0.480", "Daily_Std": "0.720w"}, "kpi_6m": {"Net_Profit": "-4.634w", "Max_Drawdown": "7.396w", "Ann_Sharpe": "-1.535", "Daily_Std": "0.411w"}}, "children": [], "ratio": 20.83333333}, {"name": "BondCycle_CN_LongShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "7.857w", "Max_Drawdown": "16.908w", "Ann_Sharpe": "0.426", "Daily_Std": "0.603w"}, "kpi_6m": {"Net_Profit": "-5.158w", "Max_Drawdown": "6.882w", "Ann_Sharpe": "-1.826", "Daily_Std": "0.385w"}}, "children": [], "ratio": 8.83333333}, {"name": "BondCycle_US_CmpyShort_AU", "kpi": {"kpi_2y": {"Net_Profit": "69.107w", "Max_Drawdown": "36.564w", "Ann_Sharpe": "1.377", "Daily_Std": "1.643w"}, "kpi_6m": {"Net_Profit": "-12.573w", "Max_Drawdown": "36.564w", "Ann_Sharpe": "-0.862", "Daily_Std": "1.989w"}}, "children": [], "ratio": 12.95896328}, {"name": "BondCycle_US_CmpyShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "7.789w", "Max_Drawdown": "2.019w", "Ann_Sharpe": "1.502", "Daily_Std": "0.170w"}, "kpi_6m": {"Net_Profit": "1.188w", "Max_Drawdown": "0.629w", "Ann_Sharpe": "1.354", "Daily_Std": "0.120w"}}, "children": [], "ratio": 345.5723542}, {"name": "BondCycle_US_CmpyShort_RB", "kpi": {"kpi_2y": {"Net_Profit": "-4.053w", "Max_Drawdown": "8.017w", "Ann_Sharpe": "-0.288", "Daily_Std": "0.460w"}, "kpi_6m": {"Net_Profit": "0.583w", "Max_Drawdown": "4.191w", "Ann_Sharpe": "0.169", "Daily_Std": "0.472w"}}, "children": [], "ratio": 4.319654428}, {"name": "BondCycle_US_CmpyShort_SC", "kpi": {"kpi_2y": {"Net_Profit": "-2.067w", "Max_Drawdown": "5.322w", "Ann_Sharpe": "-0.415", "Daily_Std": "0.163w"}, "kpi_6m": {"Net_Profit": "-0.611w", "Max_Drawdown": "2.321w", "Ann_Sharpe": "-0.586", "Daily_Std": "0.142w"}}, "children": [], "ratio": 8.639308855}, {"name": "BondCycle_US_CmpyShort_IC", "kpi": {"kpi_2y": {"Net_Profit": "80.192w", "Max_Drawdown": "4.255w", "Ann_Sharpe": "2.779", "Daily_Std": "0.945w"}, "kpi_6m": {"Net_Profit": "12.559w", "Max_Drawdown": "4.255w", "Ann_Sharpe": "2.675", "Daily_Std": "0.640w"}}, "children": [], "ratio": 51.83585313}, {"name": "BondCycle_US_CmpyShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "73.895w", "Max_Drawdown": "7.307w", "Ann_Sharpe": "2.027", "Daily_Std": "1.193w"}, "kpi_6m": {"Net_Profit": "1.623w", "Max_Drawdown": "7.307w", "Ann_Sharpe": "0.237", "Daily_Std": "0.933w"}}, "children": [], "ratio": 64.79481641}, {"name": "BondCycle_US_CmpyShort_T", "kpi": {"kpi_2y": {"Net_Profit": "7.766w", "Max_Drawdown": "4.693w", "Ann_Sharpe": "0.668", "Daily_Std": "0.380w"}, "kpi_6m": {"Net_Profit": "1.550w", "Max_Drawdown": "1.880w", "Ann_Sharpe": "1.047", "Daily_Std": "0.202w"}}, "children": [], "ratio": 64.79481641}, {"name": "BondCycle_US_CmpyShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "6.568w", "Max_Drawdown": "4.412w", "Ann_Sharpe": "0.627", "Daily_Std": "0.343w"}, "kpi_6m": {"Net_Profit": "0.233w", "Max_Drawdown": "1.594w", "Ann_Sharpe": "0.163", "Daily_Std": "0.195w"}}, "children": [], "ratio": 26.79481641}, {"name": "BondCycle_US_LongShort_AU", "kpi": {"kpi_2y": {"Net_Profit": "68.487w", "Max_Drawdown": "42.661w", "Ann_Sharpe": "1.174", "Daily_Std": "1.910w"}, "kpi_6m": {"Net_Profit": "-18.361w", "Max_Drawdown": "42.661w", "Ann_Sharpe": "-1.081", "Daily_Std": "2.315w"}}, "children": [], "ratio": 5.237430168}, {"name": "BondCycle_US_LongShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "4.389w", "Max_Drawdown": "1.208w", "Ann_Sharpe": "1.281", "Daily_Std": "0.112w"}, "kpi_6m": {"Net_Profit": "0.994w", "Max_Drawdown": "0.635w", "Ann_Sharpe": "1.409", "Daily_Std": "0.096w"}}, "children": [], "ratio": 139.6648045}, {"name": "BondCycle_US_LongShort_RB", "kpi": {"kpi_2y": {"Net_Profit": "-1.709w", "Max_Drawdown": "4.781w", "Ann_Sharpe": "-0.209", "Daily_Std": "0.268w"}, "kpi_6m": {"Net_Profit": "-0.337w", "Max_Drawdown": "2.405w", "Ann_Sharpe": "-0.183", "Daily_Std": "0.250w"}}, "children": [], "ratio": 5.237430168}, {"name": "BondCycle_US_LongShort_SC", "kpi": {"kpi_2y": {"Net_Profit": "2.039w", "Max_Drawdown": "6.472w", "Ann_Sharpe": "0.277", "Daily_Std": "0.241w"}, "kpi_6m": {"Net_Profit": "1.588w", "Max_Drawdown": "3.143w", "Ann_Sharpe": "0.861", "Daily_Std": "0.252w"}}, "children": [], "ratio": 18.45810056}, {"name": "BondCycle_US_LongShort_IC", "kpi": {"kpi_2y": {"Net_Profit": "54.227w", "Max_Drawdown": "6.428w", "Ann_Sharpe": "2.015", "Daily_Std": "0.881w"}, "kpi_6m": {"Net_Profit": "3.124w", "Max_Drawdown": "4.580w", "Ann_Sharpe": "0.731", "Daily_Std": "0.583w"}}, "children": [], "ratio": 26.18715084}, {"name": "BondCycle_US_LongShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "52.520w", "Max_Drawdown": "14.034w", "Ann_Sharpe": "1.434", "Daily_Std": "1.199w"}, "kpi_6m": {"Net_Profit": "2.521w", "Max_Drawdown": "10.197w", "Ann_Sharpe": "0.351", "Daily_Std": "0.980w"}}, "children": [], "ratio": 17.45810056}, {"name": "BondCycle_US_LongShort_T", "kpi": {"kpi_2y": {"Net_Profit": "12.460w", "Max_Drawdown": "8.454w", "Ann_Sharpe": "0.664", "Daily_Std": "0.615w"}, "kpi_6m": {"Net_Profit": "2.261w", "Max_Drawdown": "2.775w", "Ann_Sharpe": "0.961", "Daily_Std": "0.321w"}}, "children": [], "ratio": 26.18715084}, {"name": "BondCycle_US_LongShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "9.873w", "Max_Drawdown": "7.635w", "Ann_Sharpe": "0.578", "Daily_Std": "0.560w"}, "kpi_6m": {"Net_Profit": "0.972w", "Max_Drawdown": "2.426w", "Ann_Sharpe": "0.397", "Daily_Std": "0.333w"}}, "children": [], "ratio": 12.18715084}, {"name": "BondCycle_US_RealIR_LongShort_AU", "kpi": {"kpi_2y": {"Net_Profit": "87.593w", "Max_Drawdown": "19.517w", "Ann_Sharpe": "1.613", "Daily_Std": "1.777w"}, "kpi_6m": {"Net_Profit": "11.440w", "Max_Drawdown": "18.226w", "Ann_Sharpe": "1.055", "Daily_Std": "1.478w"}}, "children": [], "ratio": 0.660647434}, {"name": "BondCycle_US_RealIR_LongShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "20.135w", "Max_Drawdown": "7.568w", "Ann_Sharpe": "1.080", "Daily_Std": "0.610w"}, "kpi_6m": {"Net_Profit": "5.170w", "Max_Drawdown": "5.621w", "Ann_Sharpe": "1.063", "Daily_Std": "0.663w"}}, "children": [], "ratio": 6.606474345}, {"name": "BondCycle_US_RealIR_LongShort_RB", "kpi": {"kpi_2y": {"Net_Profit": "-7.658w", "Max_Drawdown": "11.066w", "Ann_Sharpe": "-0.490", "Daily_Std": "0.511w"}, "kpi_6m": {"Net_Profit": "0.910w", "Max_Drawdown": "5.433w", "Ann_Sharpe": "0.200", "Daily_Std": "0.622w"}}, "children": [], "ratio": 0.220215811}, {"name": "BondCycle_US_RealIR_LongShort_SC", "kpi": {"kpi_2y": {"Net_Profit": "-22.822w", "Max_Drawdown": "23.258w", "Ann_Sharpe": "-1.301", "Daily_Std": "0.574w"}, "kpi_6m": {"Net_Profit": "-3.055w", "Max_Drawdown": "13.065w", "Ann_Sharpe": "-0.570", "Daily_Std": "0.730w"}}, "children": [], "ratio": 0.660647434}, {"name": "BondCycle_US_RealIR_LongShort_IC", "kpi": {"kpi_2y": {"Net_Profit": "50.449w", "Max_Drawdown": "18.864w", "Ann_Sharpe": "0.993", "Daily_Std": "1.662w"}, "kpi_6m": {"Net_Profit": "-3.780w", "Max_Drawdown": "9.289w", "Ann_Sharpe": "-0.555", "Daily_Std": "0.928w"}}, "children": [], "ratio": 2.202158115}, {"name": "BondCycle_US_RealIR_LongShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "56.361w", "Max_Drawdown": "25.547w", "Ann_Sharpe": "1.006", "Daily_Std": "1.834w"}, "kpi_6m": {"Net_Profit": "-9.930w", "Max_Drawdown": "13.136w", "Ann_Sharpe": "-1.358", "Daily_Std": "0.997w"}}, "children": [], "ratio": 2.202158115}, {"name": "BondCycle_US_RealIR_LongShort_T", "kpi": {"kpi_2y": {"Net_Profit": "-11.675w", "Max_Drawdown": "17.214w", "Ann_Sharpe": "-0.801", "Daily_Std": "0.477w"}, "kpi_6m": {"Net_Profit": "-4.907w", "Max_Drawdown": "9.023w", "Ann_Sharpe": "-1.665", "Daily_Std": "0.402w"}}, "children": [], "ratio": 1.101079057}, {"name": "BondCycle_US_RealIR_LongShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "-1.058w", "Max_Drawdown": "7.349w", "Ann_Sharpe": "-0.080", "Daily_Std": "0.436w"}, "kpi_6m": {"Net_Profit": "-1.305w", "Max_Drawdown": "6.138w", "Ann_Sharpe": "-0.459", "Daily_Std": "0.387w"}}, "children": [], "ratio": 1.101079057}, {"name": "BondCycle2_CN_LongShort_I", "kpi": {"kpi_2y": {"Net_Profit": "3.649w", "Max_Drawdown": "6.524w", "Ann_Sharpe": "0.376", "Daily_Std": "0.318w"}, "kpi_6m": {"Net_Profit": "-4.876w", "Max_Drawdown": "5.881w", "Ann_Sharpe": "-2.283", "Daily_Std": "0.291w"}}, "children": [], "ratio": 2.36705417}, {"name": "BondCycle2_CN_LongShort_SC", "kpi": {"kpi_2y": {"Net_Profit": "49.363w", "Max_Drawdown": "11.936w", "Ann_Sharpe": "1.918", "Daily_Std": "0.843w"}, "kpi_6m": {"Net_Profit": "23.648w", "Max_Drawdown": "10.132w", "Ann_Sharpe": "2.579", "Daily_Std": "1.250w"}}, "children": [], "ratio": 1.183527084}, {"name": "BondCycle2_CN_LongShort_IH", "kpi": {"kpi_2y": {"Net_Profit": "9.949w", "Max_Drawdown": "15.521w", "Ann_Sharpe": "0.511", "Daily_Std": "0.638w"}, "kpi_6m": {"Net_Profit": "-8.077w", "Max_Drawdown": "9.195w", "Ann_Sharpe": "-2.670", "Daily_Std": "0.412w"}}, "children": [], "ratio": 0.946821667}, {"name": "BondCycle2_CN_LongShort_TF", "kpi": {"kpi_2y": {"Net_Profit": "-16.742w", "Max_Drawdown": "17.473w", "Ann_Sharpe": "-1.651", "Daily_Std": "0.332w"}, "kpi_6m": {"Net_Profit": "-8.440w", "Max_Drawdown": "8.563w", "Ann_Sharpe": "-3.742", "Daily_Std": "0.307w"}}, "children": [], "ratio": 1.183527084}, {"name": "BondCycle2_US_LongShort_CU", "kpi": {"kpi_2y": {"Net_Profit": "-10.554w", "Max_Drawdown": "20.717w", "Ann_Sharpe": "-0.741", "Daily_Std": "0.466w"}, "kpi_6m": {"Net_Profit": "-12.276w", "Max_Drawdown": "14.905w", "Ann_Sharpe": "-3.172", "Daily_Std": "0.527w"}}, "children": [], "ratio": 3.088176921}, {"name": "BondCycle2_US_LongShort_M", "kpi": {"kpi_2y": {"Net_Profit": "7.544w", "Max_Drawdown": "6.582w", "Ann_Sharpe": "0.510", "Daily_Std": "0.485w"}, "kpi_6m": {"Net_Profit": "-3.281w", "Max_Drawdown": "6.099w", "Ann_Sharpe": "-0.979", "Daily_Std": "0.457w"}}, "children": [], "ratio": 3.088176921}, {"name": "BondCycle2_US_LongShort_IF", "kpi": {"kpi_2y": {"Net_Profit": "57.596w", "Max_Drawdown": "10.399w", "Ann_Sharpe": "1.999", "Daily_Std": "0.943w"}, "kpi_6m": {"Net_Profit": "1.854w", "Max_Drawdown": "6.036w", "Ann_Sharpe": "0.322", "Daily_Std": "0.784w"}}, "children": [], "ratio": 2.670541537}, {"name": "BondCycle2_US_LongShort_IM", "kpi": {"kpi_2y": {"Net_Profit": "34.003w", "Max_Drawdown": "15.162w", "Ann_Sharpe": "1.218", "Daily_Std": "0.914w"}, "kpi_6m": {"Net_Profit": "-5.862w", "Max_Drawdown": "8.472w", "Ann_Sharpe": "-1.574", "Daily_Std": "0.508w"}}, "children": [], "ratio": 8.670541537}, {"name": "BondCycle2_US_LongShort_T", "kpi": {"kpi_2y": {"Net_Profit": "2.903w", "Max_Drawdown": "4.669w", "Ann_Sharpe": "0.380", "Daily_Std": "0.250w"}, "kpi_6m": {"Net_Profit": "-2.395w", "Max_Drawdown": "4.666w", "Ann_Sharpe": "-1.309", "Daily_Std": "0.249w"}}, "children": [], "ratio": 3.088176921}, {"name": "BondCycle2_US_LongShort_TL", "kpi": {"kpi_2y": {"Net_Profit": "5.020w", "Max_Drawdown": "3.918w", "Ann_Sharpe": "0.651", "Daily_Std": "0.253w"}, "kpi_6m": {"Net_Profit": "0.646w", "Max_Drawdown": "3.236w", "Ann_Sharpe": "0.387", "Daily_Std": "0.227w"}}, "children": [], "ratio": 3.088176921}, {"name": "PsychoCycle2_Trend", "kpi": {"kpi_2y": {"Net_Profit": "280.065w", "Max_Drawdown": "56.332w", "Ann_Sharpe": "1.683", "Daily_Std": "5.448w"}, "kpi_6m": {"Net_Profit": "37.536w", "Max_Drawdown": "41.309w", "Ann_Sharpe": "1.012", "Daily_Std": "5.056w"}}, "children": [], "ratio": 6.8}, {"name": "PsychoCycle3_Trend", "kpi": {"kpi_2y": {"Net_Profit": "237.541w", "Max_Drawdown": "34.239w", "Ann_Sharpe": "2.125", "Daily_Std": "3.659w"}, "kpi_6m": {"Net_Profit": "21.762w", "Max_Drawdown": "25.274w", "Ann_Sharpe": "0.958", "Daily_Std": "3.098w"}}, "children": [], "ratio": 15.5}], "ratio": 36.21876132}, "volume_price_202511": {"name": "volume_price_202511", "kpi": {"kpi_2y": {"Net_Profit": "297.880w", "Max_Drawdown": "31.849w", "Ann_Sharpe": "2.872", "Daily_Std": "3.395w"}, "kpi_6m": {"Net_Profit": "21.732w", "Max_Drawdown": "31.849w", "Ann_Sharpe": "0.922", "Daily_Std": "3.212w"}}, "children": [{"name": "cta_4_tengfeng_20250308", "kpi": {"kpi_2y": {"Net_Profit": "284.233w", "Max_Drawdown": "34.963w", "Ann_Sharpe": "2.826", "Daily_Std": "3.292w"}, "kpi_6m": {"Net_Profit": "25.671w", "Max_Drawdown": "19.203w", "Ann_Sharpe": "1.268", "Daily_Std": "2.759w"}}, "children": [], "ratio": 38.08073115, "_drillable": true}, {"name": "CTA_14comms_20240815", "kpi": {"kpi_2y": {"Net_Profit": "84.570w", "Max_Drawdown": "11.269w", "Ann_Sharpe": "2.144", "Daily_Std": "1.291w"}, "kpi_6m": {"Net_Profit": "18.896w", "Max_Drawdown": "5.555w", "Ann_Sharpe": "2.374", "Daily_Std": "1.085w"}}, "children": [], "ratio": 65.78947368, "_drillable": true}, {"name": "Day_CTA_Cursor_CN_15comms", "kpi": {"kpi_2y": {"Net_Profit": "117.367w", "Max_Drawdown": "24.551w", "Ann_Sharpe": "1.911", "Daily_Std": "2.011w"}, "kpi_6m": {"Net_Profit": "2.160w", "Max_Drawdown": "24.551w", "Ann_Sharpe": "0.176", "Daily_Std": "1.673w"}}, "children": [], "ratio": 75.95486111}, {"name": "AutoSingleTiming_CN_14comms", "kpi": {"kpi_2y": {"Net_Profit": "210.647w", "Max_Drawdown": "45.114w", "Ann_Sharpe": "2.031", "Daily_Std": "3.396w"}, "kpi_6m": {"Net_Profit": "-7.917w", "Max_Drawdown": "45.114w", "Ann_Sharpe": "-0.323", "Daily_Std": "3.339w"}}, "children": [], "ratio": 22.29488704}], "ratio": 3.825554705}, "cta_4_tengfeng_20250308": {"name": "cta_4_tengfeng_20250308", "kpi": {"kpi_2y": {"Net_Profit": "284.233w", "Max_Drawdown": "34.963w", "Ann_Sharpe": "2.826", "Daily_Std": "3.292w"}, "kpi_6m": {"Net_Profit": "25.671w", "Max_Drawdown": "19.203w", "Ann_Sharpe": "1.268", "Daily_Std": "2.759w"}}, "children": [{"name": "CTA_1000W_AG", "kpi": {"kpi_2y": {"Net_Profit": "86.565w", "Max_Drawdown": "16.982w", "Ann_Sharpe": "1.864", "Daily_Std": "1.520w"}, "kpi_6m": {"Net_Profit": "26.680w", "Max_Drawdown": "7.609w", "Ann_Sharpe": "1.685", "Daily_Std": "2.158w"}}, "children": [], "ratio": 15.33078599}, {"name": "CTA_1000W_AL", "kpi": {"kpi_2y": {"Net_Profit": "15.974w", "Max_Drawdown": "5.018w", "Ann_Sharpe": "1.170", "Daily_Std": "0.447w"}, "kpi_6m": {"Net_Profit": "6.533w", "Max_Drawdown": "4.787w", "Ann_Sharpe": "1.382", "Daily_Std": "0.644w"}}, "children": [], "ratio": 14.7695863}, {"name": "CTA_1000W_AU", "kpi": {"kpi_2y": {"Net_Profit": "116.373w", "Max_Drawdown": "24.582w", "Ann_Sharpe": "1.910", "Daily_Std": "1.994w"}, "kpi_6m": {"Net_Profit": "23.094w", "Max_Drawdown": "10.984w", "Ann_Sharpe": "2.243", "Daily_Std": "1.404w"}}, "children": [], "ratio": 138.5560371}, {"name": "CTA_1000W_C", "kpi": {"kpi_2y": {"Net_Profit": "2.546w", "Max_Drawdown": "8.032w", "Ann_Sharpe": "0.270", "Daily_Std": "0.309w"}, "kpi_6m": {"Net_Profit": "2.989w", "Max_Drawdown": "4.815w", "Ann_Sharpe": "1.000", "Daily_Std": "0.407w"}}, "children": [], "ratio": 3.117582225}, {"name": "CTA_1000W_CF", "kpi": {"kpi_2y": {"Net_Profit": "5.479w", "Max_Drawdown": "5.797w", "Ann_Sharpe": "0.398", "Daily_Std": "0.451w"}, "kpi_6m": {"Net_Profit": "-1.313w", "Max_Drawdown": "4.738w", "Ann_Sharpe": "-0.389", "Daily_Std": "0.460w"}}, "children": [], "ratio": 3.283048825}, {"name": "CTA_1000W_CU", "kpi": {"kpi_2y": {"Net_Profit": "-11.809w", "Max_Drawdown": "41.087w", "Ann_Sharpe": "-0.346", "Daily_Std": "1.117w"}, "kpi_6m": {"Net_Profit": "12.222w", "Max_Drawdown": "6.436w", "Ann_Sharpe": "1.389", "Daily_Std": "1.199w"}}, "children": [], "ratio": 114.7180707}, {"name": "CTA_1000W_FG", "kpi": {"kpi_2y": {"Net_Profit": "13.098w", "Max_Drawdown": "4.572w", "Ann_Sharpe": "1.270", "Daily_Std": "0.338w"}, "kpi_6m": {"Net_Profit": "3.259w", "Max_Drawdown": "1.382w", "Ann_Sharpe": "1.922", "Daily_Std": "0.231w"}}, "children": [], "ratio": 14.72794916}, {"name": "CTA_1000W_FU", "kpi": {"kpi_2y": {"Net_Profit": "3.575w", "Max_Drawdown": "12.271w", "Ann_Sharpe": "0.230", "Daily_Std": "0.508w"}, "kpi_6m": {"Net_Profit": "3.481w", "Max_Drawdown": "3.064w", "Ann_Sharpe": "1.281", "Daily_Std": "0.370w"}}, "children": [], "ratio": 28.8201951}, {"name": "CTA_1000W_I", "kpi": {"kpi_2y": {"Net_Profit": "-3.091w", "Max_Drawdown": "11.874w", "Ann_Sharpe": "-0.259", "Daily_Std": "0.391w"}, "kpi_6m": {"Net_Profit": "0.864w", "Max_Drawdown": "2.938w", "Ann_Sharpe": "0.380", "Daily_Std": "0.310w"}}, "children": [], "ratio": 15.29742571}, {"name": "CTA_1000W_IC", "kpi": {"kpi_2y": {"Net_Profit": "13.252w", "Max_Drawdown": "6.320w", "Ann_Sharpe": "1.079", "Daily_Std": "0.402w"}, "kpi_6m": {"Net_Profit": "1.531w", "Max_Drawdown": "2.884w", "Ann_Sharpe": "0.601", "Daily_Std": "0.347w"}}, "children": [], "ratio": 158.5893516}, {"name": "CTA_1000W_IF", "kpi": {"kpi_2y": {"Net_Profit": "11.999w", "Max_Drawdown": "4.283w", "Ann_Sharpe": "1.208", "Daily_Std": "0.325w"}, "kpi_6m": {"Net_Profit": "-0.996w", "Max_Drawdown": "2.713w", "Ann_Sharpe": "-0.790", "Daily_Std": "0.172w"}}, "children": [], "ratio": 98.7045616}, {"name": "CTA_1000W_IH", "kpi": {"kpi_2y": {"Net_Profit": "2.906w", "Max_Drawdown": "6.698w", "Ann_Sharpe": "0.384", "Daily_Std": "0.248w"}, "kpi_6m": {"Net_Profit": "1.228w", "Max_Drawdown": "0.905w", "Ann_Sharpe": "1.116", "Daily_Std": "0.150w"}}, "children": [], "ratio": 15.82522816}, {"name": "CTA_1000W_IM", "kpi": {"kpi_2y": {"Net_Profit": "5.655w", "Max_Drawdown": "7.474w", "Ann_Sharpe": "0.483", "Daily_Std": "0.383w"}, "kpi_6m": {"Net_Profit": "-0.430w", "Max_Drawdown": "4.028w", "Ann_Sharpe": "-0.170", "Daily_Std": "0.345w"}}, "children": [], "ratio": 188.3375559}, {"name": "CTA_1000W_M", "kpi": {"kpi_2y": {"Net_Profit": "-6.196w", "Max_Drawdown": "14.587w", "Ann_Sharpe": "-0.444", "Daily_Std": "0.457w"}, "kpi_6m": {"Net_Profit": "-2.632w", "Max_Drawdown": "3.774w", "Ann_Sharpe": "-1.208", "Daily_Std": "0.297w"}}, "children": [], "ratio": 58.57095634}, {"name": "CTA_1000W_MA", "kpi": {"kpi_2y": {"Net_Profit": "-5.071w", "Max_Drawdown": "8.585w", "Ann_Sharpe": "-0.639", "Daily_Std": "0.260w"}, "kpi_6m": {"Net_Profit": "-0.527w", "Max_Drawdown": "1.810w", "Ann_Sharpe": "-0.392", "Daily_Std": "0.183w"}}, "children": [], "ratio": 6.947401908}, {"name": "CTA_1000W_P", "kpi": {"kpi_2y": {"Net_Profit": "1.562w", "Max_Drawdown": "12.056w", "Ann_Sharpe": "0.115", "Daily_Std": "0.445w"}, "kpi_6m": {"Net_Profit": "-0.772w", "Max_Drawdown": "2.741w", "Ann_Sharpe": "-0.558", "Daily_Std": "0.188w"}}, "children": [], "ratio": 12.45120356}, {"name": "CTA_1000W_PP", "kpi": {"kpi_2y": {"Net_Profit": "-2.718w", "Max_Drawdown": "6.755w", "Ann_Sharpe": "-0.447", "Daily_Std": "0.199w"}, "kpi_6m": {"Net_Profit": "-2.316w", "Max_Drawdown": "6.089w", "Ann_Sharpe": "-1.100", "Daily_Std": "0.287w"}}, "children": [], "ratio": 5.621987495}, {"name": "CTA_1000W_RB", "kpi": {"kpi_2y": {"Net_Profit": "5.340w", "Max_Drawdown": "4.655w", "Ann_Sharpe": "0.649", "Daily_Std": "0.269w"}, "kpi_6m": {"Net_Profit": "-2.837w", "Max_Drawdown": "4.655w", "Ann_Sharpe": "-1.967", "Daily_Std": "0.197w"}}, "children": [], "ratio": 160.6477297}, {"name": "CTA_1000W_RU", "kpi": {"kpi_2y": {"Net_Profit": "5.035w", "Max_Drawdown": "4.234w", "Ann_Sharpe": "0.634", "Daily_Std": "0.260w"}, "kpi_6m": {"Net_Profit": "-2.942w", "Max_Drawdown": "3.918w", "Ann_Sharpe": "-1.874", "Daily_Std": "0.214w"}}, "children": [], "ratio": 11.8139523}, {"name": "CTA_1000W_SA", "kpi": {"kpi_2y": {"Net_Profit": "9.316w", "Max_Drawdown": "3.366w", "Ann_Sharpe": "1.148", "Daily_Std": "0.266w"}, "kpi_6m": {"Net_Profit": "0.835w", "Max_Drawdown": "1.071w", "Ann_Sharpe": "0.830", "Daily_Std": "0.137w"}}, "children": [], "ratio": 6.782259388}, {"name": "CTA_1000W_SC", "kpi": {"kpi_2y": {"Net_Profit": "4.705w", "Max_Drawdown": "14.741w", "Ann_Sharpe": "0.259", "Daily_Std": "0.594w"}, "kpi_6m": {"Net_Profit": "-0.621w", "Max_Drawdown": "6.219w", "Ann_Sharpe": "-0.176", "Daily_Std": "0.482w"}}, "children": [], "ratio": 168.0850163}, {"name": "CTA_1000W_T", "kpi": {"kpi_2y": {"Net_Profit": "8.902w", "Max_Drawdown": "7.820w", "Ann_Sharpe": "0.543", "Daily_Std": "0.537w"}, "kpi_6m": {"Net_Profit": "3.023w", "Max_Drawdown": "0.818w", "Ann_Sharpe": "1.910", "Daily_Std": "0.216w"}}, "children": [], "ratio": 138.5600724}, {"name": "CTA_1000W_TF", "kpi": {"kpi_2y": {"Net_Profit": "2.852w", "Max_Drawdown": "2.960w", "Ann_Sharpe": "0.467", "Daily_Std": "0.200w"}, "kpi_6m": {"Net_Profit": "0.671w", "Max_Drawdown": "0.311w", "Ann_Sharpe": "1.216", "Daily_Std": "0.075w"}}, "children": [], "ratio": 108.2042976}, {"name": "CTA_1000W_TL", "kpi": {"kpi_2y": {"Net_Profit": "-1.849w", "Max_Drawdown": "11.588w", "Ann_Sharpe": "-0.139", "Daily_Std": "0.436w"}, "kpi_6m": {"Net_Profit": "0.273w", "Max_Drawdown": "0.972w", "Ann_Sharpe": "0.221", "Daily_Std": "0.168w"}}, "children": [], "ratio": 158.4659006}], "ratio": 43.57298475}, "volume_price_202603": {"name": "volume_price_202603", "kpi": {"kpi_2y": {"Net_Profit": "307.161w", "Max_Drawdown": "22.377w", "Ann_Sharpe": "3.201", "Daily_Std": "3.141w"}, "kpi_6m": {"Net_Profit": "49.138w", "Max_Drawdown": "22.377w", "Ann_Sharpe": "1.958", "Daily_Std": "3.421w"}}, "children": [{"name": "cta_4_tengfeng_20250308", "kpi": {"kpi_2y": {"Net_Profit": "284.233w", "Max_Drawdown": "34.963w", "Ann_Sharpe": "2.826", "Daily_Std": "3.292w"}, "kpi_6m": {"Net_Profit": "25.671w", "Max_Drawdown": "19.203w", "Ann_Sharpe": "1.268", "Daily_Std": "2.759w"}}, "children": [], "ratio": 43.57298475, "_drillable": true}, {"name": "CTA_14comms_20240815", "kpi": {"kpi_2y": {"Net_Profit": "84.570w", "Max_Drawdown": "11.269w", "Ann_Sharpe": "2.144", "Daily_Std": "1.291w"}, "kpi_6m": {"Net_Profit": "18.896w", "Max_Drawdown": "5.555w", "Ann_Sharpe": "2.374", "Daily_Std": "1.085w"}}, "children": [], "ratio": 108.9494163, "_drillable": true}, {"name": "Day_CTA_Cursor_CN_15comms", "kpi": {"kpi_2y": {"Net_Profit": "117.367w", "Max_Drawdown": "24.551w", "Ann_Sharpe": "1.911", "Daily_Std": "2.011w"}, "kpi_6m": {"Net_Profit": "2.160w", "Max_Drawdown": "24.551w", "Ann_Sharpe": "0.176", "Daily_Std": "1.673w"}}, "children": [], "ratio": 17.92114695}, {"name": "AutoSingleTiming_CN_14comms", "kpi": {"kpi_2y": {"Net_Profit": "210.647w", "Max_Drawdown": "45.114w", "Ann_Sharpe": "2.031", "Daily_Std": "3.396w"}, "kpi_6m": {"Net_Profit": "-7.917w", "Max_Drawdown": "45.114w", "Ann_Sharpe": "-0.323", "Daily_Std": "3.339w"}}, "children": [], "ratio": 7.784120394}, {"name": "LLM_VPxai_Wt", "kpi": {"kpi_2y": {"Net_Profit": "111.566w", "Max_Drawdown": "38.852w", "Ann_Sharpe": "1.275", "Daily_Std": "2.865w"}, "kpi_6m": {"Net_Profit": "21.456w", "Max_Drawdown": "38.852w", "Ann_Sharpe": "0.704", "Daily_Std": "4.156w"}}, "children": [], "ratio": 9.01306895}, {"name": "LLM_sentimentxai_Wt", "kpi": {"kpi_2y": {"Net_Profit": "244.989w", "Max_Drawdown": "40.669w", "Ann_Sharpe": "1.899", "Daily_Std": "4.224w"}, "kpi_6m": {"Net_Profit": "127.452w", "Max_Drawdown": "40.669w", "Ann_Sharpe": "2.534", "Daily_Std": "6.857w"}}, "children": [], "ratio": 11.33786848}, {"name": "rotation_global_future_raw", "kpi": {"kpi_2y": {"Net_Profit": "841.576w", "Max_Drawdown": "148.474w", "Ann_Sharpe": "2.081", "Daily_Std": "13.238w"}, "kpi_6m": {"Net_Profit": "310.463w", "Max_Drawdown": "148.474w", "Ann_Sharpe": "2.278", "Daily_Std": "18.579w"}}, "children": [], "ratio": 0.518134715}], "ratio": 24.62380301}, "multi_factor_202511": {"name": "multi_factor_202511", "kpi": {"kpi_2y": {"Net_Profit": "395.596w", "Max_Drawdown": "39.501w", "Ann_Sharpe": "2.656", "Daily_Std": "4.877w"}, "kpi_6m": {"Net_Profit": "27.338w", "Max_Drawdown": "38.555w", "Ann_Sharpe": "1.044", "Daily_Std": "3.570w"}}, "children": [{"name": "KeyExplainFactor_All_AU", "kpi": {"kpi_2y": {"Net_Profit": "27.491w", "Max_Drawdown": "8.645w", "Ann_Sharpe": "1.469", "Daily_Std": "0.613w"}, "kpi_6m": {"Net_Profit": "1.091w", "Max_Drawdown": "2.832w", "Ann_Sharpe": "0.569", "Daily_Std": "0.262w"}}, "children": [], "ratio": 12.6}, {"name": "KeyExplainFactor_All_CU", "kpi": {"kpi_2y": {"Net_Profit": "13.917w", "Max_Drawdown": "5.681w", "Ann_Sharpe": "0.882", "Daily_Std": "0.516w"}, "kpi_6m": {"Net_Profit": "-1.283w", "Max_Drawdown": "3.452w", "Ann_Sharpe": "-0.605", "Daily_Std": "0.289w"}}, "children": [], "ratio": 33.3}, {"name": "KeyExplainFactor_All_IF", "kpi": {"kpi_2y": {"Net_Profit": "-3.303w", "Max_Drawdown": "15.597w", "Ann_Sharpe": "-0.187", "Daily_Std": "0.578w"}, "kpi_6m": {"Net_Profit": "-2.232w", "Max_Drawdown": "3.938w", "Ann_Sharpe": "-0.827", "Daily_Std": "0.368w"}}, "children": [], "ratio": 55.5}, {"name": "KeyExplainFactor_All_IC", "kpi": {"kpi_2y": {"Net_Profit": "10.780w", "Max_Drawdown": "4.967w", "Ann_Sharpe": "1.055", "Daily_Std": "0.334w"}, "kpi_6m": {"Net_Profit": "2.047w", "Max_Drawdown": "0.219w", "Ann_Sharpe": "2.535", "Daily_Std": "0.110w"}}, "children": [], "ratio": 55.5}, {"name": "KeyExplainFactor_All_IH", "kpi": {"kpi_2y": {"Net_Profit": "-12.155w", "Max_Drawdown": "20.964w", "Ann_Sharpe": "-0.756", "Daily_Std": "0.527w"}, "kpi_6m": {"Net_Profit": "-1.723w", "Max_Drawdown": "3.349w", "Ann_Sharpe": "-0.797", "Daily_Std": "0.294w"}}, "children": [], "ratio": 11.1}, {"name": "KeyExplainFactor_All_IM", "kpi": {"kpi_2y": {"Net_Profit": "8.818w", "Max_Drawdown": "4.577w", "Ann_Sharpe": "1.010", "Daily_Std": "0.286w"}, "kpi_6m": {"Net_Profit": "5.247w", "Max_Drawdown": "0.975w", "Ann_Sharpe": "2.248", "Daily_Std": "0.318w"}}, "children": [], "ratio": 55.5}, {"name": "KeyExplainFactor_5comms_AU", "kpi": {"kpi_2y": {"Net_Profit": "666.373w", "Max_Drawdown": "122.517w", "Ann_Sharpe": "2.040", "Daily_Std": "10.695w"}, "kpi_6m": {"Net_Profit": "30.530w", "Max_Drawdown": "34.786w", "Ann_Sharpe": "1.207", "Daily_Std": "3.448w"}}, "children": [], "ratio": 1.26}, {"name": "Macro_KFS_Black", "kpi": {"kpi_2y": {"Net_Profit": "16.927w", "Max_Drawdown": "4.251w", "Ann_Sharpe": "2.083", "Daily_Std": "0.266w"}, "kpi_6m": {"Net_Profit": "1.385w", "Max_Drawdown": "3.079w", "Ann_Sharpe": "0.845", "Daily_Std": "0.223w"}}, "children": [], "ratio": 45.45454545}, {"name": "Macro_KFS_CU", "kpi": {"kpi_2y": {"Net_Profit": "78.028w", "Max_Drawdown": "13.976w", "Ann_Sharpe": "1.555", "Daily_Std": "1.643w"}, "kpi_6m": {"Net_Profit": "3.887w", "Max_Drawdown": "8.996w", "Ann_Sharpe": "0.606", "Daily_Std": "0.874w"}}, "children": [], "ratio": 11.87648456}, {"name": "Macro_KFS_M", "kpi": {"kpi_2y": {"Net_Profit": "5.817w", "Max_Drawdown": "2.146w", "Ann_Sharpe": "1.488", "Daily_Std": "0.128w"}, "kpi_6m": {"Net_Profit": "-1.403w", "Max_Drawdown": "1.663w", "Ann_Sharpe": "-2.189", "Daily_Std": "0.087w"}}, "children": [], "ratio": 26.21126761}, {"name": "Macro_KFS_SC", "kpi": {"kpi_2y": {"Net_Profit": "181.772w", "Max_Drawdown": "56.288w", "Ann_Sharpe": "1.398", "Daily_Std": "4.257w"}, "kpi_6m": {"Net_Profit": "-1.331w", "Max_Drawdown": "24.895w", "Ann_Sharpe": "-0.083", "Daily_Std": "2.178w"}}, "children": [], "ratio": 0.277683135}, {"name": "Bond_yield_curve_momrev", "kpi": {"kpi_2y": {"Net_Profit": "15.820w", "Max_Drawdown": "9.175w", "Ann_Sharpe": "0.689", "Daily_Std": "0.751w"}, "kpi_6m": {"Net_Profit": "-7.298w", "Max_Drawdown": "9.175w", "Ann_Sharpe": "-1.986", "Daily_Std": "0.501w"}}, "children": [], "ratio": 38.0}, {"name": "FM_202509_AL", "kpi": {"kpi_2y": {"Net_Profit": "1.218w", "Max_Drawdown": "0.990w", "Ann_Sharpe": "0.566", "Daily_Std": "0.070w"}, "kpi_6m": {"Net_Profit": "0.500w", "Max_Drawdown": "0.802w", "Ann_Sharpe": "0.696", "Daily_Std": "0.098w"}}, "children": [], "ratio": 700.0}, {"name": "FM_202509_CU", "kpi": {"kpi_2y": {"Net_Profit": "2.865w", "Max_Drawdown": "0.500w", "Ann_Sharpe": "1.554", "Daily_Std": "0.060w"}, "kpi_6m": {"Net_Profit": "0.628w", "Max_Drawdown": "0.500w", "Ann_Sharpe": "1.246", "Daily_Std": "0.069w"}}, "children": [], "ratio": 1200.0}, {"name": "FM_202509_SN", "kpi": {"kpi_2y": {"Net_Profit": "3.216w", "Max_Drawdown": "1.016w", "Ann_Sharpe": "1.430", "Daily_Std": "0.074w"}, "kpi_6m": {"Net_Profit": "0.383w", "Max_Drawdown": "0.866w", "Ann_Sharpe": "0.651", "Daily_Std": "0.080w"}}, "children": [], "ratio": 1050.0}, {"name": "FM_202509_LC", "kpi": {"kpi_2y": {"Net_Profit": "10.896w", "Max_Drawdown": "1.995w", "Ann_Sharpe": "2.163", "Daily_Std": "0.165w"}, "kpi_6m": {"Net_Profit": "1.579w", "Max_Drawdown": "1.995w", "Ann_Sharpe": "1.411", "Daily_Std": "0.153w"}}, "children": [], "ratio": 500.0}, {"name": "FM_202509_RB", "kpi": {"kpi_2y": {"Net_Profit": "-0.246w", "Max_Drawdown": "0.936w", "Ann_Sharpe": "-0.183", "Daily_Std": "0.044w"}, "kpi_6m": {"Net_Profit": "-0.131w", "Max_Drawdown": "0.426w", "Ann_Sharpe": "-0.595", "Daily_Std": "0.030w"}}, "children": [], "ratio": 300.0}, {"name": "FM_202509_HC", "kpi": {"kpi_2y": {"Net_Profit": "0.716w", "Max_Drawdown": "0.882w", "Ann_Sharpe": "0.478", "Daily_Std": "0.049w"}, "kpi_6m": {"Net_Profit": "-0.415w", "Max_Drawdown": "0.441w", "Ann_Sharpe": "-3.875", "Daily_Std": "0.015w"}}, "children": [], "ratio": 1500.0}, {"name": "FM_202509_I", "kpi": {"kpi_2y": {"Net_Profit": "-0.822w", "Max_Drawdown": "1.216w", "Ann_Sharpe": "-0.421", "Daily_Std": "0.064w"}, "kpi_6m": {"Net_Profit": "-0.373w", "Max_Drawdown": "0.595w", "Ann_Sharpe": "-1.553", "Daily_Std": "0.033w"}}, "children": [], "ratio": 700.0}, {"name": "FM_202509_J", "kpi": {"kpi_2y": {"Net_Profit": "2.916w", "Max_Drawdown": "1.556w", "Ann_Sharpe": "0.798", "Daily_Std": "0.120w"}, "kpi_6m": {"Net_Profit": "-0.701w", "Max_Drawdown": "1.552w", "Ann_Sharpe": "-0.788", "Daily_Std": "0.121w"}}, "children": [], "ratio": 200.0}, {"name": "FM_202509_JM", "kpi": {"kpi_2y": {"Net_Profit": "2.638w", "Max_Drawdown": "1.011w", "Ann_Sharpe": "1.090", "Daily_Std": "0.079w"}, "kpi_6m": {"Net_Profit": "-0.178w", "Max_Drawdown": "0.516w", "Ann_Sharpe": "-0.448", "Daily_Std": "0.054w"}}, "children": [], "ratio": 300.0}, {"name": "FM_202509_FG", "kpi": {"kpi_2y": {"Net_Profit": "7.234w", "Max_Drawdown": "1.734w", "Ann_Sharpe": "1.808", "Daily_Std": "0.131w"}, "kpi_6m": {"Net_Profit": "1.255w", "Max_Drawdown": "0.756w", "Ann_Sharpe": "1.696", "Daily_Std": "0.101w"}}, "children": [], "ratio": 1050.0}, {"name": "FM_202509_SC", "kpi": {"kpi_2y": {"Net_Profit": "0.418w", "Max_Drawdown": "2.284w", "Ann_Sharpe": "0.104", "Daily_Std": "0.132w"}, "kpi_6m": {"Net_Profit": "1.704w", "Max_Drawdown": "2.284w", "Ann_Sharpe": "1.034", "Daily_Std": "0.225w"}}, "children": [], "ratio": 588.0}, {"name": "FM_202509_TA", "kpi": {"kpi_2y": {"Net_Profit": "0.948w", "Max_Drawdown": "2.031w", "Ann_Sharpe": "0.394", "Daily_Std": "0.079w"}, "kpi_6m": {"Net_Profit": "-0.740w", "Max_Drawdown": "1.065w", "Ann_Sharpe": "-1.819", "Daily_Std": "0.055w"}}, "children": [], "ratio": 100.0}, {"name": "FM_202509_MA", "kpi": {"kpi_2y": {"Net_Profit": "-2.554w", "Max_Drawdown": "3.408w", "Ann_Sharpe": "-0.881", "Daily_Std": "0.095w"}, "kpi_6m": {"Net_Profit": "-3.144w", "Max_Drawdown": "3.144w", "Ann_Sharpe": "-3.282", "Daily_Std": "0.131w"}}, "children": [], "ratio": 100.0}, {"name": "FM_202509_M", "kpi": {"kpi_2y": {"Net_Profit": "0.111w", "Max_Drawdown": "1.411w", "Ann_Sharpe": "0.056", "Daily_Std": "0.065w"}, "kpi_6m": {"Net_Profit": "-0.380w", "Max_Drawdown": "1.387w", "Ann_Sharpe": "-0.709", "Daily_Std": "0.073w"}}, "children": [], "ratio": 800.0}, {"name": "FM_202509_FU", "kpi": {"kpi_2y": {"Net_Profit": "5.079w", "Max_Drawdown": "1.848w", "Ann_Sharpe": "0.958", "Daily_Std": "0.174w"}, "kpi_6m": {"Net_Profit": "5.296w", "Max_Drawdown": "1.848w", "Ann_Sharpe": "2.415", "Daily_Std": "0.299w"}}, "children": [], "ratio": 188.0}], "ratio": 6.139991813}, "multi_factor_202512": {"name": "multi_factor_202512", "kpi": {"kpi_2y": {"Net_Profit": "97.290w", "Max_Drawdown": "12.912w", "Ann_Sharpe": "2.924", "Daily_Std": "1.089w"}, "kpi_6m": {"Net_Profit": "-4.101w", "Max_Drawdown": "12.912w", "Ann_Sharpe": "-0.696", "Daily_Std": "0.803w"}}, "children": [{"name": "Bond_yield_curve_momrev", "kpi": {"kpi_2y": {"Net_Profit": "15.820w", "Max_Drawdown": "9.175w", "Ann_Sharpe": "0.689", "Daily_Std": "0.751w"}, "kpi_6m": {"Net_Profit": "-7.298w", "Max_Drawdown": "9.175w", "Ann_Sharpe": "-1.986", "Daily_Std": "0.501w"}}, "children": [], "ratio": 9.88}, {"name": "FM_202601_AG", "kpi": {"kpi_2y": {"Net_Profit": "5.082w", "Max_Drawdown": "4.088w", "Ann_Sharpe": "1.070", "Daily_Std": "0.156w"}, "kpi_6m": {"Net_Profit": "0.414w", "Max_Drawdown": "4.088w", "Ann_Sharpe": "0.234", "Daily_Std": "0.241w"}}, "children": [], "ratio": 120.0}, {"name": "FM_202601_AL", "kpi": {"kpi_2y": {"Net_Profit": "0.628w", "Max_Drawdown": "1.603w", "Ann_Sharpe": "0.211", "Daily_Std": "0.097w"}, "kpi_6m": {"Net_Profit": "0.013w", "Max_Drawdown": "1.089w", "Ann_Sharpe": "0.013", "Daily_Std": "0.146w"}}, "children": [], "ratio": 150.0}, {"name": "FM_202601_CU", "kpi": {"kpi_2y": {"Net_Profit": "2.512w", "Max_Drawdown": "0.965w", "Ann_Sharpe": "1.030", "Daily_Std": "0.080w"}, "kpi_6m": {"Net_Profit": "0.579w", "Max_Drawdown": "0.889w", "Ann_Sharpe": "0.723", "Daily_Std": "0.109w"}}, "children": [], "ratio": 220.0}, {"name": "FM_202601_LC", "kpi": {"kpi_2y": {"Net_Profit": "14.373w", "Max_Drawdown": "1.456w", "Ann_Sharpe": "2.274", "Daily_Std": "0.207w"}, "kpi_6m": {"Net_Profit": "2.081w", "Max_Drawdown": "1.369w", "Ann_Sharpe": "1.969", "Daily_Std": "0.144w"}}, "children": [], "ratio": 30.0}, {"name": "FM_202601_SN", "kpi": {"kpi_2y": {"Net_Profit": "5.065w", "Max_Drawdown": "1.048w", "Ann_Sharpe": "1.592", "Daily_Std": "0.104w"}, "kpi_6m": {"Net_Profit": "1.234w", "Max_Drawdown": "0.926w", "Ann_Sharpe": "1.516", "Daily_Std": "0.111w"}}, "children": [], "ratio": 120.0}, {"name": "FM_202601_FG", "kpi": {"kpi_2y": {"Net_Profit": "7.881w", "Max_Drawdown": "3.127w", "Ann_Sharpe": "1.447", "Daily_Std": "0.178w"}, "kpi_6m": {"Net_Profit": "1.502w", "Max_Drawdown": "0.912w", "Ann_Sharpe": "1.726", "Daily_Std": "0.119w"}}, "children": [], "ratio": 60.0}, {"name": "FM_202601_HC", "kpi": {"kpi_2y": {"Net_Profit": "1.456w", "Max_Drawdown": "0.663w", "Ann_Sharpe": "0.900", "Daily_Std": "0.053w"}, "kpi_6m": {"Net_Profit": "-0.358w", "Max_Drawdown": "0.392w", "Ann_Sharpe": "-2.523", "Daily_Std": "0.019w"}}, "children": [], "ratio": 180.0}, {"name": "FM_202601_I", "kpi": {"kpi_2y": {"Net_Profit": "-0.184w", "Max_Drawdown": "1.515w", "Ann_Sharpe": "-0.076", "Daily_Std": "0.080w"}, "kpi_6m": {"Net_Profit": "-0.215w", "Max_Drawdown": "0.646w", "Ann_Sharpe": "-0.633", "Daily_Std": "0.046w"}}, "children": [], "ratio": 100.0}, {"name": "FM_202601_J", "kpi": {"kpi_2y": {"Net_Profit": "4.485w", "Max_Drawdown": "2.295w", "Ann_Sharpe": "0.946", "Daily_Std": "0.155w"}, "kpi_6m": {"Net_Profit": "-1.039w", "Max_Drawdown": "1.927w", "Ann_Sharpe": "-0.908", "Daily_Std": "0.156w"}}, "children": [], "ratio": 80.0}, {"name": "FM_202601_JM", "kpi": {"kpi_2y": {"Net_Profit": "2.599w", "Max_Drawdown": "0.955w", "Ann_Sharpe": "1.107", "Daily_Std": "0.077w"}, "kpi_6m": {"Net_Profit": "-0.223w", "Max_Drawdown": "0.738w", "Ann_Sharpe": "-0.532", "Daily_Std": "0.057w"}}, "children": [], "ratio": 80.0}, {"name": "FM_202601_RB", "kpi": {"kpi_2y": {"Net_Profit": "0.218w", "Max_Drawdown": "0.573w", "Ann_Sharpe": "0.185", "Daily_Std": "0.039w"}, "kpi_6m": {"Net_Profit": "-0.220w", "Max_Drawdown": "0.366w", "Ann_Sharpe": "-0.993", "Daily_Std": "0.030w"}}, "children": [], "ratio": 80.0}, {"name": "FM_202601_MA", "kpi": {"kpi_2y": {"Net_Profit": "-2.999w", "Max_Drawdown": "4.335w", "Ann_Sharpe": "-0.825", "Daily_Std": "0.119w"}, "kpi_6m": {"Net_Profit": "-3.715w", "Max_Drawdown": "3.715w", "Ann_Sharpe": "-3.160", "Daily_Std": "0.160w"}}, "children": [], "ratio": 100.0}, {"name": "FM_202601_PX", "kpi": {"kpi_2y": {"Net_Profit": "-0.091w", "Max_Drawdown": "1.246w", "Ann_Sharpe": "-0.041", "Daily_Std": "0.073w"}, "kpi_6m": {"Net_Profit": "-0.884w", "Max_Drawdown": "1.018w", "Ann_Sharpe": "-2.412", "Daily_Std": "0.050w"}}, "children": [], "ratio": 50.0}, {"name": "FM_202601_SA", "kpi": {"kpi_2y": {"Net_Profit": "6.570w", "Max_Drawdown": "1.441w", "Ann_Sharpe": "1.726", "Daily_Std": "0.125w"}, "kpi_6m": {"Net_Profit": "0.589w", "Max_Drawdown": "0.349w", "Ann_Sharpe": "1.460", "Daily_Std": "0.055w"}}, "children": [], "ratio": 60.0}, {"name": "FM_202601_SC", "kpi": {"kpi_2y": {"Net_Profit": "-0.988w", "Max_Drawdown": "2.153w", "Ann_Sharpe": "-0.327", "Daily_Std": "0.099w"}, "kpi_6m": {"Net_Profit": "0.212w", "Max_Drawdown": "2.153w", "Ann_Sharpe": "0.193", "Daily_Std": "0.150w"}}, "children": [], "ratio": 238.0}, {"name": "FM_202601_TA", "kpi": {"kpi_2y": {"Net_Profit": "1.649w", "Max_Drawdown": "1.843w", "Ann_Sharpe": "0.562", "Daily_Std": "0.096w"}, "kpi_6m": {"Net_Profit": "0.088w", "Max_Drawdown": "0.905w", "Ann_Sharpe": "0.130", "Daily_Std": "0.092w"}}, "children": [], "ratio": 120.0}, {"name": "FM_202601_M", "kpi": {"kpi_2y": {"Net_Profit": "0.967w", "Max_Drawdown": "1.330w", "Ann_Sharpe": "0.377", "Daily_Std": "0.084w"}, "kpi_6m": {"Net_Profit": "-0.497w", "Max_Drawdown": "1.263w", "Ann_Sharpe": "-1.070", "Daily_Std": "0.063w"}}, "children": [], "ratio": 200.0}, {"name": "FM_202601_P", "kpi": {"kpi_2y": {"Net_Profit": "2.185w", "Max_Drawdown": "2.869w", "Ann_Sharpe": "0.439", "Daily_Std": "0.163w"}, "kpi_6m": {"Net_Profit": "-1.546w", "Max_Drawdown": "1.655w", "Ann_Sharpe": "-3.197", "Daily_Std": "0.066w"}}, "children": [], "ratio": 80.0}, {"name": "KeyExplainFactor_5comms_AU", "kpi": {"kpi_2y": {"Net_Profit": "666.373w", "Max_Drawdown": "122.517w", "Ann_Sharpe": "2.040", "Daily_Std": "10.695w"}, "kpi_6m": {"Net_Profit": "30.530w", "Max_Drawdown": "34.786w", "Ann_Sharpe": "1.207", "Daily_Std": "3.448w"}}, "children": [], "ratio": 0.8}, {"name": "KeyExplainFactor_5comms_CU", "kpi": {"kpi_2y": {"Net_Profit": "144.256w", "Max_Drawdown": "187.527w", "Ann_Sharpe": "0.539", "Daily_Std": "8.760w"}, "kpi_6m": {"Net_Profit": "2.506w", "Max_Drawdown": "32.655w", "Ann_Sharpe": "0.088", "Daily_Std": "3.897w"}}, "children": [], "ratio": 1.0}, {"name": "KeyExplainFactor_All_AU", "kpi": {"kpi_2y": {"Net_Profit": "27.491w", "Max_Drawdown": "8.645w", "Ann_Sharpe": "1.469", "Daily_Std": "0.613w"}, "kpi_6m": {"Net_Profit": "1.091w", "Max_Drawdown": "2.832w", "Ann_Sharpe": "0.569", "Daily_Std": "0.262w"}}, "children": [], "ratio": 11.1}, {"name": "KeyExplainFactor_All_CU", "kpi": {"kpi_2y": {"Net_Profit": "13.917w", "Max_Drawdown": "5.681w", "Ann_Sharpe": "0.882", "Daily_Std": "0.516w"}, "kpi_6m": {"Net_Profit": "-1.283w", "Max_Drawdown": "3.452w", "Ann_Sharpe": "-0.605", "Daily_Std": "0.289w"}}, "children": [], "ratio": 22.2}, {"name": "KeyExplainFactor_All_IC", "kpi": {"kpi_2y": {"Net_Profit": "10.780w", "Max_Drawdown": "4.967w", "Ann_Sharpe": "1.055", "Daily_Std": "0.334w"}, "kpi_6m": {"Net_Profit": "2.047w", "Max_Drawdown": "0.219w", "Ann_Sharpe": "2.535", "Daily_Std": "0.110w"}}, "children": [], "ratio": 108.0}, {"name": "Macro_KFS_Black", "kpi": {"kpi_2y": {"Net_Profit": "16.927w", "Max_Drawdown": "4.251w", "Ann_Sharpe": "2.083", "Daily_Std": "0.266w"}, "kpi_6m": {"Net_Profit": "1.385w", "Max_Drawdown": "3.079w", "Ann_Sharpe": "0.845", "Daily_Std": "0.223w"}}, "children": [], "ratio": 38.0}, {"name": "Macro_KFS_CU", "kpi": {"kpi_2y": {"Net_Profit": "78.028w", "Max_Drawdown": "13.976w", "Ann_Sharpe": "1.555", "Daily_Std": "1.643w"}, "kpi_6m": {"Net_Profit": "3.887w", "Max_Drawdown": "8.996w", "Ann_Sharpe": "0.606", "Daily_Std": "0.874w"}}, "children": [], "ratio": 12.0}, {"name": "Macro_KFS_M", "kpi": {"kpi_2y": {"Net_Profit": "5.817w", "Max_Drawdown": "2.146w", "Ann_Sharpe": "1.488", "Daily_Std": "0.128w"}, "kpi_6m": {"Net_Profit": "-1.403w", "Max_Drawdown": "1.663w", "Ann_Sharpe": "-2.189", "Daily_Std": "0.087w"}}, "children": [], "ratio": 26.0}, {"name": "Macro_KFS_SC", "kpi": {"kpi_2y": {"Net_Profit": "181.772w", "Max_Drawdown": "56.288w", "Ann_Sharpe": "1.398", "Daily_Std": "4.257w"}, "kpi_6m": {"Net_Profit": "-1.331w", "Max_Drawdown": "24.895w", "Ann_Sharpe": "-0.083", "Daily_Std": "2.178w"}}, "children": [], "ratio": 1.5}, {"name": "FM_202601_FU", "kpi": {"kpi_2y": {"Net_Profit": "3.069w", "Max_Drawdown": "1.891w", "Ann_Sharpe": "0.662", "Daily_Std": "0.152w"}, "kpi_6m": {"Net_Profit": "3.916w", "Max_Drawdown": "1.444w", "Ann_Sharpe": "2.209", "Daily_Std": "0.242w"}}, "children": [], "ratio": 180.0}], "ratio": 15.61912895}, "event_driven_202603": {"name": "event_driven_202603", "kpi": {"kpi_2y": {"Net_Profit": "153.746w", "Max_Drawdown": "50.700w", "Ann_Sharpe": "1.725", "Daily_Std": "2.917w"}, "kpi_6m": {"Net_Profit": "1.182w", "Max_Drawdown": "50.700w", "Ann_Sharpe": "0.039", "Daily_Std": "4.102w"}}, "children": [{"name": "LLM_basis_Wt", "kpi": {"kpi_2y": {"Net_Profit": "62.014w", "Max_Drawdown": "16.072w", "Ann_Sharpe": "1.413", "Daily_Std": "1.437w"}, "kpi_6m": {"Net_Profit": "12.977w", "Max_Drawdown": "15.537w", "Ann_Sharpe": "0.958", "Daily_Std": "1.847w"}}, "children": [], "ratio": 32.01024328}, {"name": "LLM_keyeventv1_Wt", "kpi": {"kpi_2y": {"Net_Profit": "31.363w", "Max_Drawdown": "22.962w", "Ann_Sharpe": "0.808", "Daily_Std": "1.271w"}, "kpi_6m": {"Net_Profit": "31.363w", "Max_Drawdown": "22.962w", "Ann_Sharpe": "1.650", "Daily_Std": "2.591w"}}, "children": [], "ratio": 68.8894646}], "ratio": 1.8638806949}, "tengfeng_500w_202606": {"name": "tengfeng_500w_202606", "kpi": {"kpi_2y": {"Net_Profit": "241.114w", "Max_Drawdown": "22.879w", "Ann_Sharpe": "3.030", "Daily_Std": "2.605w"}, "kpi_6m": {"Net_Profit": "81.683w", "Max_Drawdown": "22.879w", "Ann_Sharpe": "3.396", "Daily_Std": "3.278w"}}, "children": [{"name": "CN_EconCycle_v1", "kpi": {"kpi_2y": {"Net_Profit": "188.997w", "Max_Drawdown": "35.921w", "Ann_Sharpe": "1.547", "Daily_Std": "3.999w"}, "kpi_6m": {"Net_Profit": "59.192w", "Max_Drawdown": "33.135w", "Ann_Sharpe": "1.631", "Daily_Std": "4.948w"}}, "children": [], "ratio": 28.63688431}, {"name": "CN_BondCycle_v1", "kpi": {"kpi_2y": {"Net_Profit": "500.398w", "Max_Drawdown": "139.664w", "Ann_Sharpe": "1.704", "Daily_Std": "9.610w"}, "kpi_6m": {"Net_Profit": "207.060w", "Max_Drawdown": "68.160w", "Ann_Sharpe": "2.464", "Daily_Std": "11.452w"}}, "children": [], "ratio": 5.059021922}, {"name": "CN_OPTBS_v1", "kpi": {"kpi_2y": {"Net_Profit": "313.833w", "Max_Drawdown": "58.822w", "Ann_Sharpe": "1.569", "Daily_Std": "6.549w"}, "kpi_6m": {"Net_Profit": "149.900w", "Max_Drawdown": "53.480w", "Ann_Sharpe": "2.474", "Daily_Std": "8.258w"}}, "children": [], "ratio": 7.874969712}, {"name": "CN_VP_TS_v1", "kpi": {"kpi_2y": {"Net_Profit": "538.303w", "Max_Drawdown": "56.883w", "Ann_Sharpe": "2.446", "Daily_Std": "7.203w"}, "kpi_6m": {"Net_Profit": "110.025w", "Max_Drawdown": "56.883w", "Ann_Sharpe": "1.918", "Daily_Std": "7.820w"}}, "children": [], "ratio": 7.828156313}, {"name": "CN_VP_XS_v1", "kpi": {"kpi_2y": {"Net_Profit": "107.915w", "Max_Drawdown": "41.755w", "Ann_Sharpe": "1.147", "Daily_Std": "3.080w"}, "kpi_6m": {"Net_Profit": "19.549w", "Max_Drawdown": "39.592w", "Ann_Sharpe": "0.716", "Daily_Std": "3.723w"}}, "children": [], "ratio": 6.50026001}, {"name": "LLM_sentimentxaiall_1000w", "kpi": {"kpi_2y": {"Net_Profit": "401.494w", "Max_Drawdown": "55.622w", "Ann_Sharpe": "1.942", "Daily_Std": "6.768w"}, "kpi_6m": {"Net_Profit": "277.257w", "Max_Drawdown": "55.622w", "Ann_Sharpe": "3.005", "Daily_Std": "12.577w"}}, "children": [], "ratio": 4.849268569}, {"name": "CTA_14comms_20240815", "kpi": {"kpi_2y": {"Net_Profit": "84.570w", "Max_Drawdown": "11.269w", "Ann_Sharpe": "2.144", "Daily_Std": "1.291w"}, "kpi_6m": {"Net_Profit": "18.896w", "Max_Drawdown": "5.555w", "Ann_Sharpe": "2.374", "Daily_Std": "1.085w"}}, "children": [], "ratio": 46.18473896, "_drillable": true}, {"name": "CN_MEMBER_SIF_V1", "kpi": {"kpi_2y": {"Net_Profit": "473.384w", "Max_Drawdown": "100.837w", "Ann_Sharpe": "1.995", "Daily_Std": "7.769w"}, "kpi_6m": {"Net_Profit": "139.441w", "Max_Drawdown": "53.135w", "Ann_Sharpe": "2.854", "Daily_Std": "6.659w"}}, "children": [], "ratio": 5.059021922}], "ratio": 26.0}, "minblock_sif_vp_202507": {"name": "minblock_sif_vp_202507", "kpi": {"kpi_2y": {"Net_Profit": "59.376w", "Max_Drawdown": "15.917w", "Ann_Sharpe": "1.857", "Daily_Std": "1.047w"}, "kpi_6m": {"Net_Profit": "12.497w", "Max_Drawdown": "9.828w", "Ann_Sharpe": "1.354", "Daily_Std": "1.258w"}}, "children": [{"name": "minblock_sif_vp_202409", "kpi": {"kpi_2y": {"Net_Profit": "52.205w", "Max_Drawdown": "17.091w", "Ann_Sharpe": "1.474", "Daily_Std": "1.159w"}, "kpi_6m": {"Net_Profit": "12.377w", "Max_Drawdown": "9.022w", "Ann_Sharpe": "1.235", "Daily_Std": "1.366w"}}, "children": [], "ratio": 70.0, "_drillable": true}, {"name": "pyelf_StockArbRev_day_202509_long", "kpi": {}, "children": [], "ratio": 5.0}, {"name": "minblock_sif_vp_202605", "kpi": {"kpi_2y": {"Net_Profit": "83.476w", "Max_Drawdown": "13.159w", "Ann_Sharpe": "2.113", "Daily_Std": "1.293w"}, "kpi_6m": {"Net_Profit": "16.290w", "Max_Drawdown": "7.756w", "Ann_Sharpe": "1.511", "Daily_Std": "1.470w"}}, "children": [], "ratio": 25.0, "_drillable": true}], "ratio": 8.175025487609625}, "minblock_sif_vp_202409": {"name": "minblock_sif_vp_202409", "kpi": {"kpi_2y": {"Net_Profit": "52.205w", "Max_Drawdown": "17.091w", "Ann_Sharpe": "1.474", "Daily_Std": "1.159w"}, "kpi_6m": {"Net_Profit": "12.377w", "Max_Drawdown": "9.022w", "Ann_Sharpe": "1.235", "Daily_Std": "1.366w"}}, "children": [{"name": "RawSigSSTwo_Stock_IterBKT_2604", "kpi": {"kpi_2y": {"Net_Profit": "39.844w", "Max_Drawdown": "7.188w", "Ann_Sharpe": "1.502", "Daily_Std": "0.869w"}, "kpi_6m": {"Net_Profit": "11.208w", "Max_Drawdown": "4.954w", "Ann_Sharpe": "1.682", "Daily_Std": "0.908w"}}, "children": [], "ratio": 29.294}, {"name": "pyelf_StockDTMorning_Index", "kpi": {"kpi_2y": {"Net_Profit": "21.642w", "Max_Drawdown": "22.574w", "Ann_Sharpe": "0.520", "Daily_Std": "1.363w"}, "kpi_6m": {"Net_Profit": "-3.450w", "Max_Drawdown": "18.566w", "Ann_Sharpe": "-0.260", "Daily_Std": "1.809w"}}, "children": [], "ratio": 20.107, "_drillable": true}, {"name": "Enet_StockIndex_Fierce_3W", "kpi": {"kpi_2y": {"Net_Profit": "205.358w", "Max_Drawdown": "61.773w", "Ann_Sharpe": "1.367", "Daily_Std": "4.918w"}, "kpi_6m": {"Net_Profit": "53.241w", "Max_Drawdown": "27.440w", "Ann_Sharpe": "1.594", "Daily_Std": "4.553w"}}, "children": [], "ratio": 16.347, "_drillable": true}, {"name": "pyelf_stocks_sif", "kpi": {"kpi_2y": {"Net_Profit": "127.324w", "Max_Drawdown": "14.916w", "Ann_Sharpe": "1.993", "Daily_Std": "2.091w"}, "kpi_6m": {"Net_Profit": "25.651w", "Max_Drawdown": "13.813w", "Ann_Sharpe": "1.302", "Daily_Std": "2.686w"}}, "children": [], "ratio": 19.25, "_drillable": true}], "ratio": 70.0}, "pyelf_StockDTMorning_Index": {"name": "pyelf_StockDTMorning_Index", "kpi": {"kpi_2y": {"Net_Profit": "21.642w", "Max_Drawdown": "22.574w", "Ann_Sharpe": "0.520", "Daily_Std": "1.363w"}, "kpi_6m": {"Net_Profit": "-3.450w", "Max_Drawdown": "18.566w", "Ann_Sharpe": "-0.260", "Daily_Std": "1.809w"}}, "children": [{"name": "PYELF_STOCKDTTURMORNING_DAY_2020", "kpi": {"kpi_2y": {"Net_Profit": "44.125w", "Max_Drawdown": "47.717w", "Ann_Sharpe": "0.477", "Daily_Std": "3.025w"}, "kpi_6m": {"Net_Profit": "-4.625w", "Max_Drawdown": "47.717w", "Ann_Sharpe": "-0.158", "Daily_Std": "3.981w"}}, "children": [], "ratio": 14.0}, {"name": "pyelf_StockDTTurNoon_day_2020", "kpi": {"kpi_2y": {"Net_Profit": "79.274w", "Max_Drawdown": "63.127w", "Ann_Sharpe": "0.786", "Daily_Std": "3.303w"}, "kpi_6m": {"Net_Profit": "-6.252w", "Max_Drawdown": "39.076w", "Ann_Sharpe": "-0.191", "Daily_Std": "4.455w"}}, "children": [], "ratio": 36.0}], "ratio": 20.107}, "Enet_StockIndex_Fierce_3W": {"name": "Enet_StockIndex_Fierce_3W", "kpi": {"kpi_2y": {"Net_Profit": "205.358w", "Max_Drawdown": "61.773w", "Ann_Sharpe": "1.367", "Daily_Std": "4.918w"}, "kpi_6m": {"Net_Profit": "53.241w", "Max_Drawdown": "27.440w", "Ann_Sharpe": "1.594", "Daily_Std": "4.553w"}}, "children": [{"name": "pyelf_EnetTrendStockIndexShort_day_2020wf", "kpi": {"kpi_2y": {"Net_Profit": "92.339w", "Max_Drawdown": "35.802w", "Ann_Sharpe": "1.113", "Daily_Std": "2.716w"}, "kpi_6m": {"Net_Profit": "23.424w", "Max_Drawdown": "35.802w", "Ann_Sharpe": "0.947", "Daily_Std": "3.372w"}}, "children": [], "ratio": 7.844}, {"name": "pyelf_EnetTrendStockIndex_day_2020wf", "kpi": {"kpi_2y": {"Net_Profit": "41.783w", "Max_Drawdown": "16.446w", "Ann_Sharpe": "0.958", "Daily_Std": "1.428w"}, "kpi_6m": {"Net_Profit": "2.874w", "Max_Drawdown": "16.446w", "Ann_Sharpe": "0.283", "Daily_Std": "1.383w"}}, "children": [], "ratio": 46.17}, {"name": "pyelf_ENetMultiFactor_stock_day_2020wf", "kpi": {"kpi_2y": {"Net_Profit": "58.145w", "Max_Drawdown": "20.456w", "Ann_Sharpe": "1.416", "Daily_Std": "1.344w"}, "kpi_6m": {"Net_Profit": "17.136w", "Max_Drawdown": "5.741w", "Ann_Sharpe": "1.902", "Daily_Std": "1.228w"}}, "children": [], "ratio": 277.16}, {"name": "pyelf_EnetRocXY_Stock_2022", "kpi": {"kpi_2y": {"Net_Profit": "63.485w", "Max_Drawdown": "19.638w", "Ann_Sharpe": "1.075", "Daily_Std": "1.933w"}, "kpi_6m": {"Net_Profit": "7.622w", "Max_Drawdown": "19.600w", "Ann_Sharpe": "0.523", "Daily_Std": "1.987w"}}, "children": [], "ratio": 33.74}], "ratio": 16.347}, "pyelf_stocks_sif": {"name": "pyelf_stocks_sif", "kpi": {"kpi_2y": {"Net_Profit": "127.324w", "Max_Drawdown": "14.916w", "Ann_Sharpe": "1.993", "Daily_Std": "2.091w"}, "kpi_6m": {"Net_Profit": "25.651w", "Max_Drawdown": "13.813w", "Ann_Sharpe": "1.302", "Daily_Std": "2.686w"}}, "children": [{"name": "pyelf_TradeVsw_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "113.779w", "Max_Drawdown": "22.930w", "Ann_Sharpe": "1.719", "Daily_Std": "2.167w"}, "kpi_6m": {"Net_Profit": "25.068w", "Max_Drawdown": "20.490w", "Ann_Sharpe": "1.300", "Daily_Std": "2.629w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswRR_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "92.103w", "Max_Drawdown": "48.209w", "Ann_Sharpe": "1.349", "Daily_Std": "2.236w"}, "kpi_6m": {"Net_Profit": "-1.279w", "Max_Drawdown": "38.880w", "Ann_Sharpe": "-0.065", "Daily_Std": "2.664w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "98.514w", "Max_Drawdown": "23.422w", "Ann_Sharpe": "1.468", "Daily_Std": "2.196w"}, "kpi_6m": {"Net_Profit": "14.774w", "Max_Drawdown": "20.001w", "Ann_Sharpe": "0.761", "Daily_Std": "2.646w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswRRLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "91.573w", "Max_Drawdown": "32.953w", "Ann_Sharpe": "1.448", "Daily_Std": "2.070w"}, "kpi_6m": {"Net_Profit": "-1.403w", "Max_Drawdown": "31.285w", "Ann_Sharpe": "-0.075", "Daily_Std": "2.564w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_lob_filtered", "kpi": {"kpi_2y": {"Net_Profit": "145.977w", "Max_Drawdown": "15.813w", "Ann_Sharpe": "2.282", "Daily_Std": "2.094w"}, "kpi_6m": {"Net_Profit": "27.278w", "Max_Drawdown": "15.813w", "Ann_Sharpe": "1.171", "Daily_Std": "3.174w"}}, "children": [], "ratio": 40.0}, {"name": "pyelf_TradeWoOacNsVsw_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "120.164w", "Max_Drawdown": "26.824w", "Ann_Sharpe": "1.827", "Daily_Std": "2.153w"}, "kpi_6m": {"Net_Profit": "50.157w", "Max_Drawdown": "14.433w", "Ann_Sharpe": "2.600", "Daily_Std": "2.629w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeWoOacNsVswRR_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "104.418w", "Max_Drawdown": "32.245w", "Ann_Sharpe": "1.689", "Daily_Std": "2.024w"}, "kpi_6m": {"Net_Profit": "26.309w", "Max_Drawdown": "18.593w", "Ann_Sharpe": "1.387", "Daily_Std": "2.586w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeWoOacNsVswLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "104.708w", "Max_Drawdown": "25.953w", "Ann_Sharpe": "1.637", "Daily_Std": "2.093w"}, "kpi_6m": {"Net_Profit": "38.080w", "Max_Drawdown": "14.018w", "Ann_Sharpe": "1.947", "Daily_Std": "2.666w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeWoOacNsVswRRLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "97.646w", "Max_Drawdown": "29.922w", "Ann_Sharpe": "1.661", "Daily_Std": "1.925w"}, "kpi_6m": {"Net_Profit": "18.799w", "Max_Drawdown": "17.238w", "Ann_Sharpe": "1.012", "Daily_Std": "2.532w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswAddLob_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "106.423w", "Max_Drawdown": "17.399w", "Ann_Sharpe": "1.653", "Daily_Std": "2.108w"}, "kpi_6m": {"Net_Profit": "17.033w", "Max_Drawdown": "17.399w", "Ann_Sharpe": "0.876", "Daily_Std": "2.651w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswAddLobLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "99.436w", "Max_Drawdown": "17.414w", "Ann_Sharpe": "1.537", "Daily_Std": "2.118w"}, "kpi_6m": {"Net_Profit": "12.174w", "Max_Drawdown": "17.354w", "Ann_Sharpe": "0.628", "Daily_Std": "2.643w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeWoOacNsVswAddLob_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "112.978w", "Max_Drawdown": "21.128w", "Ann_Sharpe": "1.747", "Daily_Std": "2.117w"}, "kpi_6m": {"Net_Profit": "20.137w", "Max_Drawdown": "20.262w", "Ann_Sharpe": "0.982", "Daily_Std": "2.795w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeWoOacNsVswAddLobLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "112.019w", "Max_Drawdown": "20.212w", "Ann_Sharpe": "1.735", "Daily_Std": "2.113w"}, "kpi_6m": {"Net_Profit": "17.091w", "Max_Drawdown": "18.884w", "Ann_Sharpe": "0.836", "Daily_Std": "2.788w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswAddLob_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "106.423w", "Max_Drawdown": "17.399w", "Ann_Sharpe": "1.653", "Daily_Std": "2.108w"}, "kpi_6m": {"Net_Profit": "17.033w", "Max_Drawdown": "17.399w", "Ann_Sharpe": "0.876", "Daily_Std": "2.651w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_TradeVswAddLobLobFilter_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "99.436w", "Max_Drawdown": "17.414w", "Ann_Sharpe": "1.537", "Daily_Std": "2.118w"}, "kpi_6m": {"Net_Profit": "12.174w", "Max_Drawdown": "17.354w", "Ann_Sharpe": "0.628", "Daily_Std": "2.643w"}}, "children": [], "ratio": 0.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_5", "kpi": {"kpi_2y": {"Net_Profit": "133.530w", "Max_Drawdown": "14.575w", "Ann_Sharpe": "2.225", "Daily_Std": "1.965w"}, "kpi_6m": {"Net_Profit": "24.159w", "Max_Drawdown": "14.575w", "Ann_Sharpe": "1.344", "Daily_Std": "2.451w"}}, "children": [], "ratio": 10.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_6", "kpi": {"kpi_2y": {"Net_Profit": "110.823w", "Max_Drawdown": "18.259w", "Ann_Sharpe": "1.917", "Daily_Std": "1.893w"}, "kpi_6m": {"Net_Profit": "31.815w", "Max_Drawdown": "11.566w", "Ann_Sharpe": "1.909", "Daily_Std": "2.272w"}}, "children": [], "ratio": 10.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_1", "kpi": {"kpi_2y": {"Net_Profit": "54.839w", "Max_Drawdown": "23.448w", "Ann_Sharpe": "1.421", "Daily_Std": "1.263w"}, "kpi_6m": {"Net_Profit": "2.387w", "Max_Drawdown": "23.448w", "Ann_Sharpe": "0.171", "Daily_Std": "1.907w"}}, "children": [], "ratio": 10.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_2", "kpi": {"kpi_2y": {"Net_Profit": "99.463w", "Max_Drawdown": "16.266w", "Ann_Sharpe": "1.779", "Daily_Std": "1.830w"}, "kpi_6m": {"Net_Profit": "12.854w", "Max_Drawdown": "16.266w", "Ann_Sharpe": "0.800", "Daily_Std": "2.189w"}}, "children": [], "ratio": 10.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_3", "kpi": {"kpi_2y": {"Net_Profit": "49.798w", "Max_Drawdown": "30.106w", "Ann_Sharpe": "0.845", "Daily_Std": "1.930w"}, "kpi_6m": {"Net_Profit": "12.437w", "Max_Drawdown": "15.006w", "Ann_Sharpe": "0.730", "Daily_Std": "2.323w"}}, "children": [], "ratio": 10.0}, {"name": "pyelf_OrderMrmMinmax_sif_1_4", "kpi": {"kpi_2y": {"Net_Profit": "91.149w", "Max_Drawdown": "26.126w", "Ann_Sharpe": "1.603", "Daily_Std": "1.862w"}, "kpi_6m": {"Net_Profit": "30.730w", "Max_Drawdown": "17.679w", "Ann_Sharpe": "1.786", "Daily_Std": "2.345w"}}, "children": [], "ratio": 10.0}], "ratio": 19.25}, "minblock_sif_vp_202605": {"name": "minblock_sif_vp_202605", "kpi": {"kpi_2y": {"Net_Profit": "83.476w", "Max_Drawdown": "13.159w", "Ann_Sharpe": "2.113", "Daily_Std": "1.293w"}, "kpi_6m": {"Net_Profit": "16.290w", "Max_Drawdown": "7.756w", "Ann_Sharpe": "1.511", "Daily_Std": "1.470w"}}, "children": [{"name": "minblock_sif_vp_202409_IH", "kpi": {"kpi_2y": {"Net_Profit": "0.145w", "Max_Drawdown": "6.826w", "Ann_Sharpe": "0.019", "Daily_Std": "0.250w"}, "kpi_6m": {"Net_Profit": "-0.103w", "Max_Drawdown": "2.428w", "Ann_Sharpe": "-0.055", "Daily_Std": "0.258w"}}, "children": [], "ratio": 50.0}, {"name": "minblock_sif_vp_202409_IF", "kpi": {"kpi_2y": {"Net_Profit": "10.269w", "Max_Drawdown": "5.785w", "Ann_Sharpe": "1.087", "Daily_Std": "0.309w"}, "kpi_6m": {"Net_Profit": "-3.513w", "Max_Drawdown": "5.216w", "Ann_Sharpe": "-1.670", "Daily_Std": "0.287w"}}, "children": [], "ratio": 100.0}, {"name": "minblock_sif_vp_202409_IC", "kpi": {"kpi_2y": {"Net_Profit": "26.080w", "Max_Drawdown": "5.339w", "Ann_Sharpe": "1.976", "Daily_Std": "0.432w"}, "kpi_6m": {"Net_Profit": "8.852w", "Max_Drawdown": "2.628w", "Ann_Sharpe": "2.188", "Daily_Std": "0.551w"}}, "children": [], "ratio": 120.0}, {"name": "minblock_sif_vp_202409_IM", "kpi": {"kpi_2y": {"Net_Profit": "15.710w", "Max_Drawdown": "7.093w", "Ann_Sharpe": "1.216", "Daily_Std": "0.423w"}, "kpi_6m": {"Net_Profit": "7.141w", "Max_Drawdown": "3.522w", "Ann_Sharpe": "1.788", "Daily_Std": "0.544w"}}, "children": [], "ratio": 115.0}], "ratio": 25.0}, "minblock_ttf_202501": {"name": "minblock_ttf_202501", "kpi": {"kpi_2y": {"Net_Profit": "12.203w", "Max_Drawdown": "25.412w", "Ann_Sharpe": "0.456", "Daily_Std": "0.876w"}, "kpi_6m": {"Net_Profit": "-5.915w", "Max_Drawdown": "9.393w", "Ann_Sharpe": "-1.776", "Daily_Std": "0.454w"}}, "children": [{"name": "pyelf_TTF_Index", "kpi": {"kpi_2y": {"Net_Profit": "17.679w", "Max_Drawdown": "24.906w", "Ann_Sharpe": "0.575", "Daily_Std": "1.006w"}, "kpi_6m": {"Net_Profit": "-7.799w", "Max_Drawdown": "14.108w", "Ann_Sharpe": "-1.310", "Daily_Std": "0.812w"}}, "children": [], "ratio": 50.0, "_drillable": true}], "ratio": 1.871354373147577}, "pyelf_TTF_Index": {"name": "pyelf_TTF_Index", "kpi": {"kpi_2y": {"Net_Profit": "17.679w", "Max_Drawdown": "24.906w", "Ann_Sharpe": "0.575", "Daily_Std": "1.006w"}, "kpi_6m": {"Net_Profit": "-7.799w", "Max_Drawdown": "14.108w", "Ann_Sharpe": "-1.310", "Daily_Std": "0.812w"}}, "children": [{"name": "pyelf_TTFDTMorning_Index", "kpi": {"kpi_2y": {"Net_Profit": "21.020w", "Max_Drawdown": "26.014w", "Ann_Sharpe": "0.495", "Daily_Std": "1.391w"}, "kpi_6m": {"Net_Profit": "-5.558w", "Max_Drawdown": "11.946w", "Ann_Sharpe": "-1.083", "Daily_Std": "0.700w"}}, "children": [], "ratio": 36.0, "_drillable": true}, {"name": "AutoCTA_TTFDaily_Mom_2024", "kpi": {"kpi_2y": {"Net_Profit": "11.866w", "Max_Drawdown": "29.680w", "Ann_Sharpe": "0.340", "Daily_Std": "1.144w"}, "kpi_6m": {"Net_Profit": "-10.630w", "Max_Drawdown": "21.047w", "Ann_Sharpe": "-1.240", "Daily_Std": "1.168w"}}, "children": [], "ratio": 30.0}, {"name": "Enet_Tonly_index_1W", "kpi": {"kpi_2y": {"Net_Profit": "0.395w", "Max_Drawdown": "28.289w", "Ann_Sharpe": "0.018", "Daily_Std": "0.736w"}, "kpi_6m": {"Net_Profit": "-6.971w", "Max_Drawdown": "10.306w", "Ann_Sharpe": "-1.601", "Daily_Std": "0.594w"}}, "children": [], "ratio": 0.0, "_drillable": true}, {"name": "pyelf_ZJQttf_bias", "kpi": {"kpi_2y": {"Net_Profit": "12.300w", "Max_Drawdown": "14.020w", "Ann_Sharpe": "0.429", "Daily_Std": "0.940w"}, "kpi_6m": {"Net_Profit": "-3.362w", "Max_Drawdown": "10.803w", "Ann_Sharpe": "-0.516", "Daily_Std": "0.888w"}}, "children": [], "ratio": 36.92307692}, {"name": "pyelf_ZJQttf_pos", "kpi": {"kpi_2y": {"Net_Profit": "14.187w", "Max_Drawdown": "14.964w", "Ann_Sharpe": "0.581", "Daily_Std": "0.799w"}, "kpi_6m": {"Net_Profit": "2.283w", "Max_Drawdown": "5.390w", "Ann_Sharpe": "0.480", "Daily_Std": "0.648w"}}, "children": [], "ratio": 43.63636364}, {"name": "pyelf_21ENetBond_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.964w", "Max_Drawdown": "3.298w", "Ann_Sharpe": "-0.273", "Daily_Std": "0.116w"}, "kpi_6m": {"Net_Profit": "-1.607w", "Max_Drawdown": "1.854w", "Ann_Sharpe": "-1.965", "Daily_Std": "0.111w"}}, "children": [], "ratio": 0.0, "_drillable": true}], "ratio": 50.0}, "pyelf_TTFDTMorning_Index": {"name": "pyelf_TTFDTMorning_Index", "kpi": {"kpi_2y": {"Net_Profit": "21.020w", "Max_Drawdown": "26.014w", "Ann_Sharpe": "0.495", "Daily_Std": "1.391w"}, "kpi_6m": {"Net_Profit": "-5.558w", "Max_Drawdown": "11.946w", "Ann_Sharpe": "-1.083", "Daily_Std": "0.700w"}}, "children": [{"name": "pyelf_TTFDTMorningKN_day_2022", "kpi": {"kpi_2y": {"Net_Profit": "41.106w", "Max_Drawdown": "34.382w", "Ann_Sharpe": "0.644", "Daily_Std": "2.090w"}, "kpi_6m": {"Net_Profit": "3.439w", "Max_Drawdown": "11.846w", "Ann_Sharpe": "0.434", "Daily_Std": "1.079w"}}, "children": [], "ratio": 50.0}, {"name": "AUTOCTA_TTFDAYOPENREV_2025", "kpi": {"kpi_2y": {"Net_Profit": "30.422w", "Max_Drawdown": "65.467w", "Ann_Sharpe": "0.518", "Daily_Std": "1.921w"}, "kpi_6m": {"Net_Profit": "-29.327w", "Max_Drawdown": "38.808w", "Ann_Sharpe": "-3.089", "Daily_Std": "1.294w"}}, "children": [], "ratio": 23.571}], "ratio": 36.0}, "pyelf_21ENetBond_2024wf": {"name": "pyelf_21ENetBond_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.964w", "Max_Drawdown": "3.298w", "Ann_Sharpe": "-0.273", "Daily_Std": "0.116w"}, "kpi_6m": {"Net_Profit": "-1.607w", "Max_Drawdown": "1.854w", "Ann_Sharpe": "-1.965", "Daily_Std": "0.111w"}}, "children": [{"name": "pyelf_21ENetBond_MonthDiff_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.479w", "Max_Drawdown": "3.982w", "Ann_Sharpe": "-0.136", "Daily_Std": "0.116w"}, "kpi_6m": {"Net_Profit": "-1.964w", "Max_Drawdown": "2.051w", "Ann_Sharpe": "-2.453", "Daily_Std": "0.109w"}}, "children": [], "ratio": 80.0, "_drillable": true}, {"name": "pyelf_21ENetBond_WeekDiff_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "0.631w", "Max_Drawdown": "2.688w", "Ann_Sharpe": "0.124", "Daily_Std": "0.167w"}, "kpi_6m": {"Net_Profit": "-0.177w", "Max_Drawdown": "1.771w", "Ann_Sharpe": "-0.145", "Daily_Std": "0.166w"}}, "children": [], "ratio": 20.0, "_drillable": true}], "ratio": 0.0}, "pyelf_21ENetBond_MonthDiff_2024wf": {"name": "pyelf_21ENetBond_MonthDiff_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.479w", "Max_Drawdown": "3.982w", "Ann_Sharpe": "-0.136", "Daily_Std": "0.116w"}, "kpi_6m": {"Net_Profit": "-1.964w", "Max_Drawdown": "2.051w", "Ann_Sharpe": "-2.453", "Daily_Std": "0.109w"}}, "children": [{"name": "pyelf_21ENetBond_3MonthDiff_13MinYP48_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "0.759w", "Max_Drawdown": "4.807w", "Ann_Sharpe": "0.160", "Daily_Std": "0.155w"}, "kpi_6m": {"Net_Profit": "-1.333w", "Max_Drawdown": "2.003w", "Ann_Sharpe": "-1.170", "Daily_Std": "0.155w"}}, "children": [], "ratio": 47.6744186}, {"name": "pyelf_21ENetBond_3MonthDiffSumStd_47MinYP128_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-1.579w", "Max_Drawdown": "3.403w", "Ann_Sharpe": "-0.435", "Daily_Std": "0.119w"}, "kpi_6m": {"Net_Profit": "-2.544w", "Max_Drawdown": "2.610w", "Ann_Sharpe": "-3.259", "Daily_Std": "0.106w"}}, "children": [], "ratio": 52.3255814}], "ratio": 80.0}, "pyelf_21ENetBond_WeekDiff_2024wf": {"name": "pyelf_21ENetBond_WeekDiff_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "0.631w", "Max_Drawdown": "2.688w", "Ann_Sharpe": "0.124", "Daily_Std": "0.167w"}, "kpi_6m": {"Net_Profit": "-0.177w", "Max_Drawdown": "1.771w", "Ann_Sharpe": "-0.145", "Daily_Std": "0.166w"}}, "children": [{"name": "pyelf_21ENetBond_3WeekDiff_24MinYP5_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "4.836w", "Max_Drawdown": "4.147w", "Ann_Sharpe": "0.693", "Daily_Std": "0.229w"}, "kpi_6m": {"Net_Profit": "-0.868w", "Max_Drawdown": "2.839w", "Ann_Sharpe": "-0.595", "Daily_Std": "0.199w"}}, "children": [], "ratio": 11.11761061}, {"name": "pyelf_21ENetBond_3WeekDiff_31MinYP5_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "2.178w", "Max_Drawdown": "2.599w", "Ann_Sharpe": "0.354", "Daily_Std": "0.202w"}, "kpi_6m": {"Net_Profit": "0.226w", "Max_Drawdown": "1.927w", "Ann_Sharpe": "0.168", "Daily_Std": "0.183w"}}, "children": [], "ratio": 10.37090542}, {"name": "pyelf_21ENetBond_3WeekDiff_50MinYP8_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.313w", "Max_Drawdown": "3.119w", "Ann_Sharpe": "-0.061", "Daily_Std": "0.169w"}, "kpi_6m": {"Net_Profit": "0.788w", "Max_Drawdown": "1.616w", "Ann_Sharpe": "0.632", "Daily_Std": "0.170w"}}, "children": [], "ratio": 12.40804755}, {"name": "pyelf_21ENetBond_5WeekDiff_110MinYP5_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "0.085w", "Max_Drawdown": "2.830w", "Ann_Sharpe": "0.016", "Daily_Std": "0.178w"}, "kpi_6m": {"Net_Profit": "-0.763w", "Max_Drawdown": "2.010w", "Ann_Sharpe": "-0.567", "Daily_Std": "0.183w"}}, "children": [], "ratio": 24.8160951}, {"name": "pyelf_21ENetBond_5WeekDiff_130MinYP3_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "-0.104w", "Max_Drawdown": "3.769w", "Ann_Sharpe": "-0.018", "Daily_Std": "0.190w"}, "kpi_6m": {"Net_Profit": "-0.241w", "Max_Drawdown": "2.345w", "Ann_Sharpe": "-0.171", "Daily_Std": "0.193w"}}, "children": [], "ratio": 21.71408321}, {"name": "pyelf_21ENetBond_5WeekDiff_70MinYP5_2024wf", "kpi": {"kpi_2y": {"Net_Profit": "0.054w", "Max_Drawdown": "3.509w", "Ann_Sharpe": "0.011", "Daily_Std": "0.165w"}, "kpi_6m": {"Net_Profit": "0.526w", "Max_Drawdown": "1.456w", "Ann_Sharpe": "0.441", "Daily_Std": "0.162w"}}, "children": [], "ratio": 19.57325811}], "ratio": 20.0}, "ifp_complex_group": {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "130.750w", "Max_Drawdown": "8.243w", "Ann_Sharpe": "3.530", "Daily_Std": "1.212w"}, "kpi_6m": {"Net_Profit": "13.322w", "Max_Drawdown": "8.243w", "Ann_Sharpe": "1.705", "Daily_Std": "1.065w"}}, "children": [{"name": "ifp_alpha_group", "kpi": {"kpi_2y": {"Net_Profit": "72.782w", "Max_Drawdown": "8.921w", "Ann_Sharpe": "3.011", "Daily_Std": "0.791w"}, "kpi_6m": {"Net_Profit": "11.690w", "Max_Drawdown": "7.256w", "Ann_Sharpe": "1.763", "Daily_Std": "0.904w"}}, "children": [], "ratio": 87.087, "_drillable": true}, {"name": "ifp_beta_group", "kpi": {"kpi_2y": {"Net_Profit": "62.607w", "Max_Drawdown": "6.139w", "Ann_Sharpe": "2.632", "Daily_Std": "0.779w"}, "kpi_6m": {"Net_Profit": "1.886w", "Max_Drawdown": "5.726w", "Ann_Sharpe": "0.389", "Daily_Std": "0.660w"}}, "children": [], "ratio": 71.808, "_drillable": true}, {"name": "ifp_longonly_group", "kpi": {"kpi_2y": {"Net_Profit": "59.034w", "Max_Drawdown": "19.948w", "Ann_Sharpe": "1.139", "Daily_Std": "1.696w"}, "kpi_6m": {"Net_Profit": "15.424w", "Max_Drawdown": "17.066w", "Ann_Sharpe": "1.085", "Daily_Std": "1.938w"}}, "children": [], "ratio": 15.95, "_drillable": true}], "ratio": 3.141}, "ifp_alpha_group": {"name": "ifp_alpha_group", "kpi": {"kpi_2y": {"Net_Profit": "72.782w", "Max_Drawdown": "8.921w", "Ann_Sharpe": "3.011", "Daily_Std": "0.791w"}, "kpi_6m": {"Net_Profit": "11.690w", "Max_Drawdown": "7.256w", "Ann_Sharpe": "1.763", "Daily_Std": "0.904w"}}, "children": [{"name": "ifp4_preview_comm_alpha", "kpi": {"kpi_2y": {"Net_Profit": "7.969w", "Max_Drawdown": "1.030w", "Ann_Sharpe": "2.536", "Daily_Std": "0.103w"}, "kpi_6m": {"Net_Profit": "0.975w", "Max_Drawdown": "1.030w", "Ann_Sharpe": "1.196", "Daily_Std": "0.111w"}}, "children": [], "ratio": 514.286}, {"name": "ifp3_comm", "kpi": {"kpi_2y": {"Net_Profit": "15.982w", "Max_Drawdown": "2.964w", "Ann_Sharpe": "2.290", "Daily_Std": "0.228w"}, "kpi_6m": {"Net_Profit": "5.934w", "Max_Drawdown": "1.763w", "Ann_Sharpe": "2.562", "Daily_Std": "0.316w"}}, "children": [], "ratio": 168.367}, {"name": "ifp3_macro", "kpi": {"kpi_2y": {"Net_Profit": "13.238w", "Max_Drawdown": "8.871w", "Ann_Sharpe": "1.108", "Daily_Std": "0.391w"}, "kpi_6m": {"Net_Profit": "-6.469w", "Max_Drawdown": "7.559w", "Ann_Sharpe": "-2.315", "Daily_Std": "0.381w"}}, "children": [], "ratio": 35.422}], "ratio": 87.087}, "ifp_beta_group": {"name": "ifp_beta_group", "kpi": {"kpi_2y": {"Net_Profit": "62.607w", "Max_Drawdown": "6.139w", "Ann_Sharpe": "2.632", "Daily_Std": "0.779w"}, "kpi_6m": {"Net_Profit": "1.886w", "Max_Drawdown": "5.726w", "Ann_Sharpe": "0.389", "Daily_Std": "0.660w"}}, "children": [{"name": "ifp4_preview_comm_beta", "kpi": {"kpi_2y": {"Net_Profit": "10.797w", "Max_Drawdown": "1.516w", "Ann_Sharpe": "2.000", "Daily_Std": "0.177w"}, "kpi_6m": {"Net_Profit": "0.662w", "Max_Drawdown": "1.424w", "Ann_Sharpe": "0.527", "Daily_Std": "0.171w"}}, "children": [], "ratio": 170.455}, {"name": "ifp4_preview_macro_beta", "kpi": {"kpi_2y": {"Net_Profit": "19.094w", "Max_Drawdown": "2.801w", "Ann_Sharpe": "2.282", "Daily_Std": "0.274w"}, "kpi_6m": {"Net_Profit": "1.205w", "Max_Drawdown": "2.801w", "Ann_Sharpe": "0.502", "Daily_Std": "0.327w"}}, "children": [], "ratio": 115.385}, {"name": "ifp2_comm_daynight", "kpi": {"kpi_2y": {"Net_Profit": "39.290w", "Max_Drawdown": "12.637w", "Ann_Sharpe": "1.632", "Daily_Std": "0.788w"}, "kpi_6m": {"Net_Profit": "-4.693w", "Max_Drawdown": "8.525w", "Ann_Sharpe": "-0.854", "Daily_Std": "0.749w"}}, "children": [], "ratio": 30.03}, {"name": "ifp2_comm_day", "kpi": {"kpi_2y": {"Net_Profit": "30.973w", "Max_Drawdown": "6.838w", "Ann_Sharpe": "1.677", "Daily_Std": "0.605w"}, "kpi_6m": {"Net_Profit": "1.514w", "Max_Drawdown": "2.779w", "Ann_Sharpe": "0.479", "Daily_Std": "0.431w"}}, "children": [], "ratio": 34.542}], "ratio": 71.808}, "ifp_longonly_group": {"name": "ifp_longonly_group", "kpi": {"kpi_2y": {"Net_Profit": "59.034w", "Max_Drawdown": "19.948w", "Ann_Sharpe": "1.139", "Daily_Std": "1.696w"}, "kpi_6m": {"Net_Profit": "15.424w", "Max_Drawdown": "17.066w", "Ann_Sharpe": "1.085", "Daily_Std": "1.938w"}}, "children": [{"name": "ifp4_preview_comm_alpha_longonly", "kpi": {"kpi_2y": {"Net_Profit": "1.749w", "Max_Drawdown": "2.476w", "Ann_Sharpe": "0.329", "Daily_Std": "0.174w"}, "kpi_6m": {"Net_Profit": "1.622w", "Max_Drawdown": "2.107w", "Ann_Sharpe": "1.221", "Daily_Std": "0.181w"}}, "children": [], "ratio": 250.296}, {"name": "ifp4_preview_comm_beta_longonly", "kpi": {"kpi_2y": {"Net_Profit": "4.207w", "Max_Drawdown": "3.208w", "Ann_Sharpe": "0.548", "Daily_Std": "0.251w"}, "kpi_6m": {"Net_Profit": "2.099w", "Max_Drawdown": "3.041w", "Ann_Sharpe": "0.983", "Daily_Std": "0.291w"}}, "children": [], "ratio": 175.309}, {"name": "ifp4_preview_macro_beta_longonly", "kpi": {"kpi_2y": {"Net_Profit": "13.914w", "Max_Drawdown": "3.304w", "Ann_Sharpe": "1.587", "Daily_Std": "0.287w"}, "kpi_6m": {"Net_Profit": "2.049w", "Max_Drawdown": "2.331w", "Ann_Sharpe": "0.857", "Daily_Std": "0.326w"}}, "children": [], "ratio": 331.81}], "ratio": 15.95}};
+let ALL_COMPARE = {};
+const FILE_HASHES = {"data/FuxingGroup_202601.json": "519ad5f2", "data/FM_202601.json": "374e04b4", "data/tengfeng_1000w.json": "8ab2c04d", "data/tengfeng_500w_20241008.json": "69253cf3", "data/FFT_cycle_group_20241009.json": "5fb396a8", "data/CTA_14comms_20240815.json": "f25d5af0", "data/pyelf_TTFDTMorning_Index_twap.json": "f63ea1cc", "data/Enet_Tonly_index_1W.json": "a64e81d5", "data/BondCycle_Group_20240428.json": "43fab339", "data/KeyExplainFactor_Group_20240926.json": "b23b7781", "data/peng_1000w.json": "c3e90e91", "data/tengfeng_500w_202603.json": "3cb5c830", "data/all_weather_group_202512.json": "8a2ea0ad", "data/all_weather_group_202603.json": "6000affc", "data/sentiment_group_202512.json": "4904e8fd", "data/volume_price_202511.json": "1cd85dcc", "data/cta_4_tengfeng_20250308.json": "5510c008", "data/volume_price_202603.json": "30457a96", "data/multi_factor_202511.json": "597f8e5e", "data/multi_factor_202512.json": "9a1830f6", "data/event_driven_202603.json": "f853e60a", "data/tengfeng_500w_202606.json": "5bbd36a5", "data/minblock_sif_vp_202507.json": "9b835f05", "data/minblock_sif_vp_202409.json": "d50a4924", "data/pyelf_StockDTMorning_Index.json": "8fbf20d0", "data/Enet_StockIndex_Fierce_3W.json": "39e71c62", "data/pyelf_stocks_sif.json": "5f0ef8e9", "data/minblock_sif_vp_202605.json": "5b03f109", "data/minblock_ttf_202501.json": "e50c3cd2", "data/pyelf_TTF_Index.json": "08bf3f09", "data/pyelf_TTFDTMorning_Index.json": "a6af9720", "data/pyelf_21ENetBond_2024wf.json": "d58bd576", "data/pyelf_21ENetBond_MonthDiff_2024wf.json": "0fbb6377", "data/pyelf_21ENetBond_WeekDiff_2024wf.json": "d2ca9c6f", "data/ifp_complex_group.json": "9cc7e7f3", "data/ifp_alpha_group.json": "05566650", "data/ifp_beta_group.json": "c49b66e0", "data/ifp_longonly_group.json": "26937195", "charts/zlw_1000w.json": "497fba67", "charts/FuxingGroup_202601.json": "a5af5210", "charts/FM_202601.json": "7a655a77", "charts/KMF_atr.json": "ad2c493f", "charts/QMF_Group.json": "6556824e", "charts/CMF21_FM_atr_momentumfilter.json": "03bae91d", "charts/CTA_202503II_TW.json": "47e2f8fa", "charts/tengfeng_1000w.json": "b9b480bd", "charts/tengfeng_500w_20241008.json": "945f3615", "charts/Comb_EconCycle_CN_5comms.json": "82cd7c9e", "charts/CN_EconCycle_CN_10comms.json": "633f7d32", "charts/US_EconCycle_CN_10comms.json": "19e0d796", "charts/FFT_cycle_group_20241009.json": "82a194d6", "charts/FFT_US_EconCycle.json": "52f76aa4", "charts/FFT_CN_EconCycle.json": "deb61368", "charts/FFT_CNindust23_EconCycle.json": "62e01cd3", "charts/FFT_MultiPeriod_model_wf.json": "370cbb49", "charts/Risk_CN_5comms.json": "f53fad7a", "charts/CTA_14comms_20240815.json": "145aefd4", "charts/pyelf_TTFDTTurMorning_day_2020_twap.json": "63ad7418", "charts/pyelf_TTFDTTurMorningII_day_2020_twap.json": "ac2146ff", "charts/pyelf_TTFDTTurMorningIII_day_2020_twap.json": "6cdb0661", "charts/pyelf_TTFDTMorningKN_day_2022.json": "87995c0d", "charts/pyelf_TTFDTMorningKNTSFactor_day_2022.json": "7dc13f41", "charts/Enet_Tonly_index_1W.json": "eaad40e6", "charts/pyelf_EnetTrendTonly_day_2020wf.json": "3dc51563", "charts/pyelf_ENetMultiFactor_onlyT_day_2020wf.json": "6998b068", "charts/Enet_StockIndex_Fierce_3W_IF.json": "f438105d", "charts/CTA_TS_HTOR_V2_CU.json": "9c8bcecb", "charts/CTA_TS_HTOR_V2_AU.json": "1c189ec4", "charts/CTA_TS_HTOR_V2_AG.json": "773592b7", "charts/CTA_TS_HTOR_V2_RB.json": "ba4eaa35", "charts/CTA_TS_HTOR_V2_M.json": "dc208b23", "charts/CTA_TS_HTOR_V2_I.json": "818b8781", "charts/CTA_TS_HTOR_V2_SC.json": "f671a04e", "charts/CTA_TS_MTOR_V2_CU.json": "e0a39a74", "charts/CTA_TS_MTOR_V2_AU.json": "1839ce85", "charts/CTA_TS_MTOR_V2_AG.json": "d7771432", "charts/CTA_TS_MTOR_V2_RB.json": "6c49ad25", "charts/CTA_TS_MTOR_V2_M.json": "cd05c4bb", "charts/CTA_TS_MTOR_V2_I.json": "2378029d", "charts/CTA_TS_MTOR_V2_SC.json": "0c5e272b", "charts/CTA_TS_LTOR_CU.json": "380b8793", "charts/CTA_TS_LTOR_AU.json": "5616758f", "charts/CTA_TS_LTOR_AG.json": "09a70d41", "charts/CTA_TS_LTOR_RB.json": "815c8464", "charts/CTA_TS_LTOR_M.json": "ae615d45", "charts/CTA_TS_LTOR_I.json": "ea8f38c9", "charts/CTA_TS_LTOR_SC.json": "47c60510", "charts/Enet_StockIndex_Fierce_3W_IC.json": "ffee5e34", "charts/Enet_StockIndex_Fierce_3W_IH.json": "ecaa44eb", "charts/Enet_StockIndex_Fierce_3W_IM.json": "5d53084b", "charts/BondCycle_Group_20240428.json": "4c46f942", "charts/BondCycle_US_LongShort.json": "86b88b0b", "charts/BondCycle_US_CmpyShort.json": "6c4ed450", "charts/BondCycle_US_RealIR_LongShort.json": "9afad9f0", "charts/BondCycle_CN_LongShort.json": "62ed9f8c", "charts/BondCycle_CN_CmpyShort.json": "1a952a6f", "charts/BondCycle_CN_diff_US.json": "341e59c1", "charts/Macro_LeadFactor_Explain_RollCorr.json": "a3964e4d", "charts/KeyExplainFactor_Group_20240926.json": "41e28b5e", "charts/KeyExplainFactor_All.json": "adb36212", "charts/KeyExplainFactor_Sif.json": "a65d08af", "charts/KeyExplainFactor_Treasury.json": "592fb760", "charts/KeyExplainFactor_5comms.json": "535fbad0", "charts/KeyExplainFactor_XS.json": "0f650f35", "charts/KeyExplainFactor_All_XS.json": "94bd683f", "charts/KeyExplainFactor_Sif_XS.json": "fd74c86e", "charts/KeyExplainFactor_Treasury_XS.json": "63dbfc31", "charts/peng_1000w.json": "0b6e975e", "charts/PengPriceIndex_agri.json": "491b9536", "charts/PengPriceIndex_auag.json": "e295b954", "charts/PengPriceIndex_black.json": "dc7a1ec3", "charts/PengPriceIndex_chem.json": "bbab4bdd", "charts/PengPriceIndex_metal.json": "367dca6a", "charts/PengPriceIndex_sc.json": "9f395c14", "charts/PengPriceIndex_sif.json": "843272fc", "charts/PengPriceIndex_ttf.json": "89d02d6b", "charts/tengfeng_500w_202603.json": "af4fd4b4", "charts/all_weather_group_202512.json": "50308fbd", "charts/CN_EconCycle_CN_v3.json": "e723a71e", "charts/cn_cycle_2_cn_futures.json": "e2ffbe93", "charts/CN_EconCycle_CN_v4.json": "4c78d36d", "charts/US_EconCycle_CN_v3.json": "89584105", "charts/us_cycle_2_cn_futures.json": "d313608a", "charts/US_EconCycle_CN_v4.json": "69b38502", "charts/PortfolioOPt_risk_parity_future.json": "e54eec02", "charts/LLM_macro_data_xl_20250310.json": "905608c3", "charts/LLM_agent_macro_xl_20250513.json": "f8b9b2ef", "charts/LLM_macropengfactor_Wt.json": "55e648d0", "charts/MLP_State_Predict_LongOnly.json": "c795068d", "charts/MLP_State_Predict_LongOnly_Smoth.json": "00dae710", "charts/all_weather_group_202603.json": "093b6d85", "charts/PORTFOLIOOPT_RISK_PARITY_V3_PICK.json": "f0e98c31", "charts/PORTFOLIOOPT_MAX_SHARPE_V3_PICK.json": "61d5192d", "charts/Claude_Macro_VP_v2_RiskLiquid.json": "9d3107c9", "charts/sentiment_group_202512.json": "65ab28aa", "charts/BondCycle_CN_CmpyShort_AU.json": "4e4da981", "charts/BondCycle_CN_CmpyShort_CU.json": "580e7e24", "charts/BondCycle_CN_CmpyShort_RB.json": "13f8dff6", "charts/BondCycle_CN_CmpyShort_SC.json": "a95a2b84", "charts/BondCycle_CN_CmpyShort_IC.json": "51ade504", "charts/BondCycle_CN_CmpyShort_IF.json": "4d623408", "charts/BondCycle_CN_CmpyShort_T.json": "6164bb42", "charts/BondCycle_CN_CmpyShort_TF.json": "311b007b", "charts/BondCycle_CN_LongShort_AU.json": "1dccbad3", "charts/BondCycle_CN_LongShort_CU.json": "c241e17b", "charts/BondCycle_CN_LongShort_IF.json": "cb8cedc7", "charts/BondCycle_CN_LongShort_T.json": "d647b2f9", "charts/BondCycle_CN_LongShort_TF.json": "dc3d429a", "charts/BondCycle_US_CmpyShort_AU.json": "5a441e6b", "charts/BondCycle_US_CmpyShort_CU.json": "e02a17fd", "charts/BondCycle_US_CmpyShort_RB.json": "92a2baa6", "charts/BondCycle_US_CmpyShort_SC.json": "dd9b13b6", "charts/BondCycle_US_CmpyShort_IC.json": "1b9942eb", "charts/BondCycle_US_CmpyShort_IF.json": "6682b040", "charts/BondCycle_US_CmpyShort_T.json": "5fe886b5", "charts/BondCycle_US_CmpyShort_TF.json": "91b2b9ce", "charts/BondCycle_US_LongShort_AU.json": "2d918840", "charts/BondCycle_US_LongShort_CU.json": "8a9b93b9", "charts/BondCycle_US_LongShort_RB.json": "b4e89155", "charts/BondCycle_US_LongShort_SC.json": "7a6cc435", "charts/BondCycle_US_LongShort_IC.json": "88192be8", "charts/BondCycle_US_LongShort_IF.json": "30d241f8", "charts/BondCycle_US_LongShort_T.json": "efb655cb", "charts/BondCycle_US_LongShort_TF.json": "6d98c3cf", "charts/BondCycle_US_RealIR_LongShort_AU.json": "489a1974", "charts/BondCycle_US_RealIR_LongShort_CU.json": "2b268c1e", "charts/BondCycle_US_RealIR_LongShort_RB.json": "58bf7bc6", "charts/BondCycle_US_RealIR_LongShort_SC.json": "b40e4d5f", "charts/BondCycle_US_RealIR_LongShort_IC.json": "9476217a", "charts/BondCycle_US_RealIR_LongShort_IF.json": "1e73a696", "charts/BondCycle_US_RealIR_LongShort_T.json": "397d46eb", "charts/BondCycle_US_RealIR_LongShort_TF.json": "953ce070", "charts/BondCycle2_CN_LongShort_I.json": "7d320e9a", "charts/BondCycle2_CN_LongShort_SC.json": "279d1ec2", "charts/BondCycle2_CN_LongShort_IH.json": "474db326", "charts/BondCycle2_CN_LongShort_TF.json": "e8e754e1", "charts/BondCycle2_US_LongShort_CU.json": "b27698c5", "charts/BondCycle2_US_LongShort_M.json": "10fb5d26", "charts/BondCycle2_US_LongShort_IF.json": "8e792747", "charts/BondCycle2_US_LongShort_IM.json": "612fe22b", "charts/BondCycle2_US_LongShort_T.json": "18c7e0fc", "charts/BondCycle2_US_LongShort_TL.json": "6d3f6f07", "charts/PsychoCycle2_Trend.json": "4c10fb84", "charts/PsychoCycle3_Trend.json": "d41610ae", "charts/volume_price_202511.json": "9ac38374", "charts/cta_4_tengfeng_20250308.json": "fa01e254", "charts/CTA_1000W_AG.json": "48dc0f52", "charts/CTA_1000W_AL.json": "29a7d1f2", "charts/CTA_1000W_AU.json": "6007dddb", "charts/CTA_1000W_C.json": "8763b6ed", "charts/CTA_1000W_CF.json": "aca43cfe", "charts/CTA_1000W_CU.json": "9e813307", "charts/CTA_1000W_FG.json": "efd719e1", "charts/CTA_1000W_FU.json": "1b2ef198", "charts/CTA_1000W_I.json": "ae14be05", "charts/CTA_1000W_IC.json": "179f875d", "charts/CTA_1000W_IF.json": "833db50a", "charts/CTA_1000W_IH.json": "d8f075c6", "charts/CTA_1000W_IM.json": "eae3af43", "charts/CTA_1000W_M.json": "de15682c", "charts/CTA_1000W_MA.json": "981c2261", "charts/CTA_1000W_P.json": "709cb2d3", "charts/CTA_1000W_PP.json": "c68f2a20", "charts/CTA_1000W_RB.json": "c8d85768", "charts/CTA_1000W_RU.json": "c1730c7a", "charts/CTA_1000W_SA.json": "88f237ed", "charts/CTA_1000W_SC.json": "c1668365", "charts/CTA_1000W_T.json": "3bcea53f", "charts/CTA_1000W_TF.json": "05745f15", "charts/CTA_1000W_TL.json": "eccb5672", "charts/Day_CTA_Cursor_CN_15comms.json": "f6960cfc", "charts/AutoSingleTiming_CN_14comms.json": "c9811cb7", "charts/volume_price_202603.json": "30a5683d", "charts/LLM_VPxai_Wt.json": "5e95730b", "charts/LLM_sentimentxai_Wt.json": "a13db598", "charts/rotation_global_future_raw.json": "07a26bf0", "charts/multi_factor_202511.json": "9048a172", "charts/KeyExplainFactor_All_AU.json": "e8e76242", "charts/KeyExplainFactor_All_CU.json": "61375b0f", "charts/KeyExplainFactor_All_IF.json": "3cbd6c45", "charts/KeyExplainFactor_All_IC.json": "5111e05a", "charts/KeyExplainFactor_All_IH.json": "1994428c", "charts/KeyExplainFactor_All_IM.json": "434177fe", "charts/KeyExplainFactor_5comms_AU.json": "2d91f9e8", "charts/Macro_KFS_Black.json": "07297e8c", "charts/Macro_KFS_CU.json": "2a64d026", "charts/Macro_KFS_M.json": "d52ad42e", "charts/Macro_KFS_SC.json": "529ad59e", "charts/Bond_yield_curve_momrev.json": "a4adfbd0", "charts/FM_202509_AL.json": "d0d9fec1", "charts/FM_202509_CU.json": "f7825213", "charts/FM_202509_SN.json": "0662fdd2", "charts/FM_202509_LC.json": "fde71e84", "charts/FM_202509_RB.json": "eaaa8095", "charts/FM_202509_HC.json": "50300645", "charts/FM_202509_I.json": "eb6c4c05", "charts/FM_202509_J.json": "583f2de0", "charts/FM_202509_JM.json": "8ed9c3df", "charts/FM_202509_FG.json": "60bdc60c", "charts/FM_202509_SC.json": "b810711a", "charts/FM_202509_TA.json": "a454ff22", "charts/FM_202509_MA.json": "fe78a729", "charts/FM_202509_M.json": "e6489a2e", "charts/FM_202509_FU.json": "4e679d77", "charts/multi_factor_202512.json": "568a450d", "charts/FM_202601_AG.json": "ba1d5644", "charts/FM_202601_AL.json": "9de2830e", "charts/FM_202601_CU.json": "5fdbd170", "charts/FM_202601_LC.json": "e21519ea", "charts/FM_202601_SN.json": "11698dd0", "charts/FM_202601_FG.json": "8f8e83c7", "charts/FM_202601_HC.json": "b0b4fd66", "charts/FM_202601_I.json": "ac0d50c7", "charts/FM_202601_J.json": "afa46275", "charts/FM_202601_JM.json": "d6aa9acd", "charts/FM_202601_RB.json": "4a65b244", "charts/FM_202601_MA.json": "aac67659", "charts/FM_202601_PX.json": "786b006f", "charts/FM_202601_SA.json": "5bbe0609", "charts/FM_202601_SC.json": "e9d1fc4e", "charts/FM_202601_TA.json": "9781daee", "charts/FM_202601_M.json": "2ab31c37", "charts/FM_202601_P.json": "7b7211b8", "charts/KeyExplainFactor_5comms_CU.json": "9f2b8e03", "charts/FM_202601_FU.json": "487435b7", "charts/event_driven_202603.json": "46a2ae4e", "charts/LLM_basis_Wt.json": "7bf062e0", "charts/LLM_keyeventv1_Wt.json": "ce87bbbb", "charts/tengfeng_500w_202606.json": "88262d8e", "charts/CN_EconCycle_v1.json": "a20ca7e9", "charts/CN_BondCycle_v1.json": "4f1f7aaa", "charts/CN_OPTBS_v1.json": "7724312a", "charts/CN_VP_TS_v1.json": "83005473", "charts/CN_VP_XS_v1.json": "568f89d9", "charts/LLM_sentimentxaiall_1000w.json": "47be721f", "charts/CN_MEMBER_SIF_V1.json": "8ce8fa9a", "charts/minblock_sif_vp_202507.json": "1661bce7", "charts/minblock_sif_vp_202409.json": "a754fc19", "charts/RawSigSSTwo_Stock_IterBKT_2604.json": "f6f9daba", "charts/pyelf_StockDTMorning_Index.json": "30443d6e", "charts/PYELF_STOCKDTTURMORNING_DAY_2020.json": "e66adad0", "charts/pyelf_StockDTTurNoon_day_2020.json": "47c676ab", "charts/Enet_StockIndex_Fierce_3W.json": "bdb32dbd", "charts/pyelf_EnetTrendStockIndexShort_day_2020wf.json": "2655741f", "charts/pyelf_EnetTrendStockIndex_day_2020wf.json": "cbfcd48f", "charts/pyelf_ENetMultiFactor_stock_day_2020wf.json": "ddf0106b", "charts/pyelf_EnetRocXY_Stock_2022.json": "4653d0fa", "charts/pyelf_stocks_sif.json": "fba76e43", "charts/pyelf_TradeVsw_sif_1_1.json": "cb58caf5", "charts/pyelf_TradeVswRR_sif_1_1.json": "8aa45ac8", "charts/pyelf_TradeVswLobFilter_sif_1_1.json": "ffe33ca3", "charts/pyelf_TradeVswRRLobFilter_sif_1_1.json": "0b0fd9b0", "charts/pyelf_lob_filtered.json": "ac637f00", "charts/pyelf_TradeWoOacNsVsw_sif_1_1.json": "98a37270", "charts/pyelf_TradeWoOacNsVswRR_sif_1_1.json": "3f1e7bd1", "charts/pyelf_TradeWoOacNsVswLobFilter_sif_1_1.json": "afb57516", "charts/pyelf_TradeWoOacNsVswRRLobFilter_sif_1_1.json": "fad56948", "charts/pyelf_TradeVswAddLob_sif_1_1.json": "914cf978", "charts/pyelf_TradeVswAddLobLobFilter_sif_1_1.json": "9fca2947", "charts/pyelf_TradeWoOacNsVswAddLob_sif_1_1.json": "7efd53d6", "charts/pyelf_TradeWoOacNsVswAddLobLobFilter_sif_1_1.json": "0543272d", "charts/pyelf_OrderMrmMinmax_sif_1_5.json": "00931e3a", "charts/pyelf_OrderMrmMinmax_sif_1_6.json": "009f3909", "charts/pyelf_OrderMrmMinmax_sif_1_1.json": "92551f95", "charts/pyelf_OrderMrmMinmax_sif_1_2.json": "fd72a66f", "charts/pyelf_OrderMrmMinmax_sif_1_3.json": "cd19333d", "charts/pyelf_OrderMrmMinmax_sif_1_4.json": "78c646f7", "charts/minblock_sif_vp_202605.json": "240e9841", "charts/minblock_sif_vp_202409_IH.json": "75b3e9e9", "charts/minblock_sif_vp_202409_IF.json": "8091797e", "charts/minblock_sif_vp_202409_IC.json": "17c20d0a", "charts/minblock_sif_vp_202409_IM.json": "d6a48898", "charts/minblock_ttf_202501.json": "3872c3c5", "charts/pyelf_TTF_Index.json": "1401dd43", "charts/pyelf_TTFDTMorning_Index.json": "90e37088", "charts/AUTOCTA_TTFDAYOPENREV_2025.json": "d012fbf0", "charts/AutoCTA_TTFDaily_Mom_2024.json": "a30bafd7", "charts/pyelf_ZJQttf_bias.json": "f666152c", "charts/pyelf_ZJQttf_pos.json": "48a6471b", "charts/pyelf_21ENetBond_2024wf.json": "69fc5202", "charts/pyelf_21ENetBond_MonthDiff_2024wf.json": "4b8dfe2a", "charts/pyelf_21ENetBond_3MonthDiff_13MinYP48_2024wf.json": "7b70e7f1", "charts/pyelf_21ENetBond_3MonthDiffSumStd_47MinYP128_2024wf.json": "3834e73d", "charts/pyelf_21ENetBond_WeekDiff_2024wf.json": "a67b4b07", "charts/pyelf_21ENetBond_3WeekDiff_24MinYP5_2024wf.json": "c84e6450", "charts/pyelf_21ENetBond_3WeekDiff_31MinYP5_2024wf.json": "5867f20b", "charts/pyelf_21ENetBond_3WeekDiff_50MinYP8_2024wf.json": "ec149f43", "charts/pyelf_21ENetBond_5WeekDiff_110MinYP5_2024wf.json": "b28b6efa", "charts/pyelf_21ENetBond_5WeekDiff_130MinYP3_2024wf.json": "3c7083e1", "charts/pyelf_21ENetBond_5WeekDiff_70MinYP5_2024wf.json": "4e2ae8e0", "charts/ifp_complex_group.json": "53abacd7", "charts/ifp_alpha_group.json": "9f14b381", "charts/ifp4_preview_comm_alpha.json": "95847f52", "charts/ifp3_comm.json": "06ce4613", "charts/ifp3_macro.json": "60fa0bb6", "charts/ifp_beta_group.json": "98195743", "charts/ifp4_preview_comm_beta.json": "42edc55e", "charts/ifp4_preview_macro_beta.json": "697b3927", "charts/ifp2_comm_daynight.json": "4a192ec4", "charts/ifp2_comm_day.json": "3e2e9987", "charts/ifp_longonly_group.json": "e8013c42", "charts/ifp4_preview_comm_alpha_longonly.json": "2c03bed4", "charts/ifp4_preview_comm_beta_longonly.json": "685c1c65", "charts/ifp4_preview_macro_beta_longonly.json": "070bb487", "compare/zlw_1000w.json": "4536c665", "compare/FuxingGroup_202601.json": "cba3d088", "compare/FM_202601.json": "b0478989", "compare/tengfeng_1000w.json": "086b59ea", "compare/tengfeng_500w_20241008.json": "042965e9", "compare/FFT_cycle_group_20241009.json": "0e12e769", "compare/CTA_14comms_20240815.json": "2d822084", "compare/pyelf_TTFDTMorning_Index_twap.json": "4b41adb9", "compare/Enet_Tonly_index_1W.json": "72ed6bbe", "compare/BondCycle_Group_20240428.json": "9c6849d4", "compare/KeyExplainFactor_Group_20240926.json": "88b480f8", "compare/peng_1000w.json": "23f1c6c4", "compare/tengfeng_500w_202603.json": "62477dd7", "compare/all_weather_group_202512.json": "9b847b27", "compare/all_weather_group_202603.json": "6304a66e", "compare/sentiment_group_202512.json": "e0cb5999", "compare/volume_price_202511.json": "95ff8918", "compare/cta_4_tengfeng_20250308.json": "63eb8626", "compare/volume_price_202603.json": "326da9f7", "compare/multi_factor_202511.json": "3d6c05a3", "compare/multi_factor_202512.json": "f4e01fa8", "compare/event_driven_202603.json": "fb237c79", "compare/tengfeng_500w_202606.json": "28072f16", "compare/minblock_sif_vp_202507.json": "67cf97ee", "compare/minblock_sif_vp_202409.json": "7ea9403f", "compare/pyelf_StockDTMorning_Index.json": "9622b723", "compare/Enet_StockIndex_Fierce_3W.json": "539e80e5", "compare/pyelf_stocks_sif.json": "ae509a18", "compare/minblock_sif_vp_202605.json": "86f7932c", "compare/minblock_ttf_202501.json": "76e28cfc", "compare/pyelf_TTF_Index.json": "880f8015", "compare/pyelf_TTFDTMorning_Index.json": "aeaaaac1", "compare/pyelf_21ENetBond_2024wf.json": "ce8b363d", "compare/pyelf_21ENetBond_MonthDiff_2024wf.json": "c69b9fe6", "compare/pyelf_21ENetBond_WeekDiff_2024wf.json": "a8510784", "compare/ifp_complex_group.json": "77d49ddc", "compare/ifp_alpha_group.json": "77fa4e44", "compare/ifp_beta_group.json": "f80b1738", "compare/ifp_longonly_group.json": "a8c630f3", "compare_bundle.json": "6c6a3052"};
+const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
+const COLORS = [
+  '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
+  '#42d4f4','#f032e6','#aa6e28','#469990','#000075',
+  '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
+];
+function chartHeight() {
+  return 550;
+}
+let navStack = [];
+let currentNode = TREE;
+const nodeCache = {};
+const chartCache = {};
+
+function renderNavTree(node, container, depth) {
+  const item = document.createElement('div');
+  item.className = 'nav-item';
+  item.style.paddingLeft = (12 + depth * 16) + 'px';
+  item.dataset.name = node.name;
+
+  const toggle = document.createElement('span');
+  toggle.className = 'nav-toggle' + (node.children.length > 0 ? '' : ' empty');
+  toggle.textContent = '▶';
+  item.appendChild(toggle);
+
+  const label = document.createElement('span');
+  label.textContent = node.name;
+  label.style.overflow = 'hidden';
+  label.style.textOverflow = 'ellipsis';
+  item.appendChild(label);
+  item.title = node.name;
+
+  container.appendChild(item);
+
+  let childrenDiv = null;
+  if (node.children.length > 0) {
+    childrenDiv = document.createElement('div');
+    childrenDiv.className = 'nav-children';
+    container.appendChild(childrenDiv);
+    for (const child of node.children) {
+      renderNavTree(child, childrenDiv, depth + 1);
+    }
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!childrenDiv) return;
+    const isExpanded = childrenDiv.classList.contains('expanded');
+    if (isExpanded) {
+      childrenDiv.classList.remove('expanded');
+      toggle.classList.remove('expanded');
+    } else {
+      childrenDiv.classList.add('expanded');
+      toggle.classList.add('expanded');
+    }
+  });
+
+  item.addEventListener('click', () => {
+    navToName(node.name);
+  });
+}
+
+function navToName(name) {
+  if (name === TREE.name) {
+    navStack = [];
+    currentNode = TREE;
+    location.hash = '';
+    renderPage(currentNode);
+    updateNavActive();
+    return;
+  }
+  const loaded = loadNodeData(name);
+  if (!loaded) return;
+  const ancestors = [];
+  let cur = name;
+  while (PARENT_MAP[cur]) {
+    ancestors.unshift(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  navStack = [TREE];
+  for (let i = 1; i < ancestors.length; i++) {
+    const anc = loadNodeData(ancestors[i]);
+    if (anc) navStack.push(anc);
+  }
+  currentNode = loaded;
+  location.hash = name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.name === currentNode.name);
+  });
+  // Auto-expand ancestors in sidebar
+  const ancestors = new Set();
+  let cur = currentNode.name;
+  while (PARENT_MAP[cur]) {
+    ancestors.add(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  ancestors.add(TREE.name);
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (ancestors.has(el.dataset.name)) {
+      const next = el.nextElementSibling;
+      if (next && next.classList.contains('nav-children')) {
+        next.classList.add('expanded');
+        el.querySelector('.nav-toggle')?.classList.add('expanded');
+      }
+    }
+  });
+  // Auto-scroll sidebar to active item
+  const activeEl = document.querySelector('.nav-item.active');
+  if (activeEl) {
+    activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+function initSidebar() {
+  const container = document.getElementById('nav-tree');
+  renderNavTree(NAV_TREE, container, 0);
+  updateNavActive();
+}
+
+function hashUrl(url) {
+  const h = FILE_HASHES[url];
+  return url + '?v=' + (h || DATA_DATE);
+}
+
+async function fetchRetry(url, retries) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(() => ac.abort(), 4000);
+      const r = await fetch(url, {signal: ac.signal});
+      clearTimeout(tid);
+      if (r.ok) return await r.json();
+      if (r.status === 404) return null;
+    } catch(e) {}
+    if (i < retries) await new Promise(r => setTimeout(r, 500 * (i + 1)));
+  }
+  return null;
+}
+
+const scheduleIdle = (typeof requestIdleCallback !== 'undefined')
+  ? requestIdleCallback : (fn => setTimeout(fn, 2000));
+
+let bundlePromise = null;
+function loadBundle() {
+  if (!bundlePromise) {
+    bundlePromise = fetchRetry(hashUrl('compare_bundle.json'), 1).then(raw => {
+      if (raw) unpackCompare(raw);
+    });
+  }
+  return bundlePromise;
+}
+
+function loadNodeData(name) {
+  if (nodeCache[name]) return nodeCache[name];
+  const data = ALL_DATA[name] || null;
+  if (data) nodeCache[name] = data;
+  return data;
+}
+
+async function loadChartData(name) {
+  if (chartCache[name]) return chartCache[name];
+  const data = await fetchRetry(hashUrl('charts/' + encodeURIComponent(name) + '.json'), 1);
+  if (data) chartCache[name] = data;
+  return data;
+}
+
+let overlayParams = null;
+function openOverlay(canvasId, title, curves, kpiText) {
+  overlayParams = { title, curves, kpiText };
+  const ov = document.getElementById('overlay');
+  const c = document.getElementById('overlay-canvas');
+  ov.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const W = Math.min(window.innerWidth * 0.95, 1200);
+  const H = Math.min(window.innerHeight * 0.88, 700);
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  requestAnimationFrame(() => drawMultiLine('overlay-canvas', title, curves, kpiText));
+}
+function closeOverlay() {
+  overlayParams = null;
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function fmt4(val) {
+  if (!val) return '';
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n)) return val;
+  return n.toPrecision(4) + (val.includes('w') ? 'w' : '');
+}
+
+function fmtPct1(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const n = parseFloat(val);
+  if (isNaN(n)) return '';
+  return n.toFixed(1);
+}
+
+function parseStd(val) {
+  if (!val) return 0;
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n) || n === 0) return 0;
+  return val.includes('w') ? n * 10000 : n;
+}
+
+function kpiTableHtml(label, kpi) {
+  if (!kpi || Object.keys(kpi).length === 0) return '';
+  let rows = '';
+  for (let i = 0; i < KPI_KEYS.length; i += 2) {
+    const k1 = KPI_KEYS[i], k2 = KPI_KEYS[i+1];
+    rows += '<tr>';
+    rows += `<td class="kpi-label">${k1}</td><td class="kpi-val">${kpi[k1]||'-'}</td>`;
+    if (k2) rows += `<td class="kpi-label">${k2}</td><td class="kpi-val">${kpi[k2]||'-'}</td>`;
+    rows += '</tr>';
+  }
+  return `<table class="kpi-table"><tr><th colspan="4">${label}</th></tr>${rows}</table>`;
+}
+
+function heroKpiHtml(kpi) {
+  if (!kpi) return '';
+  const k2y = kpi.kpi_2y || {};
+  const k6m = kpi.kpi_6m || {};
+  let items = '';
+  const show = [
+    ['2Y Sharpe', k2y.Ann_Sharpe, '#1565c0'],
+    ['6M Sharpe', k6m.Ann_Sharpe, '#1565c0'],
+    ['2Y Profit', k2y.Net_Profit, '#2e7d32'],
+    ['6M Profit', k6m.Net_Profit, '#2e7d32'],
+    ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
+    ['6M MaxDD', k6m.Max_Drawdown, '#c62828'],
+    ['2Y STD', k2y.Daily_Std, '#6a1b9a'],
+    ['6M STD', k6m.Daily_Std, '#6a1b9a'],
+  ];
+  for (const [label, val, color] of show) {
+    if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
+  }
+  return items;
+}
+
+const charts = {};
+
+// A curve is hidden only when a selection is active and it is not part of it.
+// Empty selection => everything shows (default state).
+function curveHidden(st, ci) { return st.selected.size > 0 && !st.selected.has(ci); }
+
+function drawChart(id, hoverCol, highlightIdx) {
+  const st = charts[id];
+  if (!st) return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const { aligned, refDates, N, pad } = st;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth;
+  const H = chartHeight();
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  let yMin = 0, yMax = 0;
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci)) return;
+    for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
+  });
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.08;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  const yTicks = 6;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.top + plotH * i / yTicks;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  st.paths = [];
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci)) { st.paths.push(null); return; }
+    const isHL = (highlightIdx === ci);
+    ctx.strokeStyle = COLORS[ci % COLORS.length];
+    ctx.lineWidth = isHL ? 3.5 : (ci === 0 ? 2.5 : 1.5);
+    ctx.globalAlpha = (highlightIdx !== undefined && highlightIdx >= 0 && !isHL) ? 0.15 : (ci === 0 ? 1.0 : 0.8);
+    const pts = [];
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      pts.push({ x, y, i });
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke(); ctx.globalAlpha = 1.0;
+    st.paths.push(pts);
+  });
+
+  ctx.fillStyle = '#888'; ctx.font = '11px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= yTicks; i++) {
+    const val = yMax - (yMax - yMin) * i / yTicks;
+    ctx.fillText(val.toFixed(1), pad.left - 6, pad.top + plotH * i / yTicks + 4);
+  }
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center';
+  const xStep = Math.max(1, Math.floor(N / 8));
+  for (let i = 0; i < N; i += xStep) {
+    const x = xOf(i);
+    ctx.save(); ctx.translate(x, H - pad.bottom + 14); ctx.rotate(-0.4);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  const xlast = xOf(N - 1);
+  ctx.save(); ctx.translate(xlast, H - pad.bottom + 14); ctx.rotate(-0.4);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  // Vertical crosshair
+  if (hoverCol !== undefined && hoverCol >= 0 && hoverCol < N) {
+    const hx = xOf(hoverCol);
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 0.8; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(hx, pad.top); ctx.lineTo(hx, H - pad.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots on curves at hover column
+    aligned.forEach((c, ci) => {
+      if (curveHidden(st, ci) || c.data[hoverCol] === null) return;
+      const y = yOf(c.data[hoverCol]);
+      ctx.fillStyle = COLORS[ci % COLORS.length];
+      ctx.beginPath(); ctx.arc(hx, y, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+}
+
+function getColFromX(id, mx) {
+  const st = charts[id];
+  if (!st) return -1;
+  const canvas = document.getElementById(id);
+  if (!canvas) return -1;
+  const { N, pad } = st;
+  const W = canvas.clientWidth;
+  const plotW = W - pad.left - pad.right;
+  const col = Math.round((mx - pad.left) / plotW * (N - 1));
+  if (col < 0 || col >= N || mx < pad.left || mx > W - pad.right) return -1;
+  return col;
+}
+
+function getOrCreateTooltip(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return null;
+  let tip = canvas.parentElement.querySelector('.chart-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    canvas.parentElement.style.position = 'relative';
+    canvas.parentElement.appendChild(tip);
+  }
+  return tip;
+}
+
+function buildTooltipHtml(id, col) {
+  const st = charts[id];
+  if (!st || col < 0) return null;
+  const { aligned, refDates } = st;
+  const rows = [];
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci) || c.data[col] === null) return;
+    rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
+  });
+  rows.sort((a, b) => b.val - a.val);
+  if (rows.length === 0) return null;
+  let html = `<div class="tt-date">${refDates[col]}</div>`;
+  for (const r of rows) {
+    html += `<div class="tt-row"><span class="tt-swatch" style="background:${r.color}"></span><span class="tt-name">${r.name}</span><span class="tt-val">${r.val.toFixed(2)}</span></div>`;
+  }
+  return html;
+}
+
+function positionTooltip(tip, canvas, mx, my) {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const tipX = mx + canvasRect.left - rect.left;
+  const tipY = my + canvasRect.top - rect.top;
+  tip.style.top = Math.max(0, tipY - 20) + 'px';
+  if (tipX + 220 < rect.width) {
+    tip.style.left = (tipX + 16) + 'px'; tip.style.right = 'auto';
+  } else {
+    tip.style.left = 'auto'; tip.style.right = (rect.width - tipX + 16) + 'px';
+  }
+}
+
+function showTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  if (tip.classList.contains('pinned')) return;
+  if (col < 0) { tip.style.display = 'none'; return; }
+  const html = buildTooltipHtml(id, col);
+  if (!html) { tip.style.display = 'none'; return; }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  positionTooltip(tip, document.getElementById(id), mx, my);
+}
+
+function pinTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  // If already pinned, unpin
+  if (tip.classList.contains('pinned')) {
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+    return;
+  }
+  if (col < 0) return;
+  const html = buildTooltipHtml(id, col);
+  if (!html) return;
+  tip.innerHTML = '<div style="text-align:right;margin-bottom:4px;"><span class="tt-close" style="cursor:pointer;color:#999;font-size:16px;line-height:1;">&times;</span></div>' + html;
+  tip.style.display = 'block';
+  tip.classList.add('pinned');
+  positionTooltip(tip, document.getElementById(id), mx, my);
+  drawChart(id, col);
+  tip.querySelector('.tt-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+  });
+}
+
+function buildLegend(id) {
+  const st = charts[id];
+  const el = document.getElementById(id + '-legend');
+  if (!el || !st) return;
+  el.innerHTML = st.aligned.map((c, ci) =>
+    `<span class="compare-legend-item${curveHidden(st, ci) ? ' hidden' : ''}${st.selected.has(ci) ? ' selected' : ''}" data-ci="${ci}">
+      <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
+      <span style="font-weight:600;">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${fmtPct1(c.display_ratio)}%)` : ''}</span>
+    </span>`
+  ).join('');
+  el.querySelectorAll('.compare-legend-item').forEach(item => {
+    const ci = parseInt(item.dataset.ci);
+    item.addEventListener('click', () => {
+      // Click to keep a curve; click more to compare several. Empty => show all.
+      if (st.selected.has(ci)) st.selected.delete(ci); else st.selected.add(ci);
+      buildLegend(id);
+      drawChart(id);
+    });
+    item.addEventListener('mouseenter', () => {
+      item.classList.add('highlight');
+      drawChart(id, undefined, ci);
+    });
+    item.addEventListener('mouseleave', () => {
+      item.classList.remove('highlight');
+      drawChart(id);
+    });
+  });
+}
+
+function setupEvents(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  let lastCol = -1;
+  canvas.addEventListener('mousemove', (e) => {
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    if (col !== lastCol) { lastCol = col; drawChart(id, col); }
+    showTooltip(id, col, mx, my);
+  });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    pinTooltip(id, col, mx, my);
+  });
+  canvas.addEventListener('mouseleave', () => {
+    lastCol = -1;
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
+    drawChart(id);
+    showTooltip(id, -1, 0, 0);
+  });
+}
+
+function loadCompareData(name) {
+  return ALL_COMPARE[name] || null;
+}
+
+function initChartFromCompare(id, compareKey, cmpData) {
+  const d = cmpData[compareKey];
+  if (!d || !d.aligned || d.aligned.length === 0) return;
+  const { refDates, aligned } = d;
+  const N = refDates.length;
+  const prevSelected = charts[id] ? charts[id].selected : new Set();
+  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, selected: prevSelected };
+  buildLegend(id);
+  drawChart(id);
+  setupEvents(id);
+}
+
+const LINE_COLORS = [
+  '#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd',
+  '#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf',
+];
+
+function drawMultiLine(canvasId, title, curves, kpiText) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !curves || curves.length === 0) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth;
+  const H = canvas.clientHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  const pad = { top: 28, right: 16, bottom: 40, left: 60 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  // Find longest date array as reference
+  let refDates = curves[0].dates;
+  for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+  const N = refDates.length;
+  if (N < 2) return;
+  const dateIndex = {};
+  refDates.forEach((d, i) => dateIndex[d] = i);
+
+  // Align all curves
+  const aligned = curves.map(c => {
+    const arr = new Array(N).fill(null);
+    c.dates.forEach((d, i) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[i]; });
+    return { name: c.name, data: arr };
+  });
+
+  // Y range
+  let yMin = Infinity, yMax = -Infinity;
+  for (const c of aligned) for (const v of c.data) {
+    if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+  }
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.06;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  // Background
+  ctx.fillStyle = '#fafafa'; ctx.fillRect(0, 0, W, H);
+  // Grid
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + plotH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  // Zero line
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 0.8; ctx.setLineDash([3,2]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw curves
+  aligned.forEach((c, ci) => {
+    ctx.strokeStyle = LINE_COLORS[ci % LINE_COLORS.length];
+    ctx.lineWidth = ci === 0 ? 2.2 : 1.4;
+    ctx.globalAlpha = ci === 0 ? 1.0 : 0.75;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // Y axis labels
+  ctx.fillStyle = '#888'; ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = yMax - (yMax - yMin) * i / 4;
+    const label = Math.abs(val) >= 10000 ? (val/10000).toFixed(1)+'w' : val.toFixed(0);
+    ctx.fillText(label, pad.left - 4, pad.top + plotH * i / 4 + 3);
+  }
+
+  // X axis dates
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center'; ctx.font = '9px -apple-system, sans-serif';
+  const xStep = Math.max(1, Math.floor(N / 6));
+  for (let i = 0; i < N; i += xStep) {
+    ctx.save(); ctx.translate(xOf(i), H - pad.bottom + 12); ctx.rotate(-0.35);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  ctx.save(); ctx.translate(xOf(N-1), H - pad.bottom + 12); ctx.rotate(-0.35);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  // Title
+  ctx.fillStyle = '#333'; ctx.font = 'bold 12px -apple-system, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(title, pad.left, 16);
+
+  // Legend (right side, compact)
+  if (aligned.length > 1) {
+    ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right';
+    const lx = W - pad.right - 4;
+    let ly = pad.top + 12;
+    const shown = aligned.slice(0, 10);
+    shown.forEach((c, ci) => {
+      const last = c.data.findLast(v => v !== null);
+      const valStr = last !== null && last !== undefined
+        ? (Math.abs(last) >= 10000 ? ' ('+(last/10000).toFixed(1)+'w)' : ' ('+last.toFixed(0)+')')
+        : '';
+      ctx.fillStyle = LINE_COLORS[ci % LINE_COLORS.length];
+      ctx.fillText(c.name + valStr, lx, ly);
+      ly += 11;
+    });
+  }
+
+  // KPI box
+  if (kpiText) {
+    ctx.font = '10px "SF Mono", Consolas, monospace'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    const lines = kpiText.split('\n');
+    const bw = 160, bh = lines.length * 13 + 8;
+    const bx = W - pad.right - bw - 2, by = H - pad.bottom - bh - 2;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = '#333';
+    lines.forEach((line, i) => ctx.fillText(line, bx + bw - 4, by + 12 + i * 13));
+  }
+}
+
+function buildKpiText(kpi) {
+  if (!kpi) return '';
+  const keys = ['Net_Profit','Max_Drawdown','Ann_Sharpe','Daily_Std'];
+  return keys.filter(k => kpi[k]).map(k => k + ': ' + kpi[k]).join('\n');
+}
+
+const CHART_SPECS = [
+  ['curve_2y', 'index_2y', 'kpi_2y', 'Equity (2Y)'],
+  ['curve_6m', 'index_6m', 'kpi_6m', 'Equity (6M)'],
+  ['top_2y', null, null, 'Top 10 (2Y)'],
+  ['top_6m', null, null, 'Top 10 (6M)'],
+  ['bottom_2y', null, null, 'Bottom 10 (2Y)'],
+  ['bottom_6m', null, null, 'Bottom 10 (6M)'],
+];
+
+function getChartCurves(kpi, key, indexKey) {
+  if (key === 'curve_2y' || key === 'curve_6m') {
+    const curves = [];
+    const main = kpi[key];
+    if (main) curves.push({ name: 'Zhuli', dates: main.dates, values: main.values });
+    const idx = kpi[indexKey];
+    if (idx) curves.push({ name: 'Index', dates: idx.dates, values: idx.values });
+    return curves.length > 0 ? curves : null;
+  } else {
+    const arr = kpi[key];
+    return (arr && arr.length > 0) ? arr : null;
+  }
+}
+
+const multiLineRegistry = {};
+
+function drawChartsInContainer(prefix, kpi) {
+  let drawn = 0;
+  CHART_SPECS.forEach(([key, indexKey, kpiKey, title], i) => {
+    const cid = prefix + '-dc-' + i;
+    const canvas = document.getElementById(cid);
+    if (!canvas) return;
+    const curves = getChartCurves(kpi, key, indexKey);
+    if (curves) {
+      const kpiText = kpiKey ? buildKpiText(kpi[kpiKey]) : null;
+      drawMultiLine(cid, title, curves, kpiText);
+      multiLineRegistry[cid] = { title, curves, kpiText };
+      const wrap = canvas.parentElement;
+      wrap.onclick = () => openOverlay(cid, title, curves, kpiText);
+      drawn++;
+    } else {
+      canvas.parentElement.style.display = 'none';
+    }
+  });
+  return drawn;
+}
+
+async function drawDetailCharts(cardId, name) {
+  const el = document.getElementById(cardId);
+  if (!el || el.dataset.chartsDrawn) return;
+  el.dataset.chartsDrawn = '1';
+  const kpi = await loadChartData(name);
+  if (!kpi) {
+    const cg = el.querySelector('.card-charts');
+    if (cg) cg.style.display = 'none';
+    return;
+  }
+  drawChartsInContainer(cardId, kpi);
+}
+
+async function drawHeroCharts(name) {
+  const kpi = await loadChartData(name);
+  if (!kpi) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+    return;
+  }
+  const drawn = drawChartsInContainer('hero', kpi);
+  if (drawn === 0) {
+    const hc = document.querySelector('.hero-charts');
+    if (hc) hc.style.display = 'none';
+  }
+}
+
+function renderPage(node) {
+  const app = document.getElementById('app');
+  const hasChildren = node.children && node.children.length > 0;
+
+  let bc = '<div class="breadcrumb">';
+  for (let i = 0; i < navStack.length; i++) {
+    bc += `<a onclick="navigateTo(${i})">${navStack[i].name}</a><span class="sep">&rsaquo;</span>`;
+  }
+  bc += `<span class="current">${node.name}</span><span style="margin-left:auto;font-size:12px;color:#999;">Updated: ${DATA_DATE}</span></div>`;
+
+  let compare = '';
+  if (hasChildren) {
+    compare = `<div class="compare-box">
+      <div class="compare-title">6M Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-6m" class="compare-canvas"></canvas>
+      <div id="chart-6m-legend" class="compare-legend"></div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-title">2Y Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-2y" class="compare-canvas"></canvas>
+      <div id="chart-2y-legend" class="compare-legend"></div>
+    </div>`;
+  }
+
+  let hero = `<div class="hero">
+    <div class="hero-header">
+      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+fmtPct1(node.ratio)+'%)</span>' : ''}</div>
+      <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
+    </div>
+    <div class="hero-charts">
+      <div class="hero-chart-wrap"><canvas id="hero-dc-0" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-1" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-2" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-3" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-4" class="hero-chart"></canvas></div>
+      <div class="hero-chart-wrap"><canvas id="hero-dc-5" class="hero-chart"></canvas></div>
+    </div>
+  </div>`;
+
+  let cards = '';
+  if (hasChildren) {
+    const sorted = [...node.children].sort((a, b) => {
+      const sa = parseFloat((a.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sb = parseFloat((b.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
+      return sb - sa;
+    });
+
+    cards = `<div class="section-header">
+      <span class="section-title">Components (${sorted.length})</span>
+      <button class="expand-btn" onclick="toggleExpandAll()">Expand All</button>
+    </div><div class="cards">`;
+    sorted.forEach((child, idx) => {
+      const ck6m = (child.kpi && child.kpi.kpi_6m) || {};
+      const ck2y = (child.kpi && child.kpi.kpi_2y) || {};
+      const isDrillable = child._drillable || (child.children && child.children.length > 0);
+      const cardId = 'card-' + idx;
+
+      cards += `<div class="card" id="${cardId}">
+        <div class="card-header" onclick="toggleCard('${cardId}')">
+          <span class="card-rank">#${idx+1}</span>
+          ${isDrillable
+            ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
+            : '<span class="card-name">'+child.name+'</span>'}
+          <span class="card-ratio">${child.ratio ? fmtPct1(child.ratio) + '%' : ''}</span>
+          ${ck6m.Net_Profit ? '<span class="badge badge-profit">6M Profit: '+fmt4(ck6m.Net_Profit)+'</span>' : ''}
+          ${ck6m.Ann_Sharpe ? '<span class="badge badge-sharpe">6M Sharpe: '+fmt4(ck6m.Ann_Sharpe)+'</span>' : ''}
+          ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
+          ${ck6m.Max_Drawdown ? '<span class="badge badge-dd">6M MaxDD: '+fmt4(ck6m.Max_Drawdown)+'</span>' : ''}
+          <span class="card-arrow">&blacktriangleright;</span>
+        </div>
+        <div class="card-body">
+          <div class="card-kpi-row">
+            ${kpiTableHtml('2Y KPI', ck2y)}
+            ${kpiTableHtml('6M KPI', ck6m)}
+          </div>
+          <div class="card-charts">
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-0" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-1" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-2" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-3" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-4" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-5" class="card-chart"></canvas></div>
+          </div>
+        </div>
+      </div>`;
+    });
+    cards += '</div>';
+    node._sorted = sorted;
+  }
+
+  app.innerHTML = bc + compare + hero + cards;
+  window.scrollTo(0, 0);
+  Object.keys(multiLineRegistry).forEach(k => delete multiLineRegistry[k]);
+  requestAnimationFrame(() => {
+    drawHeroCharts(node.name);
+    if (hasChildren) {
+      Object.keys(charts).forEach(k => delete charts[k]);
+      const cmpData = loadCompareData(node.name);
+      if (cmpData) {
+        initChartFromCompare('chart-6m', 'c6m', cmpData);
+        initChartFromCompare('chart-2y', 'c2y', cmpData);
+      } else {
+        // Not in cache yet — fetch this page's compare data
+        fetchRetry(hashUrl('compare/' + encodeURIComponent(node.name) + '.json'), 1).then(d => {
+          if (d) { ALL_COMPARE[node.name] = d; renderCompareIfReady(); }
+        });
+      }
+      // Prefetch chart data for top children once the compare bundle is done,
+      // one request at a time so it never competes with foreground fetches
+      if (node._sorted) {
+        const toPreload = node._sorted.slice(0, 8).map(c => c.name);
+        scheduleIdle(() => loadBundle().then(() => {
+          let idx = 0;
+          function preloadNext() {
+            if (idx < toPreload.length) loadChartData(toPreload[idx++]).then(preloadNext);
+          }
+          preloadNext();
+        }));
+      }
+    }
+  });
+}
+
+let cardObserver = null;
+function setupCardObserver() {
+  if (cardObserver) cardObserver.disconnect();
+  cardObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting && e.target.classList.contains('expanded')) {
+        const idx = parseInt(e.target.id.replace('card-',''));
+        const child = currentNode._sorted && currentNode._sorted[idx];
+        if (child) drawDetailCharts(e.target.id, child.name);
+      }
+    }
+  }, { rootMargin: '200px' });
+  document.querySelectorAll('.card').forEach(c => cardObserver.observe(c));
+}
+
+let allExpanded = false;
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  const btn = document.querySelector('.expand-btn');
+  if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.card').forEach(c => {
+    if (allExpanded) c.classList.add('expanded');
+    else c.classList.remove('expanded');
+  });
+  if (allExpanded) setupCardObserver();
+}
+
+function toggleCard(cardId) {
+  const card = document.getElementById(cardId);
+  card.classList.toggle('expanded');
+  if (card.classList.contains('expanded')) {
+    const idx = parseInt(cardId.replace('card-',''));
+    const child = currentNode._sorted && currentNode._sorted[idx];
+    if (child) requestAnimationFrame(() => drawDetailCharts(cardId, child.name));
+  }
+}
+
+function drillDown(sortedIdx) {
+  allExpanded = false;
+  const child = currentNode._sorted[sortedIdx];
+  const loaded = loadNodeData(child.name);
+  navStack.push(currentNode);
+  currentNode = loaded || child;
+  location.hash = child.name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function navigateTo(stackIdx) {
+  allExpanded = false;
+  currentNode = navStack[stackIdx];
+  navStack = navStack.slice(0, stackIdx);
+  location.hash = currentNode === TREE ? '' : currentNode.name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function navigateToHash() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && hash !== TREE.name) {
+    const loaded = loadNodeData(hash);
+    if (loaded) {
+      const ancestors = [];
+      let cur = hash;
+      while (PARENT_MAP[cur]) {
+        ancestors.unshift(PARENT_MAP[cur]);
+        cur = PARENT_MAP[cur];
+      }
+      navStack = [TREE];
+      for (let i = 1; i < ancestors.length; i++) {
+        const anc = loadNodeData(ancestors[i]);
+        if (anc) navStack.push(anc);
+      }
+      currentNode = loaded;
+      renderPage(currentNode);
+      updateNavActive();
+      return;
+    }
+  }
+  navStack = [];
+  currentNode = TREE;
+  renderPage(TREE);
+  updateNavActive();
+}
+
+initSidebar();
+(function() {
+  const resizer = document.getElementById('sidebar-resizer');
+  const sidebar = document.getElementById('sidebar');
+  const STORAGE_KEY = 'sidebar-width';
+  const savedW = localStorage.getItem(STORAGE_KEY);
+  if (savedW) sidebar.style.width = savedW + 'px';
+  let startX, startW;
+  function onMouseMove(e) {
+    const w = Math.max(180, startW + e.clientX - startX);
+    sidebar.style.width = w + 'px';
+  }
+  function onMouseUp() {
+    localStorage.setItem(STORAGE_KEY, sidebar.offsetWidth);
+    resizer.classList.remove('active');
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = e.clientX;
+    startW = sidebar.offsetWidth;
+    resizer.classList.add('active');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+})();
+function unpackCompare(raw) {
+  const dp = raw._d;
+  for (const k in raw) {
+    if (k === '_d') continue;
+    const entry = {};
+    for (const sk in raw[k]) {
+      const s = raw[k][sk];
+      const refDates = dp[s.di];
+      const N = refDates.length;
+      const aligned = s.a.map(a => {
+        const data = a.v.slice();
+        while (data.length < N) data.push(null);
+        return {name: a.n, data, ratio: a.r ?? null, display_ratio: a.dr ?? null};
+      });
+      entry[sk] = {refDates, aligned};
+    }
+    ALL_COMPARE[k] = entry;
+  }
+}
+
+function renderCompareIfReady() {
+  if (currentNode.children && currentNode.children.length > 0) {
+    const cmpData = loadCompareData(currentNode.name);
+    if (cmpData) {
+      initChartFromCompare('chart-6m', 'c6m', cmpData);
+      initChartFromCompare('chart-2y', 'c2y', cmpData);
+    }
+  }
+}
+
+navigateToHash();
+// Phase 1: fetch current page's compare (~50K, fast)
+if (currentNode.name) {
+  fetchRetry(hashUrl('compare/' + encodeURIComponent(currentNode.name) + '.json'), 1).then(d => {
+    if (d) { ALL_COMPARE[currentNode.name] = d; renderCompareIfReady(); }
+  });
+}
+// Phase 2: full bundle (fills ALL_COMPARE for all pages) — deferred to idle
+// so it never competes with first-paint requests
+scheduleIdle(() => loadBundle());
+window.addEventListener('hashchange', () => { navigateToHash(); updateNavActive(); });
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    Object.keys(charts).forEach(id => drawChart(id));
+    Object.keys(multiLineRegistry).forEach(id => {
+      const p = multiLineRegistry[id];
+      if (document.getElementById(id)) drawMultiLine(id, p.title, p.curves, p.kpiText);
+    });
+    if (overlayParams) {
+      const c = document.getElementById('overlay-canvas');
+      const W = Math.min(window.innerWidth * 0.95, 1200);
+      const H = Math.min(window.innerHeight * 0.88, 700);
+      c.style.width = W + 'px'; c.style.height = H + 'px';
+      drawMultiLine('overlay-canvas', overlayParams.title, overlayParams.curves, overlayParams.kpiText);
+    }
+  }, 150);
+});
+</script>
+</div>
+</body>
+</html>
