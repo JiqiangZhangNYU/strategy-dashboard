@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<title>cs_group Strategy Dashboard - 2026-08-22</title>
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js', {updateViaCache:'none'})
+    .then(function(registration){return registration.update();})
+    .catch(function(){});
+}</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+       background: #f0f2f5; color: #333; padding: 0; margin: 0; display: flex; min-height: 100vh; }
+.sidebar-wrap { display: flex; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+.sidebar { width: 260px; min-width: 180px; background: #fff;
+            padding: 12px 0; overflow-y: auto; overflow-x: hidden; height: 100%;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.04); font-size: 13px; }
+.sidebar-resizer { width: 5px; cursor: col-resize; background: transparent; flex-shrink: 0;
+                    border-right: 1px solid #e0e0e0; transition: background 0.15s; }
+.sidebar-resizer:hover, .sidebar-resizer.active { background: #4363d8; border-right-color: #4363d8; }
+.sidebar-title { font-size: 14px; font-weight: 700; color: #1a1a2e; padding: 8px 16px 12px;
+                  border-bottom: 1px solid #eee; margin-bottom: 4px; }
+.nav-item { display: flex; align-items: center; cursor: pointer; padding: 5px 12px 5px 0;
+             color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+             border-radius: 0 6px 6px 0; margin-right: 8px; user-select: none; }
+.nav-item:hover { background: #f0f2f5; color: #4363d8; }
+.nav-item.active { background: #e3eafc; color: #4363d8; font-weight: 600; }
+.nav-toggle { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+               flex-shrink: 0; font-size: 10px; color: #aaa; transition: transform 0.15s; }
+.nav-toggle.expanded { transform: rotate(90deg); }
+.nav-toggle.empty { visibility: hidden; }
+.nav-children { display: none; }
+.nav-children.expanded { display: block; }
+.main-content { flex: 1; padding: 20px; max-width: 1400px; min-width: 0; }
+.breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+              margin-bottom: 16px; font-size: 14px; color: #666; }
+.breadcrumb a { color: #4363d8; text-decoration: none; cursor: pointer; font-weight: 500; }
+.breadcrumb a:hover { text-decoration: underline; }
+.breadcrumb .sep { color: #bbb; margin: 0 2px; }
+.breadcrumb .current { color: #333; font-weight: 600; }
+.compare-box { background: #fff; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px;
+               box-shadow: 0 1px 6px rgba(0,0,0,0.08); overflow: visible; -webkit-overflow-scrolling: touch; }
+.compare-title { font-size: 16px; font-weight: 600; color: #555; margin-bottom: 8px; }
+.compare-title-row { display: flex; align-items: baseline; justify-content: space-between;
+                      gap: 12px; flex-wrap: wrap; }
+.intraday-status { color: #888; font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.intraday-status.error { color: #b45309; }
+.compare-canvas { min-width: 0; width: 100%; height: 66.667vh;
+                   border-radius: 8px; border: 1px solid #eee; cursor: crosshair; }
+.compare-legend { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px 10px;
+                   margin-top: 6px; padding-right: 4px; max-height: min(24vh, 180px); overflow-y: auto;
+                   font-size: 12px; scrollbar-width: thin; }
+.compare-legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer;
+                        min-width: 0; max-width: 100%; padding: 2px 8px; border-radius: 4px; user-select: none; }
+.compare-legend-label { min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.compare-legend-item:hover { background: #f0f2f5; }
+.compare-legend-item.hidden { opacity: 0.35; text-decoration: line-through; }
+.compare-legend-item.highlight { background: #e3eafc; }
+.compare-legend-item.selected { background: #e3eafc; box-shadow: inset 0 0 0 1px #b4c7f0; }
+.chart-tooltip { position: absolute; pointer-events: none; background: rgba(255,255,255,0.96);
+                  border: 1px solid #ccc; border-radius: 6px; padding: 8px 12px; font-size: 12px;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.12); z-index: 10; max-height: 60vh; overflow-y: auto;
+                  width: max-content; max-width: min(420px, calc(100vw - 32px)); scrollbar-width: thin; }
+.chart-tooltip.pinned { pointer-events: auto; }
+.chart-tooltip .tt-date { font-weight: 700; margin-bottom: 4px; color: #333; }
+.chart-tooltip .tt-row { display: flex; align-items: flex-start; gap: 6px; padding: 1px 0; }
+.chart-tooltip .tt-swatch { width: 10px; height: 3px; border-radius: 1px; flex-shrink: 0; }
+.chart-tooltip .tt-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.chart-tooltip .tt-val { flex-shrink: 0; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+.compare-legend-swatch { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+.hero { background: #fff; border-radius: 12px; margin-bottom: 20px; overflow: hidden;
+         box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+.hero-header { display: flex; align-items: center; justify-content: space-between;
+               position: relative; padding: 20px 42px 20px 20px; flex-wrap: wrap; gap: 12px; cursor: pointer;
+               user-select: none; list-style: none; border-bottom: 1px solid transparent; }
+.hero-header::-webkit-details-marker { display: none; }
+.hero-header::marker { content: ''; }
+.hero-header:hover { background: #fafbff; }
+.hero[open] .hero-header { border-bottom-color: #f0f0f0; }
+.hero-title { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.hero-kpi { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-kpi-item { text-align: center; }
+.hero-kpi-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+.hero-kpi-val { font-size: 16px; font-weight: 700; font-family: "SF Mono", Consolas, monospace; }
+.hero-arrow { position: absolute; right: 20px; top: 50%; color: #aaa; font-size: 12px;
+               transform: translateY(-50%); transition: transform 0.2s; }
+.hero[open] .hero-arrow { transform: translateY(-50%) rotate(90deg); }
+.hero-body { padding: 16px 20px 20px; }
+.hero-chart-status { padding: 28px 0; text-align: center; color: #888; font-size: 13px; }
+.hero.charts-unavailable .hero-chart-status { color: #b45309; }
+.section-header { display: flex; align-items: center; justify-content: space-between;
+                   margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e8e8e8; }
+.section-title { font-size: 16px; font-weight: 600; color: #555; }
+.expand-btn { padding: 6px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff;
+              cursor: pointer; font-size: 13px; font-weight: 500; color: #4363d8; }
+.expand-btn:hover { background: #f0f2f5; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+         overflow: hidden; transition: box-shadow 0.2s; }
+.card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+.card-header { display: flex; align-items: center; padding: 14px 20px; cursor: pointer;
+               user-select: none; gap: 12px; border-bottom: 1px solid transparent; }
+.card-header:hover { background: #fafbff; }
+.card.expanded .card-header { border-bottom-color: #f0f0f0; }
+.card-rank { font-weight: 700; font-size: 16px; color: #4363d8; min-width: 36px; }
+.card-name { font-weight: 600; font-size: 15px; flex: 1; color: #222; }
+.card-name.drillable { color: #4363d8; cursor: pointer; }
+.card-name.drillable:hover { text-decoration: underline; }
+.card-ratio { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;
+              background: #f3e8ff; color: #7c3aed; }
+.badge { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge-profit { background: #e8f5e9; color: #2e7d32; }
+.badge-sharpe { background: #e3f2fd; color: #1565c0; }
+.badge-dd { background: #fce4ec; color: #c62828; }
+.card-arrow { font-size: 12px; color: #aaa; transition: transform 0.2s; }
+.card.expanded .card-arrow { transform: rotate(90deg); }
+.drill-icon { font-size: 14px; color: #4363d8; margin-left: 4px; }
+.card-body { display: none; padding: 16px 20px; }
+.card.expanded .card-body { display: block; }
+.card-kpi-row { display: flex; gap: 24px; margin-bottom: 12px; }
+.kpi-table { border-collapse: collapse; font-size: 13px; }
+.kpi-table th { background: #f5f6fa; padding: 6px 12px; text-align: center;
+                border: 1px solid #e8e8e8; font-weight: 600; color: #555; }
+.kpi-table td { padding: 5px 12px; border: 1px solid #e8e8e8; }
+.kpi-label { color: #777; font-weight: 500; }
+.kpi-val { font-weight: 600; color: #222; font-family: "SF Mono", Consolas, monospace; }
+.card-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card-chart-wrap { cursor: pointer; }
+.card-chart { width: 100%; height: 200px; border-radius: 6px; border: 1px solid #eee; display: block; }
+.hero-charts { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero.charts-ready .hero-charts { display: grid; }
+.hero.charts-ready .hero-chart-status { display: none; }
+.hero-chart-wrap { cursor: pointer; }
+.hero-chart { width: 100%; height: 240px; border-radius: 8px; border: 1px solid #eee; display: block; }
+.overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+           background: rgba(0,0,0,0.85); z-index: 9999; align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.overlay canvas { max-width: 95vw; max-height: 90vh; background: #fff; border-radius: 8px; }
+.overlay-close { position: fixed; top: 12px; right: 18px; color: #fff; font-size: 32px;
+                  cursor: pointer; z-index: 10000; font-weight: bold; line-height: 1; }
+.loading { text-align: center; padding: 40px; color: #888; font-size: 15px; }
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  .sidebar-wrap { height: auto; position: relative; flex-direction: column; }
+  .sidebar { width: 100% !important; min-width: 100%; height: auto; max-height: 50vh; }
+  .sidebar-resizer { display: none; }
+  .main-content { padding: 10px; }
+  .compare-box { padding: 10px; margin-bottom: 10px; }
+  .compare-canvas { height: 66.667vh; }
+  .compare-legend { max-height: min(24vh, 180px); }
+  .hero-header { padding: 14px 36px 14px 12px; gap: 8px; }
+  .hero-arrow { right: 12px; }
+  .hero-body { padding: 10px 12px 12px; }
+  .hero-title { font-size: 18px; }
+  .hero-kpi { gap: 10px; }
+  .hero-kpi-val { font-size: 14px; }
+  .card-header { flex-wrap: wrap; padding: 10px 12px; gap: 6px; }
+  .card-rank { font-size: 14px; min-width: 28px; }
+  .card-name { font-size: 13px; }
+  .badge, .card-ratio { font-size: 11px; padding: 2px 6px; }
+  .card-body { padding: 10px 12px; }
+  .card-kpi-row { flex-direction: column; gap: 8px; }
+  .kpi-table { width: 100%; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="sidebar-wrap">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-title">cs_group</div>
+    <div id="nav-tree"></div>
+  </div>
+  <div class="sidebar-resizer" id="sidebar-resizer"></div>
+</div>
+<div class="main-content">
+<div id="app"></div>
+<div class="overlay" id="overlay" onclick="closeOverlay()">
+  <span class="overlay-close" onclick="closeOverlay()">&times;</span>
+  <canvas id="overlay-canvas"></canvas>
+</div>
+<script>
+const TREE = {"name": "cs_group", "kpi": {}, "children": [{"name": "CTA_HS_LTOR_Mom", "kpi": {"kpi_2y": {"Net_Profit": "41.808w", "Max_Drawdown": "10.430w", "Ann_Sharpe": "1.332", "Daily_Std": "1.028w"}, "kpi_6m": {"Net_Profit": "11.291w", "Max_Drawdown": "10.430w", "Ann_Sharpe": "1.157", "Daily_Std": "1.255w"}}, "children": [], "ratio": 0.0}, {"name": "deap_benchmark_v8_daxin_opt", "kpi": {"kpi_2y": {"Net_Profit": "72.272w", "Max_Drawdown": "9.236w", "Ann_Sharpe": "2.528", "Daily_Std": "0.936w"}, "kpi_6m": {"Net_Profit": "9.874w", "Max_Drawdown": "9.236w", "Ann_Sharpe": "1.336", "Daily_Std": "0.950w"}}, "children": [], "ratio": 0.0}, {"name": "LLMQ_comm_reports", "kpi": {"kpi_2y": {"Net_Profit": "52.298w", "Max_Drawdown": "6.625w", "Ann_Sharpe": "2.406", "Daily_Std": "0.712w"}, "kpi_6m": {"Net_Profit": "15.083w", "Max_Drawdown": "5.559w", "Ann_Sharpe": "2.329", "Daily_Std": "0.832w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_cov_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "70.151w", "Max_Drawdown": "5.357w", "Ann_Sharpe": "3.362", "Daily_Std": "0.683w"}, "kpi_6m": {"Net_Profit": "8.919w", "Max_Drawdown": "5.357w", "Ann_Sharpe": "1.313", "Daily_Std": "0.873w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_2026_index_opt", "kpi": {"kpi_2y": {"Net_Profit": "60.658w", "Max_Drawdown": "7.864w", "Ann_Sharpe": "2.565", "Daily_Std": "0.774w"}, "kpi_6m": {"Net_Profit": "7.871w", "Max_Drawdown": "7.864w", "Ann_Sharpe": "1.255", "Daily_Std": "0.806w"}}, "children": [], "ratio": 0.0}, {"name": "DAYDEAPCOMM500_NEUBETA_opt", "kpi": {"kpi_2y": {"Net_Profit": "61.195w", "Max_Drawdown": "7.223w", "Ann_Sharpe": "2.198", "Daily_Std": "0.912w"}, "kpi_6m": {"Net_Profit": "14.055w", "Max_Drawdown": "4.178w", "Ann_Sharpe": "1.663", "Daily_Std": "1.086w"}}, "children": [], "ratio": 0.0}, {"name": "ALPHALLM_OPT_INDEX", "kpi": {"kpi_2y": {"Net_Profit": "61.210w", "Max_Drawdown": "6.888w", "Ann_Sharpe": "2.154", "Daily_Std": "0.930w"}, "kpi_6m": {"Net_Profit": "16.148w", "Max_Drawdown": "3.957w", "Ann_Sharpe": "2.362", "Daily_Std": "0.879w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_2026_index_opt_voladj", "kpi": {"kpi_2y": {"Net_Profit": "76.417w", "Max_Drawdown": "4.926w", "Ann_Sharpe": "3.117", "Daily_Std": "0.803w"}, "kpi_6m": {"Net_Profit": "13.259w", "Max_Drawdown": "4.926w", "Ann_Sharpe": "2.456", "Daily_Std": "0.694w"}}, "children": [], "ratio": 0.0}, {"name": "LLMQ_manual_comm_v1_index", "kpi": {"kpi_2y": {"Net_Profit": "104.995w", "Max_Drawdown": "7.282w", "Ann_Sharpe": "3.901", "Daily_Std": "0.881w"}, "kpi_6m": {"Net_Profit": "36.746w", "Max_Drawdown": "7.282w", "Ann_Sharpe": "4.646", "Daily_Std": "1.017w"}}, "children": [], "ratio": 0.0}, {"name": "FM_202601", "kpi": {"kpi_2y": {"Net_Profit": "81.335w", "Max_Drawdown": "10.187w", "Ann_Sharpe": "2.880", "Daily_Std": "0.925w"}, "kpi_6m": {"Net_Profit": "6.110w", "Max_Drawdown": "10.187w", "Ann_Sharpe": "0.845", "Daily_Std": "0.929w"}}, "children": [], "ratio": 0.0}, {"name": "QMF_Group", "kpi": {"kpi_2y": {"Net_Profit": "76.036w", "Max_Drawdown": "12.057w", "Ann_Sharpe": "2.599", "Daily_Std": "0.958w"}, "kpi_6m": {"Net_Profit": "5.402w", "Max_Drawdown": "12.057w", "Ann_Sharpe": "0.621", "Daily_Std": "1.119w"}}, "children": [], "ratio": 0.0}, {"name": "CMF21_FM_atr_momentumfilter", "kpi": {"kpi_2y": {"Net_Profit": "77.607w", "Max_Drawdown": "6.505w", "Ann_Sharpe": "2.958", "Daily_Std": "0.859w"}, "kpi_6m": {"Net_Profit": "26.531w", "Max_Drawdown": "4.476w", "Ann_Sharpe": "3.123", "Daily_Std": "1.092w"}}, "children": [], "ratio": 0.0}, {"name": "ifp2_group", "kpi": {"kpi_2y": {"Net_Profit": "72.596w", "Max_Drawdown": "19.075w", "Ann_Sharpe": "1.355", "Daily_Std": "1.755w"}, "kpi_6m": {"Net_Profit": "10.712w", "Max_Drawdown": "13.577w", "Ann_Sharpe": "1.077", "Daily_Std": "1.278w"}}, "children": [], "ratio": 0.0}, {"name": "ifp_complex_group", "kpi": {"kpi_2y": {"Net_Profit": "121.958w", "Max_Drawdown": "8.829w", "Ann_Sharpe": "3.287", "Daily_Std": "1.215w"}, "kpi_6m": {"Net_Profit": "20.410w", "Max_Drawdown": "8.829w", "Ann_Sharpe": "2.458", "Daily_Std": "1.067w"}}, "children": [], "ratio": 0.0}, {"name": "Deap_comm_2026_index", "kpi": {"kpi_2y": {"Net_Profit": "69.323w", "Max_Drawdown": "10.697w", "Ann_Sharpe": "2.437", "Daily_Std": "0.931w"}, "kpi_6m": {"Net_Profit": "7.389w", "Max_Drawdown": "10.697w", "Ann_Sharpe": "0.880", "Daily_Std": "1.079w"}}, "children": [], "ratio": 0.0}, {"name": "CTA_HS_LTOR_V2", "kpi": {"kpi_2y": {"Net_Profit": "34.329w", "Max_Drawdown": "6.367w", "Ann_Sharpe": "1.620", "Daily_Std": "0.694w"}, "kpi_6m": {"Net_Profit": "5.491w", "Max_Drawdown": "5.086w", "Ann_Sharpe": "1.041", "Daily_Std": "0.678w"}}, "children": [], "ratio": 0.0}]};
+const DATA_DATE = '2026-08-22';
+const PARENT_MAP = {};
+const NAV_TREE = {"name": "cs_group", "children": []};
+const ALL_DATA = {};
+let ALL_COMPARE = {};
+const FILE_HASHES = {"charts/CTA_HS_LTOR_Mom.json": "0d5152fc", "charts/deap_benchmark_v8_daxin_opt.json": "d8b6e7e8", "charts/LLMQ_comm_reports.json": "ecee90a2", "charts/Deap_comm_cov_index_opt.json": "295593cc", "charts/Deap_comm_2026_index_opt.json": "43e3b998", "charts/DAYDEAPCOMM500_NEUBETA_opt.json": "c4e81f8d", "charts/ALPHALLM_OPT_INDEX.json": "85f27c17", "charts/Deap_comm_2026_index_opt_voladj.json": "2b801176", "charts/LLMQ_manual_comm_v1_index.json": "84a9ce04", "charts/FM_202601.json": "0b188470", "charts/QMF_Group.json": "4469c158", "charts/CMF21_FM_atr_momentumfilter.json": "6ee41c57", "charts/ifp2_group.json": "b0ed115d", "charts/ifp_complex_group.json": "c3879b6e", "charts/Deap_comm_2026_index.json": "91c4048e", "charts/CTA_HS_LTOR_V2.json": "34681436", "compare/cs_group.json": "d2f1d8ee", "compare_bundle.json": "49784d70"};
+const KPI_KEYS = ['Net_Profit', 'Max_Drawdown', 'Ann_Sharpe', 'Daily_Std'];
+const COLORS = [
+  '#e6194b','#3cb44b','#4363d8','#f58231','#911eb4',
+  '#42d4f4','#f032e6','#aa6e28','#469990','#000075',
+  '#e6beff','#9a6324','#808000','#ffd8b1','#800000',
+];
+function chartHeight() {
+  return Math.round(window.innerHeight * 2 / 3);
+}
+let navStack = [];
+let currentNode = TREE;
+const nodeCache = {};
+const chartCache = new Map();
+const CHART_CACHE_LIMIT = 12;
+const INTRADAY_RECHECK_MS = 15 * 60 * 1000;
+let intradayPageToken = 0;
+let intradayManifestPromise = null;
+const intradayPayloadCache = {};
+const intradayCheckedAt = {};
+const INTRADAY_REVISION_KEY = 'intraday-revision:' +
+  location.pathname.replace(/index[.]html$/, '');
+
+function lruGet(cache, key) {
+  if (!cache.has(key)) return null;
+  const value = cache.get(key);
+  cache.delete(key);
+  cache.set(key, value);
+  return value;
+}
+
+function lruSet(cache, key, value, limit) {
+  if (cache.has(key)) cache.delete(key);
+  cache.set(key, value);
+  while (cache.size > limit) cache.delete(cache.keys().next().value);
+}
+
+function renderNavTree(node, container, depth) {
+  const item = document.createElement('div');
+  item.className = 'nav-item';
+  item.style.paddingLeft = (12 + depth * 16) + 'px';
+  item.dataset.name = node.name;
+
+  const toggle = document.createElement('span');
+  toggle.className = 'nav-toggle' + (node.children.length > 0 ? '' : ' empty');
+  toggle.textContent = '▶';
+  item.appendChild(toggle);
+
+  const label = document.createElement('span');
+  label.textContent = node.name;
+  label.style.overflow = 'hidden';
+  label.style.textOverflow = 'ellipsis';
+  item.appendChild(label);
+  item.title = node.name;
+
+  container.appendChild(item);
+
+  let childrenDiv = null;
+  if (node.children.length > 0) {
+    childrenDiv = document.createElement('div');
+    childrenDiv.className = 'nav-children';
+    container.appendChild(childrenDiv);
+    for (const child of node.children) {
+      renderNavTree(child, childrenDiv, depth + 1);
+    }
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!childrenDiv) return;
+    const isExpanded = childrenDiv.classList.contains('expanded');
+    if (isExpanded) {
+      childrenDiv.classList.remove('expanded');
+      toggle.classList.remove('expanded');
+    } else {
+      childrenDiv.classList.add('expanded');
+      toggle.classList.add('expanded');
+    }
+  });
+
+  item.addEventListener('click', () => {
+    navToName(node.name);
+  });
+}
+
+function navToName(name) {
+  if (name === TREE.name) {
+    navStack = [];
+    currentNode = TREE;
+    location.hash = '';
+    renderPage(currentNode);
+    updateNavActive();
+    return;
+  }
+  const loaded = loadNodeData(name);
+  if (!loaded) return;
+  const ancestors = [];
+  let cur = name;
+  while (PARENT_MAP[cur]) {
+    ancestors.unshift(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  navStack = [TREE];
+  for (let i = 1; i < ancestors.length; i++) {
+    const anc = loadNodeData(ancestors[i]);
+    if (anc) navStack.push(anc);
+  }
+  currentNode = loaded;
+  location.hash = name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.name === currentNode.name);
+  });
+  // Auto-expand ancestors in sidebar
+  const ancestors = new Set();
+  let cur = currentNode.name;
+  while (PARENT_MAP[cur]) {
+    ancestors.add(PARENT_MAP[cur]);
+    cur = PARENT_MAP[cur];
+  }
+  ancestors.add(TREE.name);
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (ancestors.has(el.dataset.name)) {
+      const next = el.nextElementSibling;
+      if (next && next.classList.contains('nav-children')) {
+        next.classList.add('expanded');
+        el.querySelector('.nav-toggle')?.classList.add('expanded');
+      }
+    }
+  });
+  // Auto-scroll sidebar to active item
+  const activeEl = document.querySelector('.nav-item.active');
+  if (activeEl) {
+    activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+function initSidebar() {
+  const container = document.getElementById('nav-tree');
+  renderNavTree(NAV_TREE, container, 0);
+  updateNavActive();
+}
+
+function hashUrl(url) {
+  const h = FILE_HASHES[url];
+  return url + '?v=' + (h || DATA_DATE);
+}
+
+async function fetchRetry(url, retries) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(() => ac.abort(), 4000);
+      const r = await fetch(url, {signal: ac.signal});
+      clearTimeout(tid);
+      if (r.ok) return await r.json();
+      if (r.status === 404) return null;
+    } catch(e) {}
+    if (i < retries) await new Promise(r => setTimeout(r, 500 * (i + 1)));
+  }
+  return null;
+}
+
+function loadNodeData(name) {
+  if (nodeCache[name]) return nodeCache[name];
+  const data = ALL_DATA[name] || null;
+  if (data) nodeCache[name] = data;
+  return data;
+}
+
+async function loadChartData(name) {
+  const cached = lruGet(chartCache, name);
+  if (cached) return cached;
+  const data = await fetchRetry(hashUrl('charts/' + encodeURIComponent(name) + '.json'), 1);
+  if (data) lruSet(chartCache, name, data, CHART_CACHE_LIMIT);
+  return data;
+}
+
+let overlayParams = null;
+function openOverlay(canvasId, title, curves, kpiText) {
+  overlayParams = { title, curves, kpiText };
+  const ov = document.getElementById('overlay');
+  const c = document.getElementById('overlay-canvas');
+  ov.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const W = Math.min(window.innerWidth * 0.95, 1200);
+  const H = Math.min(window.innerHeight * 0.88, 700);
+  c.style.width = W + 'px'; c.style.height = H + 'px';
+  requestAnimationFrame(() => drawMultiLine('overlay-canvas', title, curves, kpiText));
+}
+function closeOverlay() {
+  overlayParams = null;
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function fmt4(val) {
+  if (!val) return '';
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n)) return val;
+  return n.toPrecision(4) + (val.includes('w') ? 'w' : '');
+}
+
+function fmtPct1(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const n = parseFloat(val);
+  if (isNaN(n)) return '';
+  return n.toFixed(1);
+}
+
+function parseStd(val) {
+  if (!val) return 0;
+  const s = val.replace('w','');
+  const n = parseFloat(s);
+  if (isNaN(n) || n === 0) return 0;
+  return val.includes('w') ? n * 10000 : n;
+}
+
+function kpiTableHtml(label, kpi) {
+  if (!kpi || Object.keys(kpi).length === 0) return '';
+  let rows = '';
+  for (let i = 0; i < KPI_KEYS.length; i += 2) {
+    const k1 = KPI_KEYS[i], k2 = KPI_KEYS[i+1];
+    rows += '<tr>';
+    rows += `<td class="kpi-label">${k1}</td><td class="kpi-val">${kpi[k1]||'-'}</td>`;
+    if (k2) rows += `<td class="kpi-label">${k2}</td><td class="kpi-val">${kpi[k2]||'-'}</td>`;
+    rows += '</tr>';
+  }
+  return `<table class="kpi-table"><tr><th colspan="4">${label}</th></tr>${rows}</table>`;
+}
+
+function heroKpiHtml(kpi) {
+  if (!kpi) return '';
+  const k2y = kpi.kpi_2y || {};
+  const k6m = kpi.kpi_6m || {};
+  let items = '';
+  const show = [
+    ['2Y Sharpe', k2y.Ann_Sharpe, '#1565c0'],
+    ['6M Sharpe', k6m.Ann_Sharpe, '#1565c0'],
+    ['2Y Profit', k2y.Net_Profit, '#2e7d32'],
+    ['6M Profit', k6m.Net_Profit, '#2e7d32'],
+    ['2Y MaxDD', k2y.Max_Drawdown, '#c62828'],
+    ['6M MaxDD', k6m.Max_Drawdown, '#c62828'],
+    ['2Y STD', k2y.Daily_Std, '#6a1b9a'],
+    ['6M STD', k6m.Daily_Std, '#6a1b9a'],
+  ];
+  for (const [label, val, color] of show) {
+    if (val) items += `<div class="hero-kpi-item"><div class="hero-kpi-label">${label}</div><div class="hero-kpi-val" style="color:${color}">${val}</div></div>`;
+  }
+  return items;
+}
+
+const charts = {};
+
+// A curve is hidden only when a selection is active and it is not part of it.
+// Empty selection => everything shows (default state).
+function curveHidden(st, ci) { return st.selected.size > 0 && !st.selected.has(ci); }
+
+function formatAxisDate(st, value) {
+  return value.slice(5);
+}
+
+function formatAxisValue(st, value) {
+  if (st.mode !== 'intraday') return value.toFixed(1);
+  const abs = Math.abs(value);
+  if (abs >= 10000) return (value / 10000).toFixed(1) + 'w';
+  if (abs >= 1000) return value.toFixed(0);
+  return value.toFixed(1);
+}
+
+function formatTooltipValue(st, value) {
+  if (st.mode !== 'intraday') return value.toFixed(2);
+  return value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' CNY';
+}
+
+function latestCurveValue(curve) {
+  for (let index = curve.data.length - 1; index >= 0; index--) {
+    if (curve.data[index] !== null) return curve.data[index];
+  }
+  return 0;
+}
+
+function deriveDayMarkerIndexes(refDates) {
+  const seen = new Set();
+  const indexes = [];
+  refDates.forEach((value, index) => {
+    const match = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/.exec(String(value));
+    if (!match || match[2] < '09:00' || seen.has(match[1])) return;
+    seen.add(match[1]);
+    if (index > 0) indexes.push(index);
+  });
+  return indexes;
+}
+
+function drawChart(id, hoverCol, highlightIdx) {
+  const st = charts[id];
+  if (!st) return;
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const { aligned, refDates, N, pad } = st;
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.clientWidth;
+  const H = chartHeight();
+  const backingW = Math.max(1, Math.round(W * dpr));
+  const backingH = Math.max(1, Math.round(H * dpr));
+  if (canvas.width !== backingW || canvas.height !== backingH) {
+    canvas.width = backingW;
+    canvas.height = backingH;
+  }
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  let yMin = 0, yMax = 0;
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci)) return;
+    for (const v of c.data) { if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; } }
+  });
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.08;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => N > 1 ? pad.left + plotW * i / (N - 1) : pad.left + plotW / 2;
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  const yTicks = 6;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.top + plotH * i / yTicks;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const markerIndexes = Array.isArray(st.dayMarkerIndexes)
+    ? st.dayMarkerIndexes
+    : (Number.isInteger(st.todayMarkerIndex) ? [st.todayMarkerIndex] : []);
+  markerIndexes.forEach(markerIndex => {
+    if (markerIndex <= 0 || markerIndex >= N) return;
+    const markerX = xOf(markerIndex);
+    ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 1.2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(markerX, pad.top); ctx.lineTo(markerX, H - pad.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci)) return;
+    const isHL = (highlightIdx === ci);
+    ctx.strokeStyle = COLORS[ci % COLORS.length];
+    ctx.lineWidth = isHL ? 3.5 : (ci === 0 ? 2.5 : 1.5);
+    ctx.globalAlpha = (highlightIdx !== undefined && highlightIdx >= 0 && !isHL) ? 0.15 : (ci === 0 ? 1.0 : 0.8);
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke(); ctx.globalAlpha = 1.0;
+  });
+
+  ctx.fillStyle = '#888'; ctx.font = '11px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= yTicks; i++) {
+    const val = yMax - (yMax - yMin) * i / yTicks;
+    ctx.fillText(formatAxisValue(st, val), pad.left - 6, pad.top + plotH * i / yTicks + 4);
+  }
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center';
+  const xTickCount = Math.max(2, Math.min(8, Math.floor(plotW / 100)));
+  const xTickIndexes = [...new Set(Array.from({length: xTickCount + 1}, (_, k) =>
+    Math.round((N - 1) * k / xTickCount)))];
+  for (const i of xTickIndexes) {
+    const x = xOf(i);
+    const labelX = i === N - 1 ? x - 24 : x;
+    ctx.save(); ctx.translate(labelX, H - pad.bottom + 14); ctx.rotate(-0.4);
+    ctx.fillText(formatAxisDate(st, refDates[i]), 0, 0); ctx.restore();
+  }
+
+  // Vertical crosshair
+  if (hoverCol !== undefined && hoverCol >= 0 && hoverCol < N) {
+    const hx = xOf(hoverCol);
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 0.8; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(hx, pad.top); ctx.lineTo(hx, H - pad.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots on curves at hover column
+    aligned.forEach((c, ci) => {
+      if (curveHidden(st, ci) || c.data[hoverCol] === null) return;
+      const y = yOf(c.data[hoverCol]);
+      ctx.fillStyle = COLORS[ci % COLORS.length];
+      ctx.beginPath(); ctx.arc(hx, y, 3.5, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+}
+
+function getColFromX(id, mx) {
+  const st = charts[id];
+  if (!st) return -1;
+  const canvas = document.getElementById(id);
+  if (!canvas) return -1;
+  const { N, pad } = st;
+  const W = canvas.clientWidth;
+  const plotW = W - pad.left - pad.right;
+  const col = Math.round((mx - pad.left) / plotW * (N - 1));
+  if (col < 0 || col >= N || mx < pad.left || mx > W - pad.right) return -1;
+  return col;
+}
+
+function getOrCreateTooltip(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return null;
+  let tip = canvas.parentElement.querySelector('.chart-tooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.className = 'chart-tooltip';
+    canvas.parentElement.style.position = 'relative';
+    canvas.parentElement.appendChild(tip);
+  }
+  return tip;
+}
+
+function buildTooltipHtml(id, col) {
+  const st = charts[id];
+  if (!st || col < 0) return null;
+  const { aligned, refDates } = st;
+  const rows = [];
+  aligned.forEach((c, ci) => {
+    if (curveHidden(st, ci) || c.data[col] === null) return;
+    rows.push({ name: c.name, val: c.data[col], color: COLORS[ci % COLORS.length] });
+  });
+  rows.sort((a, b) => b.val - a.val);
+  if (rows.length === 0) return null;
+  let html = `<div class="tt-date">${refDates[col]}</div>`;
+  for (const r of rows) {
+    html += `<div class="tt-row"><span class="tt-swatch" style="background:${r.color}"></span><span class="tt-name">${r.name}</span><span class="tt-val">${formatTooltipValue(st, r.val)}</span></div>`;
+  }
+  return html;
+}
+
+function positionTooltip(tip, canvas, mx, my) {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const canvasRect = canvas.getBoundingClientRect();
+  const tipX = mx + canvasRect.left - rect.left;
+  const tipY = my + canvasRect.top - rect.top;
+  tip.style.top = Math.max(0, tipY - 20) + 'px';
+  const tipWidth = tip.offsetWidth;
+  const desiredLeft = tipX + tipWidth + 16 <= rect.width
+    ? tipX + 16 : tipX - tipWidth - 16;
+  tip.style.left = Math.max(0, Math.min(desiredLeft, rect.width - tipWidth)) + 'px';
+  tip.style.right = 'auto';
+}
+
+function showTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  if (tip.classList.contains('pinned')) return;
+  if (col < 0) { tip.style.display = 'none'; return; }
+  const html = buildTooltipHtml(id, col);
+  if (!html) { tip.style.display = 'none'; return; }
+  tip.innerHTML = html;
+  tip.style.display = 'block';
+  positionTooltip(tip, document.getElementById(id), mx, my);
+}
+
+function pinTooltip(id, col, mx, my) {
+  const tip = getOrCreateTooltip(id);
+  if (!tip) return;
+  // If already pinned, unpin
+  if (tip.classList.contains('pinned')) {
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+    return;
+  }
+  if (col < 0) return;
+  const html = buildTooltipHtml(id, col);
+  if (!html) return;
+  tip.innerHTML = '<div style="text-align:right;margin-bottom:4px;"><span class="tt-close" style="cursor:pointer;color:#999;font-size:16px;line-height:1;">&times;</span></div>' + html;
+  tip.style.display = 'block';
+  tip.classList.add('pinned');
+  positionTooltip(tip, document.getElementById(id), mx, my);
+  drawChart(id, col);
+  tip.querySelector('.tt-close').addEventListener('click', (e) => {
+    e.stopPropagation();
+    tip.classList.remove('pinned');
+    tip.style.display = 'none';
+    drawChart(id);
+  });
+}
+
+function buildLegend(id) {
+  const st = charts[id];
+  const el = document.getElementById(id + '-legend');
+  if (!el || !st) return;
+  el.innerHTML = st.aligned.map((c, ci) =>
+    `<span class="compare-legend-item${curveHidden(st, ci) ? ' hidden' : ''}${st.selected.has(ci) ? ' selected' : ''}" data-ci="${ci}">
+      <span class="compare-legend-swatch" style="background:${COLORS[ci % COLORS.length]}"></span>
+      <span class="compare-legend-label">${c.name}${(c.display_ratio !== null && c.display_ratio !== undefined) ? ` (${fmtPct1(c.display_ratio)}%)` : ''}</span>
+    </span>`
+  ).join('');
+  el.querySelectorAll('.compare-legend-item').forEach(item => {
+    const ci = parseInt(item.dataset.ci);
+    item.addEventListener('click', () => {
+      // Click to keep a curve; click more to compare several. Empty => show all.
+      if (st.selected.has(ci)) st.selected.delete(ci); else st.selected.add(ci);
+      buildLegend(id);
+      drawChart(id);
+    });
+    item.addEventListener('mouseenter', () => {
+      item.classList.add('highlight');
+      drawChart(id, undefined, ci);
+    });
+    item.addEventListener('mouseleave', () => {
+      item.classList.remove('highlight');
+      drawChart(id);
+    });
+  });
+}
+
+function setupEvents(id) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  if (canvas.dataset.chartEventsBound === '1') return;
+  canvas.dataset.chartEventsBound = '1';
+  let lastCol = -1;
+  canvas.addEventListener('mousemove', (e) => {
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    if (col !== lastCol) { lastCol = col; drawChart(id, col); }
+    showTooltip(id, col, mx, my);
+  });
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = getColFromX(id, mx);
+    pinTooltip(id, col, mx, my);
+  });
+  canvas.addEventListener('mouseleave', () => {
+    lastCol = -1;
+    const tip = canvas.parentElement.querySelector('.chart-tooltip');
+    if (tip && tip.classList.contains('pinned')) return;
+    drawChart(id);
+    showTooltip(id, -1, 0, 0);
+  });
+}
+
+function loadCompareData(name) {
+  return ALL_COMPARE[name] || null;
+}
+
+function initChartFromCompare(id, compareKey, cmpData) {
+  const d = cmpData[compareKey];
+  if (!d || !d.aligned || d.aligned.length === 0) return;
+  const { refDates, aligned } = d;
+  const N = refDates.length;
+  const prevSelected = charts[id] ? charts[id].selected : new Set();
+  charts[id] = { aligned, refDates, N, pad: { top: 20, right: 20, bottom: 50, left: 60 }, selected: prevSelected };
+  buildLegend(id);
+  drawChart(id);
+  setupEvents(id);
+}
+
+function setIntradayStatus(message, isError) {
+  const status = document.getElementById('intraday-status');
+  if (!status) return;
+  status.textContent = message;
+  status.classList.toggle('error', !!isError);
+}
+
+function initIntradayChart(payload) {
+  const id = 'chart-intraday';
+  const canvas = document.getElementById(id);
+  const legend = document.getElementById(id + '-legend');
+  if (!canvas || !legend) return;
+  const oldTooltip = canvas.parentElement.querySelector('.chart-tooltip');
+  if (oldTooltip) {
+    oldTooltip.classList.remove('pinned');
+    oldTooltip.style.display = 'none';
+  }
+  const refDates = payload && (payload.refDates || payload.dates);
+  let aligned = payload && payload.aligned;
+  if ((!aligned || aligned.length === 0) && payload && payload.values) {
+    aligned = [{
+      name: payload.strategy,
+      data: payload.values,
+      ratio: null,
+      display_ratio: null,
+    }];
+  }
+  if (Array.isArray(aligned) && currentNode) {
+    const visibleNames = new Set([
+      currentNode.name,
+      ...((currentNode.children || []).map(child => child.name)),
+    ].map(name => String(name || '').toLowerCase()));
+    aligned = aligned.filter(curve =>
+      visibleNames.has(String(curve.name || '').toLowerCase())
+    );
+  }
+  const valid = payload && payload.status === 'ok' && Array.isArray(refDates) &&
+    refDates.length >= 2 && Array.isArray(aligned) && aligned.length > 0 &&
+    aligned.every(c => Array.isArray(c.data) && c.data.length === refDates.length);
+  if (!valid) {
+    canvas.style.display = 'none';
+    legend.style.display = 'none';
+    const label = payload && payload.status === 'no_position_data'
+      ? 'No intraday position data' : 'Intraday data unavailable';
+    setIntradayStatus(label, true);
+    delete charts[id];
+    return;
+  }
+
+  canvas.style.display = 'block';
+  legend.style.display = 'flex';
+  aligned = aligned.map(c => ({
+    ...c,
+    data: c.data.map(v => (v === null || v === undefined)
+      ? null : (Number.isFinite(Number(v)) ? Number(v) : null)),
+  }));
+  aligned.sort((a, b) => latestCurveValue(b) - latestCurveValue(a));
+  const previous = charts[id];
+  const selectedNames = new Set();
+  if (previous) {
+    previous.selected.forEach(ci => {
+      const curve = previous.aligned[ci];
+      if (curve) selectedNames.add(curve.name);
+    });
+  }
+  const selected = new Set();
+  aligned.forEach((curve, ci) => {
+    if (selectedNames.has(curve.name)) selected.add(ci);
+  });
+  let todayMarkerIndex = -1;
+  if (payload.today_marker && payload.today_marker > refDates[0] &&
+      payload.today_marker <= refDates[refDates.length - 1]) {
+    todayMarkerIndex = refDates.findIndex(value => value >= payload.today_marker);
+  }
+  const dayMarkerIndexes = deriveDayMarkerIndexes(refDates);
+  if (dayMarkerIndexes.length === 0 && todayMarkerIndex > 0) {
+    dayMarkerIndexes.push(todayMarkerIndex);
+  }
+  charts[id] = {
+    aligned,
+    refDates,
+    N: refDates.length,
+    pad: { top: 20, right: 20, bottom: 50, left: 70 },
+    selected,
+    mode: 'intraday',
+    todayMarkerIndex,
+    dayMarkerIndexes,
+  };
+  buildLegend(id);
+  drawChart(id);
+  setupEvents(id);
+  const hasLatest = payload.parent_available !== false &&
+    payload.latest !== null && payload.latest !== undefined &&
+    Number.isFinite(Number(payload.latest));
+  const latestLabel = hasLatest
+    ? `Latest ${Number(payload.latest).toLocaleString(undefined, {
+        minimumFractionDigits: 2, maximumFractionDigits: 2,
+      })} CNY`
+    : 'Latest unavailable';
+  const quoteTime = String(payload.quote_at || '').slice(5, 16);
+  const curveCount = aligned.length;
+  setIntradayStatus(`${latestLabel} | quote ${quoteTime} | ${curveCount} curves`, false);
+}
+
+async function fetchIntradayJson(url, cacheMode, timeoutMs) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {cache: cacheMode, signal: controller.signal});
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function loadIntradayManifest() {
+  if (!intradayManifestPromise) {
+    const url = 'intraday/manifest.json?t=' + Date.now();
+    intradayManifestPromise = fetchIntradayJson(url, 'no-store', 5000)
+      .finally(() => { intradayManifestPromise = null; });
+  }
+  return intradayManifestPromise;
+}
+
+function readStoredIntradayRevision() {
+  try { return localStorage.getItem(INTRADAY_REVISION_KEY) || ''; }
+  catch (error) { return ''; }
+}
+
+function storeIntradayRevision(revision) {
+  if (!revision) return;
+  try { localStorage.setItem(INTRADAY_REVISION_KEY, revision); }
+  catch (error) {}
+}
+
+async function restoreIntradayFromCache(name, pageToken) {
+  const revision = readStoredIntradayRevision();
+  if (!revision) return;
+  const url = 'intraday/' + encodeURIComponent(name) + '.json?v=' +
+    encodeURIComponent(revision);
+  const payload = await fetchIntradayJson(url, 'force-cache', 2500);
+  if (!payload || pageToken !== intradayPageToken || currentNode.name !== name) return;
+  const existing = intradayPayloadCache[name];
+  if (existing && existing.revision !== revision) return;
+  intradayPayloadCache[name] = {revision, payload};
+  initIntradayChart(payload);
+}
+
+async function refreshIntraday(name, pageToken) {
+  intradayCheckedAt[name] = Date.now();
+  try {
+    const manifest = await loadIntradayManifest();
+    if (pageToken !== intradayPageToken || currentNode.name !== name) return;
+    const revision = manifest && manifest.revision ? String(manifest.revision) : null;
+    const cached = intradayPayloadCache[name];
+    if (revision && cached && cached.revision === revision) {
+      if (!charts['chart-intraday']) initIntradayChart(cached.payload);
+      return;
+    }
+    const suffix = revision ? '?v=' + encodeURIComponent(revision) : '?t=' + Date.now();
+    const url = 'intraday/' + encodeURIComponent(name) + '.json' + suffix;
+    const payload = await fetchIntradayJson(url, revision ? 'default' : 'no-store', 10000);
+    if (pageToken !== intradayPageToken || currentNode.name !== name) return;
+    if (!payload) {
+      delete intradayCheckedAt[name];
+      if (charts['chart-intraday'] && cached && cached.payload) {
+        const oldQuote = String(cached.payload.quote_at || '').slice(5, 16);
+        setIntradayStatus(`Refresh delayed | showing quote ${oldQuote}`, true);
+      } else {
+        setIntradayStatus('Intraday data unavailable', true);
+      }
+      return;
+    }
+    intradayPayloadCache[name] = {revision: revision || payload.generated_at || '', payload};
+    storeIntradayRevision(revision);
+    initIntradayChart(payload);
+  } catch (error) {
+    delete intradayCheckedAt[name];
+    if (pageToken === intradayPageToken && currentNode.name === name) {
+      const cached = intradayPayloadCache[name];
+      if (charts['chart-intraday'] && cached && cached.payload) {
+        const oldQuote = String(cached.payload.quote_at || '').slice(5, 16);
+        setIntradayStatus(`Refresh delayed | showing quote ${oldQuote}`, true);
+      } else {
+        setIntradayStatus('Intraday refresh delayed', true);
+      }
+    }
+  }
+}
+
+function stopIntradayRefresh() {
+  intradayPageToken += 1;
+}
+
+function startIntradayRefresh(name) {
+  stopIntradayRefresh();
+  const pageToken = intradayPageToken;
+  const cached = intradayPayloadCache[name];
+  if (cached) initIntradayChart(cached.payload);
+  else restoreIntradayFromCache(name, pageToken);
+  refreshIntraday(name, pageToken);
+}
+
+function refreshVisibleIntraday() {
+  if (document.hidden || !currentNode || !currentNode.children ||
+      currentNode.children.length === 0) return;
+  const name = currentNode.name;
+  const lastChecked = intradayCheckedAt[name] || 0;
+  if (Date.now() - lastChecked < INTRADAY_RECHECK_MS) return;
+  refreshIntraday(name, intradayPageToken);
+}
+
+const LINE_COLORS = [
+  '#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd',
+  '#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf',
+];
+
+function drawMultiLine(canvasId, title, curves, kpiText) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !curves || curves.length === 0) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const W = canvas.clientWidth;
+  const H = canvas.clientHeight;
+  const backingW = Math.max(1, Math.round(W * dpr));
+  const backingH = Math.max(1, Math.round(H * dpr));
+  if (canvas.width !== backingW || canvas.height !== backingH) {
+    canvas.width = backingW;
+    canvas.height = backingH;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const pad = { top: 28, right: 16, bottom: 40, left: 60 };
+  const plotW = W - pad.left - pad.right;
+  const plotH = H - pad.top - pad.bottom;
+
+  // Find longest date array as reference
+  let refDates = curves[0].dates;
+  for (const c of curves) if (c.dates.length > refDates.length) refDates = c.dates;
+  const N = refDates.length;
+  if (N < 2) return;
+  const dateIndex = {};
+  refDates.forEach((d, i) => dateIndex[d] = i);
+
+  // Align all curves
+  const aligned = curves.map(c => {
+    const arr = new Array(N).fill(null);
+    c.dates.forEach((d, i) => { if (dateIndex[d] !== undefined) arr[dateIndex[d]] = c.values[i]; });
+    return { name: c.name, data: arr };
+  });
+
+  // Y range
+  let yMin = Infinity, yMax = -Infinity;
+  for (const c of aligned) for (const v of c.data) {
+    if (v !== null) { if (v < yMin) yMin = v; if (v > yMax) yMax = v; }
+  }
+  if (yMin === yMax) { yMin -= 1; yMax += 1; }
+  const yPad = (yMax - yMin) * 0.06;
+  yMin -= yPad; yMax += yPad;
+
+  const xOf = i => pad.left + plotW * i / (N - 1);
+  const yOf = v => pad.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+
+  // Background
+  ctx.fillStyle = '#fafafa'; ctx.fillRect(0, 0, W, H);
+  // Grid
+  ctx.strokeStyle = '#e8e8e8'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + plotH * i / 4;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+  }
+  // Zero line
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = '#bbb'; ctx.lineWidth = 0.8; ctx.setLineDash([3,2]);
+    ctx.beginPath(); ctx.moveTo(pad.left, yOf(0)); ctx.lineTo(W - pad.right, yOf(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Draw curves
+  aligned.forEach((c, ci) => {
+    ctx.strokeStyle = LINE_COLORS[ci % LINE_COLORS.length];
+    ctx.lineWidth = ci === 0 ? 2.2 : 1.4;
+    ctx.globalAlpha = ci === 0 ? 1.0 : 0.75;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < N; i++) {
+      if (c.data[i] === null) continue;
+      const x = xOf(i), y = yOf(c.data[i]);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // Y axis labels
+  ctx.fillStyle = '#888'; ctx.font = '10px -apple-system, sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = yMax - (yMax - yMin) * i / 4;
+    const label = Math.abs(val) >= 10000 ? (val/10000).toFixed(1)+'w' : val.toFixed(0);
+    ctx.fillText(label, pad.left - 4, pad.top + plotH * i / 4 + 3);
+  }
+
+  // X axis dates
+  ctx.fillStyle = '#888'; ctx.textAlign = 'center'; ctx.font = '9px -apple-system, sans-serif';
+  const xStep = Math.max(1, Math.floor(N / 6));
+  for (let i = 0; i < N; i += xStep) {
+    ctx.save(); ctx.translate(xOf(i), H - pad.bottom + 12); ctx.rotate(-0.35);
+    ctx.fillText(refDates[i].slice(5), 0, 0); ctx.restore();
+  }
+  ctx.save(); ctx.translate(xOf(N-1), H - pad.bottom + 12); ctx.rotate(-0.35);
+  ctx.fillText(refDates[N-1].slice(5), 0, 0); ctx.restore();
+
+  // Title
+  ctx.fillStyle = '#333'; ctx.font = 'bold 12px -apple-system, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(title, pad.left, 16);
+
+  // Legend (right side, compact)
+  if (aligned.length > 1) {
+    ctx.font = '9px -apple-system, sans-serif'; ctx.textAlign = 'right';
+    const lx = W - pad.right - 4;
+    let ly = pad.top + 12;
+    const shown = aligned.slice(0, 10);
+    shown.forEach((c, ci) => {
+      const last = c.data.findLast(v => v !== null);
+      const valStr = last !== null && last !== undefined
+        ? (Math.abs(last) >= 10000 ? ' ('+(last/10000).toFixed(1)+'w)' : ' ('+last.toFixed(0)+')')
+        : '';
+      ctx.fillStyle = LINE_COLORS[ci % LINE_COLORS.length];
+      ctx.fillText(c.name + valStr, lx, ly);
+      ly += 11;
+    });
+  }
+
+  // KPI box
+  if (kpiText) {
+    ctx.font = '10px "SF Mono", Consolas, monospace'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    const lines = kpiText.split('\n');
+    const bw = 160, bh = lines.length * 13 + 8;
+    const bx = W - pad.right - bw - 2, by = H - pad.bottom - bh - 2;
+    ctx.fillRect(bx, by, bw, bh);
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.5;
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = '#333';
+    lines.forEach((line, i) => ctx.fillText(line, bx + bw - 4, by + 12 + i * 13));
+  }
+}
+
+function buildKpiText(kpi) {
+  if (!kpi) return '';
+  const keys = ['Net_Profit','Max_Drawdown','Ann_Sharpe','Daily_Std'];
+  return keys.filter(k => kpi[k]).map(k => k + ': ' + kpi[k]).join('\n');
+}
+
+const CHART_SPECS = [
+  ['curve_2y', 'index_2y', 'kpi_2y', 'Equity (2Y)'],
+  ['curve_6m', 'index_6m', 'kpi_6m', 'Equity (6M)'],
+  ['top_2y', null, null, 'Top 10 (2Y)'],
+  ['top_6m', null, null, 'Top 10 (6M)'],
+  ['bottom_2y', null, null, 'Bottom 10 (2Y)'],
+  ['bottom_6m', null, null, 'Bottom 10 (6M)'],
+];
+
+function getChartCurves(kpi, key, indexKey) {
+  if (key === 'curve_2y' || key === 'curve_6m') {
+    const curves = [];
+    const main = kpi[key];
+    if (main) curves.push({ name: 'Zhuli', dates: main.dates, values: main.values });
+    const idx = kpi[indexKey];
+    if (idx) curves.push({ name: 'Index', dates: idx.dates, values: idx.values });
+    return curves.length > 0 ? curves : null;
+  } else {
+    const arr = kpi[key];
+    return (arr && arr.length > 0) ? arr : null;
+  }
+}
+
+const multiLineRegistry = {};
+
+function drawChartsInContainer(prefix, kpi) {
+  let drawn = 0;
+  CHART_SPECS.forEach(([key, indexKey, kpiKey, title], i) => {
+    const cid = prefix + '-dc-' + i;
+    const canvas = document.getElementById(cid);
+    if (!canvas) return;
+    const curves = getChartCurves(kpi, key, indexKey);
+    if (curves) {
+      const kpiText = kpiKey ? buildKpiText(kpi[kpiKey]) : null;
+      drawMultiLine(cid, title, curves, kpiText);
+      multiLineRegistry[cid] = { title, curves, kpiText };
+      const wrap = canvas.parentElement;
+      wrap.onclick = () => openOverlay(cid, title, curves, kpiText);
+      drawn++;
+    } else {
+      canvas.parentElement.style.display = 'none';
+    }
+  });
+  return drawn;
+}
+
+async function drawDetailCharts(cardId, name) {
+  const el = document.getElementById(cardId);
+  if (!el || !el.classList.contains('expanded') ||
+      el.dataset.chartsDrawn || el.dataset.chartsLoading) return;
+  el.dataset.chartsLoading = '1';
+  const kpi = await loadChartData(name);
+  const activeEl = document.getElementById(cardId);
+  const idx = parseInt(cardId.replace('card-', ''));
+  const activeChild = currentNode._sorted && currentNode._sorted[idx];
+  delete el.dataset.chartsLoading;
+  if (activeEl !== el || !el.classList.contains('expanded') ||
+      !activeChild || activeChild.name !== name) return;
+  if (!kpi) {
+    const cg = el.querySelector('.card-charts');
+    if (cg) cg.style.display = 'none';
+    return;
+  }
+  const cg = el.querySelector('.card-charts');
+  if (cg) cg.style.display = '';
+  el.dataset.chartsDrawn = '1';
+  drawChartsInContainer(cardId, kpi);
+}
+
+async function drawHeroCharts(name) {
+  const hero = document.getElementById('hero');
+  if (!hero || !hero.open || hero.dataset.chartsDrawn || hero.dataset.chartsLoading) return;
+  hero.dataset.chartsLoading = '1';
+  hero.classList.remove('charts-unavailable');
+  const status = hero.querySelector('.hero-chart-status');
+  if (status) status.textContent = 'Loading...';
+  const kpi = await loadChartData(name);
+  const activeHero = document.getElementById('hero');
+  if (activeHero !== hero || currentNode.name !== name || !hero.open) {
+    delete hero.dataset.chartsLoading;
+    return;
+  }
+  delete hero.dataset.chartsLoading;
+  if (!kpi) {
+    hero.classList.add('charts-unavailable');
+    if (status) status.textContent = 'Chart data unavailable';
+    return;
+  }
+  hero.classList.add('charts-ready');
+  const drawn = drawChartsInContainer('hero', kpi);
+  if (drawn === 0) {
+    hero.classList.remove('charts-ready');
+    hero.classList.add('charts-unavailable');
+    if (status) status.textContent = 'No chart data';
+    return;
+  }
+  hero.dataset.chartsDrawn = '1';
+}
+
+function redrawVisibleRegisteredCharts(prefix) {
+  Object.keys(multiLineRegistry).forEach(id => {
+    if (!id.startsWith(prefix + '-dc-')) return;
+    const canvas = document.getElementById(id);
+    if (!canvas || canvas.getClientRects().length === 0) return;
+    const p = multiLineRegistry[id];
+    drawMultiLine(id, p.title, p.curves, p.kpiText);
+  });
+}
+
+function releaseCanvases(container) {
+  if (!container) return;
+  container.querySelectorAll('canvas').forEach(canvas => {
+    canvas.width = 0;
+    canvas.height = 0;
+  });
+}
+
+function releaseCardCharts(card) {
+  if (!card) return;
+  Object.keys(multiLineRegistry).forEach(id => {
+    if (id.startsWith(card.id + '-dc-')) delete multiLineRegistry[id];
+  });
+  releaseCanvases(card);
+  delete card.dataset.chartsDrawn;
+}
+
+function handleHeroToggle() {
+  const hero = document.getElementById('hero');
+  if (!hero) return;
+  if (!hero.open) {
+    Object.keys(multiLineRegistry).forEach(id => {
+      if (id.startsWith('hero-dc-')) delete multiLineRegistry[id];
+    });
+    releaseCanvases(hero);
+    delete hero.dataset.chartsDrawn;
+    hero.classList.remove('charts-ready');
+    return;
+  }
+  if (hero.dataset.chartsDrawn) {
+    requestAnimationFrame(() => redrawVisibleRegisteredCharts('hero'));
+  } else {
+    const name = currentNode.name;
+    requestAnimationFrame(() => drawHeroCharts(name));
+  }
+}
+
+function renderPage(node) {
+  stopIntradayRefresh();
+  if (cardObserver) {
+    cardObserver.disconnect();
+    cardObserver = null;
+  }
+  const app = document.getElementById('app');
+  releaseCanvases(app);
+  Object.keys(charts).forEach(k => delete charts[k]);
+  const hasChildren = node.children && node.children.length > 0;
+
+  let bc = '<div class="breadcrumb">';
+  for (let i = 0; i < navStack.length; i++) {
+    bc += `<a onclick="navigateTo(${i})">${navStack[i].name}</a><span class="sep">&rsaquo;</span>`;
+  }
+  bc += `<span class="current">${node.name}</span><span style="margin-left:auto;font-size:12px;color:#999;">Updated: ${DATA_DATE}</span></div>`;
+
+  let compare = '';
+  if (hasChildren) {
+    compare = `<div class="compare-box" id="intraday-box">
+      <div class="compare-title compare-title-row"><span>Recent Minute Equity (5 Trading Days)</span><span id="intraday-status" class="intraday-status">Loading...</span></div>
+      <canvas id="chart-intraday" class="compare-canvas"></canvas>
+      <div id="chart-intraday-legend" class="compare-legend"></div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-title">6M Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-6m" class="compare-canvas"></canvas>
+      <div id="chart-6m-legend" class="compare-legend"></div>
+    </div>
+    <div class="compare-box">
+      <div class="compare-title">2Y Normalized Equity (Equity / Daily_Std)</div>
+      <canvas id="chart-2y" class="compare-canvas"></canvas>
+      <div id="chart-2y-legend" class="compare-legend"></div>
+    </div>`;
+  }
+
+  let hero = `<details class="hero" id="hero" ontoggle="handleHeroToggle()">
+    <summary class="hero-header">
+      <div class="hero-title">${node.name}${node.ratio ? ' <span style="font-size:14px;color:#7c3aed;">(Weight: '+fmtPct1(node.ratio)+'%)</span>' : ''}</div>
+      <div class="hero-kpi">${heroKpiHtml(node.kpi)}</div>
+      <span class="hero-arrow">&blacktriangleright;</span>
+    </summary>
+    <div class="hero-body">
+      <div class="hero-chart-status">Loading...</div>
+      <div class="hero-charts">
+        <div class="hero-chart-wrap"><canvas id="hero-dc-0" class="hero-chart"></canvas></div>
+        <div class="hero-chart-wrap"><canvas id="hero-dc-1" class="hero-chart"></canvas></div>
+        <div class="hero-chart-wrap"><canvas id="hero-dc-2" class="hero-chart"></canvas></div>
+        <div class="hero-chart-wrap"><canvas id="hero-dc-3" class="hero-chart"></canvas></div>
+        <div class="hero-chart-wrap"><canvas id="hero-dc-4" class="hero-chart"></canvas></div>
+        <div class="hero-chart-wrap"><canvas id="hero-dc-5" class="hero-chart"></canvas></div>
+      </div>
+    </div>
+  </details>`;
+
+  let cards = '';
+  if (hasChildren) {
+    const sorted = [...node.children].sort((a, b) => {
+      const sa = parseFloat((a.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
+      const sb = parseFloat((b.kpi?.kpi_6m?.Ann_Sharpe || '0').replace('w','')) || 0;
+      return sb - sa;
+    });
+
+    cards = `<div class="section-header">
+      <span class="section-title">Components (${sorted.length})</span>
+      <button class="expand-btn" onclick="toggleExpandAll()">Expand All</button>
+    </div><div class="cards">`;
+    sorted.forEach((child, idx) => {
+      const ck6m = (child.kpi && child.kpi.kpi_6m) || {};
+      const ck2y = (child.kpi && child.kpi.kpi_2y) || {};
+      const isDrillable = child._drillable || (child.children && child.children.length > 0);
+      const cardId = 'card-' + idx;
+
+      cards += `<div class="card" id="${cardId}">
+        <div class="card-header" onclick="toggleCard('${cardId}')">
+          <span class="card-rank">#${idx+1}</span>
+          ${isDrillable
+            ? '<span class="card-name drillable" onclick="event.stopPropagation(); drillDown('+idx+')">'+child.name+' <span class="drill-icon">&blacktriangleright;</span></span>'
+            : '<span class="card-name">'+child.name+'</span>'}
+          <span class="card-ratio">${child.ratio ? fmtPct1(child.ratio) + '%' : ''}</span>
+          ${ck6m.Net_Profit ? '<span class="badge badge-profit">6M Profit: '+fmt4(ck6m.Net_Profit)+'</span>' : ''}
+          ${ck6m.Ann_Sharpe ? '<span class="badge badge-sharpe">6M Sharpe: '+fmt4(ck6m.Ann_Sharpe)+'</span>' : ''}
+          ${ck2y.Ann_Sharpe ? '<span class="badge badge-sharpe">2Y Sharpe: '+fmt4(ck2y.Ann_Sharpe)+'</span>' : ''}
+          ${ck6m.Max_Drawdown ? '<span class="badge badge-dd">6M MaxDD: '+fmt4(ck6m.Max_Drawdown)+'</span>' : ''}
+          <span class="card-arrow">&blacktriangleright;</span>
+        </div>
+        <div class="card-body">
+          <div class="card-kpi-row">
+            ${kpiTableHtml('2Y KPI', ck2y)}
+            ${kpiTableHtml('6M KPI', ck6m)}
+          </div>
+          <div class="card-charts">
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-0" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-1" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-2" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-3" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-4" class="card-chart"></canvas></div>
+            <div class="card-chart-wrap"><canvas id="${cardId}-dc-5" class="card-chart"></canvas></div>
+          </div>
+        </div>
+      </div>`;
+    });
+    cards += '</div>';
+    node._sorted = sorted;
+  }
+
+  app.innerHTML = bc + compare + hero + cards;
+  window.scrollTo(0, 0);
+  Object.keys(multiLineRegistry).forEach(k => delete multiLineRegistry[k]);
+  requestAnimationFrame(() => {
+    if (currentNode !== node) return;
+    if (hasChildren) {
+      startIntradayRefresh(node.name);
+      const cmpData = loadCompareData(node.name);
+      if (cmpData) {
+        initChartFromCompare('chart-6m', 'c6m', cmpData);
+        initChartFromCompare('chart-2y', 'c2y', cmpData);
+      } else {
+        // Not in cache yet — fetch this page's compare data
+        fetchRetry(hashUrl('compare/' + encodeURIComponent(node.name) + '.json'), 1).then(d => {
+          if (d) { ALL_COMPARE[node.name] = d; renderCompareIfReady(); }
+        });
+      }
+    }
+  });
+}
+
+let cardObserver = null;
+function setupCardObserver() {
+  if (cardObserver) cardObserver.disconnect();
+  cardObserver = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting && e.target.isConnected &&
+          document.getElementById(e.target.id) === e.target &&
+          e.target.classList.contains('expanded')) {
+        const idx = parseInt(e.target.id.replace('card-',''));
+        const child = currentNode._sorted && currentNode._sorted[idx];
+        if (child) {
+          if (e.target.dataset.chartsDrawn) {
+            requestAnimationFrame(() => redrawVisibleRegisteredCharts(e.target.id));
+          } else {
+            drawDetailCharts(e.target.id, child.name);
+          }
+        }
+      }
+    }
+  }, { rootMargin: '200px' });
+  document.querySelectorAll('.card').forEach(c => cardObserver.observe(c));
+}
+
+let allExpanded = false;
+function toggleExpandAll() {
+  allExpanded = !allExpanded;
+  const btn = document.querySelector('.expand-btn');
+  if (btn) btn.textContent = allExpanded ? 'Collapse All' : 'Expand All';
+  document.querySelectorAll('.card').forEach(c => {
+    if (allExpanded) c.classList.add('expanded');
+    else { c.classList.remove('expanded'); releaseCardCharts(c); }
+  });
+  if (allExpanded) setupCardObserver();
+}
+
+function toggleCard(cardId) {
+  const card = document.getElementById(cardId);
+  card.classList.toggle('expanded');
+  if (card.classList.contains('expanded')) {
+    const idx = parseInt(cardId.replace('card-',''));
+    const child = currentNode._sorted && currentNode._sorted[idx];
+    if (child) requestAnimationFrame(() => {
+      if (card.dataset.chartsDrawn) redrawVisibleRegisteredCharts(cardId);
+      else drawDetailCharts(cardId, child.name);
+    });
+  } else releaseCardCharts(card);
+}
+
+function drillDown(sortedIdx) {
+  allExpanded = false;
+  const child = currentNode._sorted[sortedIdx];
+  const loaded = loadNodeData(child.name);
+  navStack.push(currentNode);
+  currentNode = loaded || child;
+  location.hash = child.name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function navigateTo(stackIdx) {
+  allExpanded = false;
+  currentNode = navStack[stackIdx];
+  navStack = navStack.slice(0, stackIdx);
+  location.hash = currentNode === TREE ? '' : currentNode.name;
+  renderPage(currentNode);
+  updateNavActive();
+}
+
+function navigateToHash() {
+  const hash = decodeURIComponent(location.hash.slice(1));
+  if (hash && hash !== TREE.name) {
+    const loaded = loadNodeData(hash);
+    if (loaded) {
+      const ancestors = [];
+      let cur = hash;
+      while (PARENT_MAP[cur]) {
+        ancestors.unshift(PARENT_MAP[cur]);
+        cur = PARENT_MAP[cur];
+      }
+      navStack = [TREE];
+      for (let i = 1; i < ancestors.length; i++) {
+        const anc = loadNodeData(ancestors[i]);
+        if (anc) navStack.push(anc);
+      }
+      currentNode = loaded;
+      renderPage(currentNode);
+      updateNavActive();
+      return;
+    }
+  }
+  navStack = [];
+  currentNode = TREE;
+  renderPage(TREE);
+  updateNavActive();
+}
+
+initSidebar();
+(function() {
+  const resizer = document.getElementById('sidebar-resizer');
+  const sidebar = document.getElementById('sidebar');
+  const STORAGE_KEY = 'sidebar-width';
+  const savedW = localStorage.getItem(STORAGE_KEY);
+  if (savedW) sidebar.style.width = savedW + 'px';
+  let startX, startW;
+  function onMouseMove(e) {
+    const w = Math.max(180, startW + e.clientX - startX);
+    sidebar.style.width = w + 'px';
+  }
+  function onMouseUp() {
+    localStorage.setItem(STORAGE_KEY, sidebar.offsetWidth);
+    resizer.classList.remove('active');
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }
+  resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startX = e.clientX;
+    startW = sidebar.offsetWidth;
+    resizer.classList.add('active');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+})();
+function renderCompareIfReady() {
+  if (currentNode.children && currentNode.children.length > 0) {
+    const cmpData = loadCompareData(currentNode.name);
+    if (cmpData) {
+      initChartFromCompare('chart-6m', 'c6m', cmpData);
+      initChartFromCompare('chart-2y', 'c2y', cmpData);
+    }
+  }
+}
+
+navigateToHash();
+window.addEventListener('hashchange', () => { navigateToHash(); updateNavActive(); });
+document.addEventListener('visibilitychange', refreshVisibleIntraday);
+window.addEventListener('focus', refreshVisibleIntraday);
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    Object.keys(charts).forEach(id => drawChart(id));
+    Object.keys(multiLineRegistry).forEach(id => {
+      const p = multiLineRegistry[id];
+      const canvas = document.getElementById(id);
+      if (canvas && canvas.getClientRects().length > 0) {
+        drawMultiLine(id, p.title, p.curves, p.kpiText);
+      }
+    });
+    if (overlayParams) {
+      const c = document.getElementById('overlay-canvas');
+      const W = Math.min(window.innerWidth * 0.95, 1200);
+      const H = Math.min(window.innerHeight * 0.88, 700);
+      c.style.width = W + 'px'; c.style.height = H + 'px';
+      drawMultiLine('overlay-canvas', overlayParams.title, overlayParams.curves, overlayParams.kpiText);
+    }
+  }, 150);
+});
+</script>
+</div>
+</body>
+</html>
